@@ -1,0 +1,2776 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Kartta</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	  <meta name="viewport" content="initial-scale=1.0, user-scalable=no,width=device-width">
+<script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?callback=GetMap' async defer></script>
+
+
+<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.2/jquery.ui.touch-punch.min.js"></script>
+<!-- <script src="js/CanvasPushpinModule.js"></script> -->
+<link rel="stylesheet" href="css\smoothness\jquery-ui-1.10.3.custom.min.css">
+
+<script src="js/jquery.layout-latest.min.js"></script>
+<!-- <script src="js/CanvasPushpinModule.js"></script> -->
+<link rel="stylesheet" href="css\smoothness\jquery-ui-1.10.3.custom.min.css">
+<script type="text/javascript">
+
+var options = {
+   email:"",
+   id:"",
+   logname:"",
+   interval:"5000",
+   usersTofollow:"",
+   send:true,
+   readGPS: true,
+   resend:false,
+   follow:false,
+   followMe:false,
+   selectNewPin: true,
+   smallRaport:false,
+   drawLogLine:false,
+   HCenter:true,
+   showAccuracy:true,
+   extra:false
+};
+
+
+
+$(document).ready(function () {
+	//$('body').layout({ applyDemoStyles: true });
+  initPage();
+  $( "#menu" ).menu();
+  $( "#routeDiv" ).draggable({handle: ".move"});
+  $( "#routeDiv" ).resizable();
+  $( "#routeRaport" ).draggable({handle: ".move"});
+  $( "#routeRaport" ).resizable();
+
+  $('#editPinLoc').keypress(function(e){
+    if(e.keyCode==13) {
+      $('#buttonAddPin').click();
+      return false;
+    }
+   });
+ // $(".dragable").draggableTouch();
+  closeNav();
+});
+</script>
+<script type="text/javascript">
+
+jQuery(window).bind('beforeunload', function(){
+    return 'my text';
+});
+
+
+function goodbye(e) {
+    if(!e) e = window.event;
+    //e.cancelBubble is supported by IE - this will kill the bubbling process.
+    e.cancelBubble = true;
+
+    //e.stopPropagation works in Firefox.
+    if (e.stopPropagation ) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    var confirmationMessage = 'Haluatko lopettaa?'; //This is displayed on the dialog;
+
+  e.returnValue = confirmationMessage;     // Gecko, Trident, Chrome 34+
+  return confirmationMessage;
+}
+window.onbeforeunload=goodbye;
+
+function getUrlVars()
+ {
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+ }
+
+ var params = getUrlVars();
+ var map = null;
+ var canvasLayer;
+ var directionsManager = null;
+ var geoLocationProvider = null;
+ var tilelayer;
+ var redIcon = "css/pin2/red.png";
+ var blueIcon = "css/pin2/blue.png";
+ var blueSelIcon = "css/pin2/blueSel.png";
+ var greenIcon = "css/pin2/green.png";
+ var greenSelIcon = "css/pin2/greenSel.png";
+ var greenDotIcon = "css/pin2/blackGreenDot.png";
+ var greenDotSelIcon = "css/pin2/blackGreenDotSel.png";
+ var redDotIcon = "css/pin2/blackRedDot.png";
+ var redDotSelIcon = "css/pin2/blackRedDotSel.png";
+ var currentPosPin = null;
+ var hitPin = null;
+
+ var followPinList = {}
+ var followPolylineList = {}
+ var followLocationsList = {}
+ var myLineVertices = new Array();
+ var myPolyline;
+
+ function GetMap() {
+    // Microsoft.Maps.loadModule('Microsoft.Maps.Themes.BingTheme',{ callback: ContinueGetMap });
+    Microsoft.Maps.loadModule("Microsoft.Maps.SpatialMath", function () {
+      ContinueGetMap();
+    });
+ }
+
+ function ContinueGetMap()
+ {
+ // Initialize the map
+    var pzoom = parseInt(params["zoom"]) || parseInt(localStorage.zoom) || 8;
+    var lon = params["lon"] || localStorage.lon || 25.75;
+    var lat = params["lat"] || localStorage.lat || 62.25;
+    var load = params["load"] || localStorage.load || "";
+    var route = params["route"] || localStorage.route || "";
+    var froute = params["froute"] || localStorage.froute || "";
+    var opens = params["open"] || "";
+
+	map = new Microsoft.Maps.Map("#mapDiv",{
+	  credentials:"Ao_g6EJt65LD09k5BdCLMyDSNnfnLtKjKkrDKTDCp4IvIEyldy5RlHr5gDd6JJQu",
+	  culture: 'fi', homeRegion: 'FI',
+	  zoom: pzoom,
+      mapTypeId: Microsoft.Maps.MapTypeId.road,
+	  // mapTypeId: Microsoft.Maps.MapTypeId.mercator,
+	  center:new Microsoft.Maps.Location(lat,lon)
+	});
+
+	map.setView({ labelOverlay: Microsoft.Maps.LabelOverlay.hidden });
+	map.setOptions({disableStreetside: true})
+
+	// Microsoft.Maps.loadModule('Microsoft.Maps.Directions', { callback: directionsModuleLoaded, culture: 'fi', homeRegion: 'FI', theme: new Microsoft.Maps.Themes.BingTheme()  });
+	Microsoft.Maps.loadModule('Microsoft.Maps.Directions', directionsModuleLoaded);
+
+    var tileSource = new Microsoft.Maps.TileSource({ uriConstructor: getTilePath });
+    tilelayer = new Microsoft.Maps.TileLayer({ mercator: tileSource, opacity: 1 });
+    // map.entities.push(tilelayer);
+	var  origo = new Microsoft.Maps.Location(0,0);
+    currentPosPin = newPin(origo,false,"I",greenDotIcon,greenDotSelIcon);
+	hitPin = newPin(origo,true,"H",redDotIcon,redDotSelIcon);
+	Microsoft.Maps.Events.addHandler(map,'click',mapHit);
+	Microsoft.Maps.Events.addHandler(map,'viewchange',mapMove);
+
+    var mapName = localStorage.getItem("mapName") || "Bing Maps normal";
+    var paramMapName = params["mapName"];
+    if ( paramMapName != undefined ) mapName = paramMapName;
+    SelectMapMode(mapName);
+    var cb = $('#combobox')[0];
+
+
+    for(var i=0; i<cb.options.length; i++) {
+        if ( cb.options[i].text == mapName ) {
+           cb.selectedIndex = i;
+           break;
+        }
+    }
+
+
+    var i = 1;
+    while ( true ) {
+       var p = params["p"+i] || false;
+       if ( !p ) break;
+       p = decodeURIComponent(p) || "";
+       addPinAt(p);
+       i++;
+    }
+
+	// geoLocationProvider = new Microsoft.Maps.GeoLocationProvider(map); // not any more in V8
+	// Get the user's current location
+    // myPolyline.setOptions({strokeThickness: 3, strokeColor: "orange"});
+	  showCurrentPosition();
+
+	  if ( load ) {
+	      document.getElementById("editURLTrack").value = load.replaceAll(",", "\n");
+	      AutoGrowTextArea(document.getElementById("editURLTrack"));
+	      handleURLTrack();
+    }
+	  if ( route ) {
+	      document.getElementById("editURLRoute").value = route.replaceAll(",", "\n");
+	      AutoGrowTextArea(document.getElementById("editURLRoute"));
+	      handleURLRoute(froute);
+    }
+	  if ( false && froute ) {
+        forceRoute(froute);
+    }
+    checkGeoLocation();
+
+	  if ( opens ) {
+	       var ops = opens.split(",");
+	       for (var i in ops) {
+	            openDiv(ops[i].trim());
+         }
+    }
+ }
+
+
+function findMyPlace() {
+   var center = currentPosPin.getLocation();
+   map.setView({center:center});
+}
+
+function copyToUrl() {
+    var tr = document.getElementById("editURLTrack").value.trim().replaceAll("\n",",");
+    if ( tr != "" ) tr = "&load="+tr;
+    var ro = document.getElementById("editURLRoute").value.trim().replaceAll("\n",",");
+    if ( ro != "" ) ro = "&route="+ro;
+    var pos = map.getCenter();
+    var url = "k.html?" +
+     "lat="+pos.latitude.toFixed(5)+
+     "&lon="+pos.longitude.toFixed(5)+
+     "&zoom="+map.getZoom()+
+     "&mapName="+mapmode+
+     tr + ro;
+    history.replaceState("object or string", "Title",url);
+}
+
+function copyRouteToUrl() {
+    var url = "k.html?" +
+     "zoom="+map.getZoom()+
+     "&mapName="+mapmode+
+     "&from="+editFrom.value+
+     "&to="+editTo.value+
+     "";
+    history.replaceState("object or string", "Title",url);
+}
+
+
+ var mouseDown = false;
+
+ function mapHit(e)
+ {
+  if ( mouseDown ) { mouseDown = false; return; }
+  if (e.targetType != "map") return;
+  var point = new Microsoft.Maps.Point(e.getX(), e.getY());
+  var loc = e.target.tryPixelToLocation(point);
+  setHitPinLoc(loc);
+  DisplayLocPin(hitPin);
+}
+
+var dst;
+
+function setHitPinLoc(loc) {
+  hitPin.setLocation(loc);
+  calcDistance();
+}
+
+function calcDistance() {
+  if ( !selectedPin ) return;
+  if ( !hitPin ) return;
+  var d = WGS84_distance(selectedPin.getLocation(),hitPin.getLocation());
+  if (!dst) dst = $("#distance");
+  // dst.css( "border" , "3px solid red" );
+  dst[0].innerText = "" + d.toFixed(3) + " km";
+}
+
+
+function mapMove()
+{
+   mouseDown = true;
+   var pos = map.getCenter();
+   localStorage.lon = pos.longitude;
+   localStorage.lat = pos.latitude;
+   localStorage.zoom = map.getZoom();
+   if ( options.HCenter ) {
+     setHitPinLoc(map.getCenter());
+     DisplayLocPin(hitPin);
+   }
+}
+
+ function SelectMapMode(mode)
+ {
+	var mm = mapModes[mode];
+    if ( mm == undefined ) return;
+    $(".logo").empty();
+    mapmode = mode;
+    // map.entities.remove(tilelayer);
+	// map.layers.remove(tilelayer);
+	map.layers.clear();
+
+	if ( mapmode != "Bing Maps normal")
+	{
+       // map.entities.push(tilelayer);
+	   map.layers.insert(tilelayer)
+  	   map.setOptions( { mapTypeId: Microsoft.Maps.MapTypeId.mercator, allowHidingLabelsOfRoad : true } );
+  	   map.setView({ labelOverlay: Microsoft.Maps.LabelOverlay.hidden });
+	} else {
+		map.setOptions( { mapTypeId: Microsoft.Maps.MapTypeId.road, allowHidingLabelsOfRoad : false } );
+    	map.setView({ labelOverlay: Microsoft.Maps.LabelOverlay.visible });
+	}
+    $(".logo").append(mm.c);
+    if (typeof mm.i !== 'undefined') {
+       mm.i();
+    }
+    mapfunction = mm.f;
+    localStorage.setItem("mapName",mode);
+ }
+
+
+
+ // Simulation of C# string.Format, only {n} works.
+ if (!String.format) {
+  String.format = function(format) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return format.replace(/{(\d+)}/g, function(match, number) {
+      return typeof args[number] != 'undefined'
+        ? args[number]
+        : match
+      ;
+    });
+  };
+}
+
+
+     // Converts tile XY coordinates into a QuadKey at a specified level of detail.
+        function TileXYToQuadKey(tile)
+        {
+            var quadKey = "";
+            for (var i = tile.zoom; i > 0; i--)
+            {
+                var digit = '0';
+                var mask = 1 << (i - 1);
+                if ((tile.x & mask) != 0)
+                {
+                    digit++;
+                }
+                if ((tile.y & mask) != 0)
+                {
+                    digit++;
+                    digit++;
+                }
+                quadKey += digit;
+            }
+            return quadKey;
+        }
+
+        function Clip(n, minValue, maxValue)
+        {
+		    if ( n < minValue ) return minValue;
+			if ( maxValue < n ) return maxValue;
+            return n;
+        }
+        // Convert Pixel map position to latitude/longitude
+        function PixelXYToLatLong(pixelX, pixelY, tile)
+        {
+            var mapSize = 256 << tile.zoom;
+            var x = (Clip(pixelX, 0, mapSize - 1) / mapSize) - 0.5;
+            var y = 0.5 - (Clip(pixelY, 0, mapSize - 1) / mapSize);
+            tile.x = 90 - 360 * Math.atan(Math.exp(-y * 2 * Math.PI)) / Math.PI;
+            tile.y = 360 * x; // tarkista kumminko päin
+			return tile;
+        }
+
+ function nokiaConvert(tile)
+ {
+    tile.zoom  = Clip(tile.zoom,0,20);
+    return PixelXYToLatLong(256 * tile.x + 128, 256 * tile.y + 128,tile);
+ }
+
+ function tileToWMSRect(tile)
+ {
+	var mapSize = 256 << tile.zoom;
+	var pixelX = 256 * tile.x + 128;
+	var pixelY = 256 * tile.y + 128
+    var x1 = (Clip(pixelX-128, 0, mapSize - 1) / mapSize) - 0.5;
+    var y1 = 0.5 - (Clip(pixelY+128, 0, mapSize - 1) / mapSize);
+    var x2 = (Clip(pixelX+128, 0, mapSize - 1) / mapSize) - 0.5;
+    var y2 = 0.5 - (Clip(pixelY-128, 0, mapSize - 1) / mapSize);
+	return {
+      x1 : 90 - 360 * Math.atan(Math.exp(-y1 * 2 * Math.PI)) / Math.PI,
+      y1 : 360 * x1,
+      x2 : 90 - 360 * Math.atan(Math.exp(-y2 * 2 * Math.PI)) / Math.PI,
+      y2 : 360 * x2
+	};
+ }
+
+ var belectro = {
+   link : "https://tanger.belectro.fi/tiles/mmltopo/v9/256/{0}/{2}/{1}?ref=7f2d",
+   ok : false,
+   init : function() {
+        if ( this.ok ) return;
+        this.ok = true;
+        $.ajax( {url:"https://www.mit.jyu.fi/demowww/cyclo/bbark.php",
+        success: function( data ) {
+            var bbarkObj = JSON.parse(data);
+            var url = bbarkObj.base_map_groups[0].maps[0].url;
+            url = url.replace("{W}", "256");
+            url = url.replace("{Z}", "{0}");
+            url = url.replace("{Y}", "{2}");
+            url = url.replace("{X}", "{1}");
+            belectro.link = url;
+            return;
+            },
+        async:   false})
+    }
+ };
+
+ var mapModes = {
+    "Bing Maps normal"   : { f:function(tile) {
+	                            return String.format("http://ecn.t1.tiles.virtualearth.net/tiles/r{0}?g=1135",TileXYToQuadKey(tile));
+							}, c:""},
+	"Bing Maps aerial"   : { f:function(tile) {
+	                            return String.format("https://ecn.t1.tiles.virtualearth.net/tiles/h{0}?g=1135",TileXYToQuadKey(tile));
+							}, c:""},
+	"Google street"      : { f:function(tile) { return String.format("https://mt1.google.com/vt/lyrs=m&z={0}&x={1}&y={2}",tile.zoom ,tile.x, tile.y ); },
+	                         c:'(c) <a href="http://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>'},
+	"Google satellite"   : { f:function(tile) { return String.format("https://mt1.google.com/vt/lyrs=y&z={0}&x={1}&y={2}",tile.zoom ,tile.x, tile.y ); },
+	                         c:'(c) <a href="http://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>'},
+//  "Google Street"      : { f:function(tile) { tile = nokiaConvert(tile); return String.format("https://maps.googleapis.com/maps/api/staticmap?center={1},{2}&zoom={0}&size=256x256&key=AIzaSyCpXjAoV19MUbpGd6e6YD9IketR2Gu-tqc",tile.zoom ,tile.x, tile.y); }, c:""},
+//  "Google satellite"   : { f:function(tile) { tile = nokiaConvert(tile); return String.format("https://maps.googleapis.com/maps/api/staticmap?center={1},{2}&zoom={0}&size=256x256&key=AIzaSyCpXjAoV19MUbpGd6e6YD9IketR2Gu-tqc&maptype=hybrid",tile.zoom ,tile.x, tile.y); }, c:""},
+//    "Nokia"              : { f:function(tile) { tile = nokiaConvert(tile); return String.format("http://m.nok.it/?app_id=_peU-uCkp-j8ovkzFGNU&app_code=gBoUkAMoxoqIWfxWA5DuMQ&h=256&w=256&ctr={1},{2}&z={0}&t=0&nord",tile.zoom ,tile.x, tile.y); }, c:""},
+//	"MapQuest"           : { f:function(tile) { return String.format("http://otile1.mqcdn.com/tiles/1.0.0/map/{0}/{1}/{2}.png",Clip(tile.zoom,0,19) ,tile.x, tile.y); },
+//	                         c:'(c) <a href="http://info.mapquest.com/terms-of-use/" target="_blank">MapQuest</a>'},
+	"OpenStreet"         : { f:function(tile) { return String.format("https://tile.openstreetmap.org/{0}/{1}/{2}.png",tile.zoom,tile.x,tile.y); },
+	                         c:'(c) <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'},
+	"OpenCycle"          : //{ f:function(tile) { return String.format("http://a.tile.opencyclemap.org/cycle/{0}/{1}/{2}.png",tile.zoom ,tile.x, tile.y ); },
+	                         { f:function(tile) { return String.format("https://tile.thunderforest.com/cycle/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
+	                         c:'(c) <a href="http://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	"Landscape"          : { f:function(tile) { return String.format("https://tile.thunderforest.com/landscape/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
+	                         c:'(c) <a href="http://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	"Transport"          : { f:function(tile) { return String.format("https://tile.thunderforest.com/transport/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
+	                         c:'(c) <a href="http://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	"Outdoors"           : { f:function(tile) { return String.format("https://tile.thunderforest.com/outdoors/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
+	                         c:'(c) <a href="http://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	"Kapsi peruskartta"  : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/peruskartta/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
+	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+	"Kapsi Tausta"       : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/taustakartta/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
+	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+	"Kapsi Ilma"         : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/ortokuva/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
+	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'
+                             },
+	"b-bark SuomiTopo"   : { f:function(tile) {
+                                 var url = String.format(belectro.link,tile.zoom ,tile.x, tile.y );
+								 return url;
+						      },
+	                         c:'<span>Render:</span> <a href="https://www.b-bark.com" target="_blank"><img style="vertical-align:middle" src="css/b_bark_logo.png" width="20%" height="20%" /></a><br />(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a><br />',
+                             i: belectro.init },
+    "DeLorme World Base" : { f:function(tile) { return String.format("https://server.arcgisonline.com/ArcGIS/rest/services/Specialty/DeLorme_World_Base_Map/MapServer/tile/{0}/{2}/{1}",tile.zoom ,tile.x, tile.y); },
+	                         c:'(c) <a href="http://www.esri.com/legal/software-license" target="_blank">ArgGIS</a>'},
+	"World Imagery"      : { f:function(tile) { return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{0}/{2}/{1}",tile.zoom ,tile.x, tile.y);},
+	                         c:'(c) <a href="http://www.esri.com/~/media/Files/Pdfs/legal/pdfs/e204_e300.pdf" target="_blank">ArgGIS</a>'},
+	"Ilmailu merged"      : { f:function(tile) {
+	                             var airac = "1806";
+	                             var url = String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/merged/256/latest/{0}/{1}/{2}.png',tile.zoom ,tile.x, tile.y);
+	                             return url},
+	                         c:'(c) <a href="https://openflightmaps.org/live/ef-finland/" target="_blank">openflightmaps.org</a>'},
+	"Ilmailu aero"      : { f:function(tile) {
+	                             var airac = "1806";
+	                             var url = String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/aero/256/latest/{0}/{1}/{2}.png',tile.zoom ,tile.x, tile.y);
+	                             return url},
+	                         c:'(c) <a href="https://openflightmaps.org/live/ef-finland/" target="_blank">openflightmaps.org</a>'},
+/*
+	"Ilmailu base"      : { f:function(tile) {
+	                             var airac = "1806";
+	                             var url = String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/base/256/latest/{0}/{1}/{2}.png',tile.zoom ,tile.x, tile.y);
+	                             return url},
+	                         c:'(c) <a href="https://openflightmaps.org/live/ef-finland/" target="_blank">openflightmaps.org</a>'},
+*/
+ }
+
+var extra = params["extra"];
+if ( !extra ) extra = getOptionValue("extra");
+if ( extra ) {
+   mapModes["Merikartta"] = { f:function(tile) { var rect = tileToWMSRect(tile);	return String.format("https://kartta.liikennevirasto.fi/meriliikenne//dgds/wms_ip/merikartta?VERSION=1.1.1&REQUEST=GetMap&WIDTH=256&HEIGHT=256&FORMAT=image/jpeg&SRS=EPSG:4326&BBOX={1},{0},{3},{2}&LAYERS=cells",rect.x1,rect.y1,rect.x2,rect.y2); },
+	                         c:'(c) <a href="https://portal.liikennevirasto.fi/sivu/www/f/liikenneverkko/merikartat" target="_blank">Liikennevirasto</a>'};
+   setOption("extra", true);
+ }
+
+ var mapmode = "Bing map normal";
+ var mapfunction = mapModes[mapmode];
+
+ function getTilePath(tile) {
+    var url = mapfunction(tile);
+	//console.log(url);
+    return url;
+ }
+
+ function directionsModuleLoaded()
+ {
+	// Initialize the location provider
+	// geoLocationProvider = new Microsoft.Maps.GeoLocationProvider(map); // not anymore in V8
+	// Get the user's current location
+	showCurrentPosition();
+    if ( params["to"] ) {
+        if ( params["from"] ) findDriving();
+
+    }
+ }
+
+
+function ellipsoid(name, a, invf){
+  /* constructor */
+  this.name=name
+  this.a=a
+  this.invf=invf
+}
+
+var ells = [new ellipsoid("WGS84",6378.137/1.852,298.257223563),
+            new ellipsoid("FAI sphere",6371.0/1.852,1000000000.)];
+
+
+function getEllipsoid(selection){
+//  document.spheroid.major_radius.value=ells[selection.selectedIndex+1].a*1.852
+//  document.spheroid.inverse_f.value=ells[selection.selectedIndex+1].invf
+  return ells[selection.selectedIndex];
+}
+
+function atan2(y,x) {
+    var out;
+    if (x <0)            { out= Math.atan(y/x)+Math.PI;}
+    if ((x >0) && (y>=0)){ out= Math.atan(y/x);}
+    if ((x >0) && (y<0)) { out= Math.atan(y/x)+2*Math.PI;}
+    if ((x==0) && (y>0)) { out= Math.PI/2;}
+    if ((x==0) && (y<0)) { out= 3*Math.PI/2;}
+    if ((x==0) && (y==0)) {
+    //alert("atan2(0,0) undefined")
+        out= 0.
+    }
+    return out
+}
+
+function WGS84_distance(p1,p2) {
+   var selection = { selectedIndex: 0 };
+   var m = Math.PI/180;
+   return crsdist_ell(p1.latitude*m,p1.longitude*m,p2.latitude*m,p2.longitude*m,getEllipsoid(selection));
+}
+
+function crsdist_ell(glat1,glon1,glat2,glon2,ellipse){
+// glat1 initial geodetic latitude in radians N positive
+// glon1 initial geodetic longitude in radians E positive
+// glat2 final geodetic latitude in radians N positive
+// glon2 final geodetic longitude in radians E positive
+    a=ellipse.a
+    f=1/ellipse.invf
+    //alert("a="+a+" f="+f)
+    var r, tu1, tu2, cu1, su1, cu2, s1, b1, f1
+    var x, sx, cx, sy, cy,y, sa, c2a, cz, e, c, d
+    var EPS= 0.00000000005
+    var faz, baz, s
+    var iter=1
+    var MAXITER=100
+  if ((glat1+glat2==0.) && (Math.abs(glon1-glon2)==Math.PI)){
+    alert("Course and distance between antipodal points is undefined")
+    glat1=glat1+0.00001 // allow algorithm to complete
+    }
+  if (glat1==glat2 && (glon1==glon2 || Math.abs(Math.abs(glon1-glon2)-2*Math.PI) <  EPS)){
+    //alert("Points 1 and 2 are identical- course undefined")
+    return 0.0;
+    out=new MakeArray(0)
+    out.d=0
+    out.crs12=0
+    out.crs21=Math.PI
+    return out
+  }
+  r = 1 - f
+  tu1 = r * Math.tan (glat1)
+  tu2 = r * Math.tan (glat2)
+  cu1 = 1. / Math.sqrt (1. + tu1 * tu1)
+  su1 = cu1 * tu1
+  cu2 = 1. / Math.sqrt (1. + tu2 * tu2)
+  s1 = cu1 * cu2
+  b1 = s1 * tu2
+  f1 = b1 * tu1
+  x = glon2 - glon1
+  d = x + 1 // force one pass
+  while ((Math.abs(d - x) > EPS) && (iter < MAXITER))
+    {
+      iter=iter+1
+      sx = Math.sin (x)
+//       alert("sx="+sx)
+      cx = Math.cos (x)
+      tu1 = cu2 * sx
+      tu2 = b1 - su1 * cu2 * cx
+      sy = Math.sqrt(tu1 * tu1 + tu2 * tu2)
+      cy = s1 * cx + f1
+      y = atan2 (sy, cy)
+      sa = s1 * sx / sy
+      c2a = 1 - sa * sa
+      cz = f1 + f1
+      if (c2a > 0.)
+     cz = cy - cz / c2a
+      e = cz * cz * 2. - 1.
+      c = ((-3. * c2a + 4.) * f + 4.) * c2a * f / 16.
+      d = x
+      x = ((e * cy * c + cz) * sy * c + y) * sa
+      x = (1. - c) * x * f + glon2 - glon1
+    }
+  x = Math.sqrt ((1 / (r * r) - 1) * c2a + 1)
+  x +=1
+  x = (x - 2.) / x
+  c = 1. - x
+  c = (x * x / 4. + 1.) / c
+  d = (0.375 * x * x - 1.) * x
+  x = e * cy
+  s = ((((sy*sy*4.-3.)*(1.-e-e)*cz*d/6.-x)*d/4.+cz)*sy*d+y)*c*a*r
+
+  return s*1.852;
+  /*
+  faz = modcrs(atan2(tu1, tu2))
+  baz = modcrs(atan2(cu1 * sx, b1 * cx - su1 * cu2) + Math.PI)
+  out=new MakeArray(0)
+  out.d=s
+  out.crs12=faz
+  out.crs21=baz
+  if (Math.abs(iter-MAXITER)<EPS){
+    alert("Algorithm did not converge")
+  }
+  return out
+  */
+}
+
+ var zoom;
+ function showCurrentPosition()
+ {
+    if ( currentPosPin == null ) return;
+    zoom = map.getZoom();
+	/*
+	geoLocationProvider.getCurrentPosition({
+        enableHighAccuracy:true,
+        showAccuracyCircle:options.showAccuracy,
+        successCallback:displayCenter,
+        updateMapView:false,
+        //errorCallback: function(object) { alert('Error callback invoked, error code '  + object.errorCode); }
+	});
+	*/
+	// getLocation();
+ }
+
+/*
+ var locationStarted = false;
+ function getLocation() {
+    if ( locationStarted ) return;
+    locationStarted = true;
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(displayCenter, errorCallBack, {enableHighAccuracy: true});
+    } else {
+        setError("Geolocation is not supported by this browser.");
+    }
+}
+*/
+
+var geo_options = {
+  enableHighAccuracy: true,
+  maximumAge        : 3000000,
+  timeout           : 27000
+};
+
+
+ var watcher = null;
+ function getGeoLocation() {
+    if ( watcher ) return;
+    if (navigator.geolocation) {
+        watcher = navigator.geolocation.watchPosition(displayCurrentPosition, errorCallBack, geo_options);
+    } else {
+        setError("Geolocation is not supported by this browser.");
+    }
+}
+
+
+function startGeoLocation(enable) {
+   if ( watcher ) navigator.geolocation.clearWatch(watcher);
+   watcher = null;
+   if ( enable ) getGeoLocation();
+}
+
+function checkGeoLocation() {
+    startGeoLocation(document.getElementById("readGPS").checked);
+}
+
+ function checkFollow(timer,clear)
+ {
+    // if ( timer=="send" && !options.sendPos) return;
+    var tim = timers[timer];
+    if ( options[timer] && !clear)
+       tim.t = setInterval(function(){ tim.f();	}, tim.interval);
+	  else
+       clearInterval(tim.t);
+ }
+
+
+var sending = false;
+ function sendPosition() {
+   // checkFollow("send",true);
+   // checkFollow("resend",true);
+   clearError();
+   // getLocation();
+   if ( options.send ) {
+       if ( lastGPSCoord )
+          postPosition(lastGPSCoord);
+       else
+          navigator.geolocation.getCurrentPosition(postPosition, errorCallBack, {enableHighAccuracy: true});
+   }
+ }
+
+ function fixed(d,n) {
+    if ( d == null ) return "NaN";
+	  return d.toFixed(n);
+ }
+
+
+ function i2(i) {
+     if ( i >= 10 ) return "" + i;
+     return "0"+i;
+ }
+
+
+ var spaces = "                                                                                                                           ";
+
+ function fixeds(s,n)
+ {
+    if ( s == null ) s = "";
+    if ( n < 0 ) return (s + spaces).substr(0, -n);
+    s = spaces + s;
+    var l = s.length;
+    return s.substr(l-n);
+ }
+
+ function cleanNumbers(s)
+ {
+    return s.replace(/[^0-9]/g,'').trim();
+ }
+
+ function sendCyclo(command,f, extra)
+ {
+ /*
+    $.ajax({
+	  type: 'POST',
+	  url: "https://www.mit.jyu.fi/demowww/cyclo/",
+	  contentType: 'text/plain',
+	  xhrFields: { withCredentials: false },
+	   success: function() {
+       },
+	});
+	*/
+   clearError();
+   options.id = cleanNumbers(options.id);
+   var params = $.extend({}, command, { id: options.id, e: getEmailTag()  });
+   $.post( "https://www.mit.jyu.fi/demowww/cyclo/index.php", params )
+    .done(function( data ) {
+	  f(data, extra)
+	 } );
+ }
+
+
+ function getEmailTag() {
+   if ( !options.tag ) return options.email;
+   return options.email + "+" + options.tag
+ }
+
+
+ function getLogname() {
+    if ( options.logname ) return options.logname;
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; //January is 0!
+    var yy = today.getFullYear()-2000;
+
+    return i2(yy) + i2(mm) + i2(dd);
+ }
+
+ var lastSend = ""
+
+ function postPosition(position)
+ {
+    if ( sending ) return;
+    sending = true;
+    // checkFollow("send",true);
+    // checkFollow("resend",false);
+ /*
+    $.ajax({
+	  type: 'POST',
+	  url: "https://www.mit.jyu.fi/demowww/cyclo/",
+	  contentType: 'text/plain',
+	  xhrFields: { withCredentials: false },
+	   success: function() {
+       },
+	});
+	*/
+   clearError();
+   // var position ="62.4596956,25.7324266,0,433,41478.4036846991,2.390,254.9,3.0,3.0";
+   var pos = fixed(position.coords.latitude,7) + "," +
+             fixed(position.coords.longitude,7) + "," +
+			 "0" + "," +
+             fixed(((position.coords.altitude)*3.280839895),0) + "," +
+			 fixed((position.timestamp/1000/3600/24)+25569.00,10) + "," +
+			 fixed(position.coords.speed,1) + "," +
+			 fixed(position.coords.heading,1) + "," +
+			 fixed(position.coords.accuracy,1) + "," +
+			 fixed(position.coords.altitudeAccuracy,1);
+   var posmsg = fixed(position.coords.latitude,4) + "," +
+                fixed(position.coords.longitude,4);
+
+   var tag =  "";
+   if ( options.tag ) tag = "+" + options.tag;
+
+   if ( lastSend ==posmsg ) {
+      setError("");
+      // timers["send"].interval = options.interval;
+      // checkFollow("send",false);
+      // checkFollow("resend",true);
+      sending = false;
+      return;
+   }
+   $.post( "https://www.mit.jyu.fi/demowww/cyclo/", { id: options.id, e: getEmailTag(), d : pos, log:getLogname()  })
+    .done(function( data ) {
+      setError(data);
+      // timers["send"].interval = options.interval;
+      // checkFollow("send",false);
+      // checkFollow("resend",true);
+      sending = false;
+      lastSend = posmsg;
+	  }
+	);
+   var c = document.getElementById('coord');
+   c.innerHTML = " " + posmsg;
+ }
+
+
+ function errorCallBack()
+ {
+    setError("getLocation error");
+ }
+
+
+  var lastGPSCoord = null;
+	function displayCurrentPosition(position)
+	{
+	   lastGPSCoord = position;
+	    /*
+	    var accuracy = args.position.coords.accuracy;
+		// Display the user location when the geo location request returns
+		// alert("The user's location is " + args.center);
+		if ( accuracy > 500 ) {
+		  geoLocationProvider.removeAccuracyCircle();
+		  if ( options.showAccuracy )
+            geoLocationProvider.addAccuracyCircle(args.center, 500, 500, {polygonOptions:{fillColor:new Microsoft.Maps.Color(50,100,0,0), strokeColor:new Microsoft.Maps.Color(100,255,0,0)}});
+		}
+        */
+		// map.setView({ zoom:zoom });
+		currentPosPin.setLocation(position.coords);
+		if ( currentPosPin == selectedPin ) map.setView({center:selectedPin.getLocation()});
+		if ( options.followMe ) {
+        var curpos = new Microsoft.Maps.Location(position.coords.latitude, position.coords.longitude, position.coords.altitude);
+		    myLineVertices.push(curpos);
+        if (!myPolyline) {
+            myPolyline = new Microsoft.Maps.Polyline(myLineVertices);
+            map.entities.push(myPolyline);
+        }
+  		  myPolyline.setLocations(myLineVertices);
+		    myPolyline.setOptions({strokeThickness: options.followMeWidth, strokeColor: options.followMeColor});
+    }
+    // for test draw
+ 		     // center = new Microsoft.Maps.Location(position.coords.latitude, position.coords.longitude+0.5, position.coords.altitude);
+		     // myLineVertices.push(center);
+		     // myPolyline.setLocations(myLineVertices);
+       if ( options.send ) postPosition(position);
+
+	}
+
+
+ function moveEditTo(edit) {
+     var editField = document.getElementById(edit);
+     var s = getPinText();
+     editField.value = s;
+     var name = edit.replace("edit","").toLowerCase();
+     setOption(name,editField.value);
+     calcDistance();
+ }
+
+  function pToStr(p, sep) {
+     var s = p.latitude.toFixed(5) + sep + p.longitude.toFixed(5);
+     return s;
+  }
+
+
+  function moveITo(edit) {
+     var editField = document.getElementById(edit);
+     var p = currentPosPin.getLocation();
+     var s = pToStr(p, ' ');
+
+  	 editField.value = s;
+     var name = edit.replace("edit","").toLowerCase();
+     setOption(name,editField.value);
+     calcDistance();
+ }
+
+
+function checkSpecialCoord(s) {
+	var su = s.toUpperCase();
+  if ( su === "" || su ==="I" )
+    return pToStr(currentPosPin.getLocation(), ' ');
+  if ( su === "H" )
+    return pToStr(hitPin.getLocation(), ' ');
+  if ( isCoordinate(s) ) return getNormalizedCoordinateString(s, " ");
+	return s;
+}
+
+
+function findDriving() {
+	// Initialize the DirectionsManager
+	if ( directionsManager == null ) directionsManager = new Microsoft.Maps.Directions.DirectionsManager(map);
+	// directionsManager.resetDirections();
+	directionsManager.clearAll();
+
+	// Create start and end waypoints
+	var addrFrom = checkSpecialCoord(document.getElementById('editFrom').value);
+	var addrTo = checkSpecialCoord(document.getElementById('editTo').value);
+	var modeCB = document.getElementById('RouteMode');
+
+
+	var startWaypoint = new Microsoft.Maps.Directions.Waypoint({address:addrFrom});
+	var endWaypoint = new Microsoft.Maps.Directions.Waypoint({address:addrTo});
+	var rMode = Microsoft.Maps.Directions.RouteMode.driving;
+	if ( modeCB.checked ) rMode = Microsoft.Maps.Directions.RouteMode.walking;
+
+
+	directionsManager.addWaypoint(startWaypoint);
+	directionsManager.addWaypoint(endWaypoint);
+	directionsManager.setRequestOptions({
+	  culture: 'fi',
+	  distanceUnit: Microsoft.Maps.Directions.DistanceUnit.kilometers,
+	  routeMode: rMode,
+	  // routeOptimization: Microsoft.Maps.Directions.RouteOptimization.shortestDistance
+	  });
+
+	// Set the id of the div to use to display the directions
+	directionsManager.setRenderOptions({ itineraryContainer: document.getElementById('itineraryDiv') });
+
+	// Specify a handler for when an error occurs
+	Microsoft.Maps.Events.addHandler(directionsManager, 'directionsError', displayError);
+
+	// Calculate directions, which displays a route on the map
+	directionsManager.calculateDirections();
+
+}
+
+
+var searchManager = null;
+var searchPins = [];
+
+
+function getPinText() {
+    return document.getElementById('editPinLoc').value.trim();
+}
+
+function setPinText(s) {
+    document.getElementById('editPinLoc').value = s.trim();
+    checkAddPinText();
+}
+
+function search() {
+    if (!searchManager) {
+        //Create an instance of the search manager and perform the search.
+        Microsoft.Maps.loadModule('Microsoft.Maps.Search', function () {
+            searchManager = new Microsoft.Maps.Search.SearchManager(map);
+            search()
+        });
+    } else {
+        //Remove any previous results from the map.
+        clearSearchResults();
+        //Get the users query and geocode it.
+        var query = getPinText();
+        geocodeQuery(query);
+    }
+}
+
+function selectSearchPin(t) {
+    var s = t.text();
+    var v = t.val();
+    var i = s.indexOf(')');
+    setPinText(s.substr(i+2));
+    centerSearchPin(parseInt(v)-1);
+}
+
+
+function centerSearchPin(n) {
+   if ( n < 0 ) return;
+   if ( n >= searchPins.length ) return;
+   var pin = searchPins[n];
+   map.setView({center:pin.location});
+}
+
+function clearSearchResults() {
+    var cb = $('#searchCombo');
+    cb.empty();
+
+    for (var i in searchPins) {
+        map.entities.remove(searchPins[i]);
+    }
+
+    searchPins = [];
+    clearError();
+    clearMessage();
+    closeDiv("searchSpan");
+}
+
+function geocodeQuery(query) {
+    var searchRequest = {
+        where: query,
+        callback: function (r) {
+            if (r && r.results && r.results.length > 0) {
+                openDiv("searchSpan");
+                var pin, pins = [], locs = [], output = '';
+
+                for (var i = 0; i < r.results.length; i++) {
+                    //Create a pushpin for each result.
+                    pin = new Microsoft.Maps.Pushpin(r.results[i].location, {
+                        text: (i+1) + ''
+                    });
+                    pins.push(pin);
+                    pin.location = r.results[i].location;
+                    locs.push(r.results[i].location);
+
+                    output += (i+1) + ') ' + r.results[i].name + ',';
+                    var opt = (i+1) + ') ' + r.results[i].name;
+                    $('#searchCombo').append( new Option(opt,""+(i+1)) );
+                    searchPins.push(pin);
+                }
+
+                setMessage("/" + r.results.length);
+                //Add the pins to the map
+                map.entities.push(pins);
+
+                centerSearchPin(0);
+
+                /*
+                //Determine a bounding box to best view the results.
+                var bounds;
+
+                if (r.results.length == 1) {
+                    bounds = r.results[0].bestView;
+                } else {
+                    //Use the locations from the results to calculate a bounding box.
+                    bounds = Microsoft.Maps.LocationRect.fromLocations(locs);
+                }
+
+                map.setView({ bounds: bounds });
+                */
+            }
+        },
+        errorCallback: function (e) {
+            //If there is an error, alert the user about it.
+            // alert("No results found.");
+            setError("Ei löydy!")
+        }
+    };
+
+    //Make the geocode request.
+    searchManager.geocode(searchRequest);
+}
+
+ function displayError(e)
+ {
+	alert(e.message);
+ }
+
+
+ function DisplayLoc(e)
+ {
+	if (e.targetType == 'pushpin') DisplayLocPin(e.target);
+ }
+
+function DisplayLocPin(pin)
+{
+   var pinLoc = pin.getLocation();
+   var alt = pinLoc.altitude;
+   var alts = "";
+   if ( !(alt === undefined) ) alts = " " + (alt/3.280839895).toFixed(0) + " m";
+   setPinText(pinLoc.latitude.toFixed(5) + " " + pinLoc.longitude.toFixed(5) + " " + pin.getText() + alts);
+   calcDistance();
+}
+
+function ddmmssToDeg(s)
+{
+   if ( s.length != 6 ) return 0;
+   if ( s.indexOf(",") >= 0 ) return 0;
+   if ( s.indexOf(".") >= 0 ) return 0;
+   var dd = parseFloat(s.substr(0, 2));
+   var mm = parseFloat(s.substr(2, 2));
+   var ss = parseFloat(s.substr(4, 2));
+   return dd + mm/60 + ss/3600;
+}
+
+
+function sToDeg(s) {
+   // s can be:
+   //    623025  = ddmmss
+   //    63.5017 = dd.dddd
+   //    63.30'25 = dd.mm'ss
+   //    63.30'25" = dd.mm'ss"
+   //    63.3017' = dd.mm.mm'
+   var c = String.fromCharCode(65533); // asteen merkki?
+   s = s.replaceAll(c, ".");
+   var im = s.indexOf("'");
+   var id = s.indexOf(".");
+   if ( id < 0 ) return ddmmssToDeg(s);
+   if ( im < 0 ) return parseFloat(s);
+   if ( im < s.length-1 ) return ddmmssToDeg(s.replace("'","").replace('"','').replace('.',''));
+   s = s.replace("'","");
+   var dd = parseFloat(s.substr(0, id));
+   var mm = parseFloat("0."+s.substr(id+1))*100.0/60.0;
+   return dd + mm;
+}
+
+function d2(d) {
+	  d = Math.round(d);
+	  if ( d < 10 ) return "0" + d;
+	  return ""+d;
+}
+
+
+function toDDMMSS(d) {
+	var t = {dd:0, mm:0, ss: 0};
+  var sign = 1; if ( d < 0 ) { sign = -1; d = -d; }
+  var b  = Math.round(d*360000);
+  t.ss  = (b % 6000)/100;
+  b  = Math.floor(b / 6000);
+  t.mm  = b % 60;
+  t.dd  = Math.floor(b / 60);
+  t.dd  = sign * t.dd;
+  return t;
+}
+
+
+
+function ddmmss(d) {
+	  var sign = ''; if ( d < 0 ) { sign = "-"; d = -d; }
+	  var t = toDDMMSS(d);
+	  return sign + d2(t.dd) + '.' + d2(t.mm) + "'" + d2(t.ss) + '"';
+}
+
+ var pinNr = 1;
+
+
+ function clearEdit(id) {
+     document.getElementById(id).value = "";
+ }
+
+ function addPin() {
+   var s = getPinText().trim();
+   if (s === "") return;
+   if ( !isCoordinate(s) ) return search();
+   var pin = addPinAt(s);
+   if (options.selectNewPin)
+     selectActivePin(pin);
+ }
+
+
+ function isCoordinate(s) {
+     if ( s === "" ) return false;
+     return "0123456789-".indexOf(s[0]) >= 0;
+ }
+
+
+ function checkAddPinText()
+ {
+     var text = "Lisää pinni"
+     if ( !isCoordinate(getPinText()) ) text = "Etsi";
+     document.getElementById('buttonAddPin').innerText = text;
+ }
+
+
+ function getCoordinateFromText(s) {
+     if (s === "") return null;
+	   var latLongArray = (s).split(/[\s,]+/);
+     var latVal = 0;
+     var longVal = 0;
+	   var lats = latLongArray[0];
+	   var lons = latLongArray[1];
+
+     latVal = sToDeg(lats);
+     longVal = Microsoft.Maps.Location.normalizeLongitude(sToDeg(lons));
+     var center = new Microsoft.Maps.Location(latVal, longVal)
+     return center;
+ }
+
+
+ function getCoordinate() {
+    return getCoordinateFromText(getPinText());
+ }
+
+
+ function getNormalizedCoordinateString(s, sep) {
+     var pos = getCoordinateFromText(s);
+     if ( pos == null ) return "";
+     return pos.latitude + sep + pos.longitude;
+ }
+
+function addPinAt(pinLoc)
+{
+  var center = hitPin.getLocation();
+  var name = ""+pinNr;
+  if ( pinLoc != "" ) {
+     var latLongArray = (pinLoc).split(/[\s,]+/);
+     center = getCoordinateFromText(pinLoc);
+     name = latLongArray[2];
+     if ( name === undefined || name == "H" || name == "" ) name = ""+pinNr++;
+  }
+  else pinNr++;
+
+  var pin = newPin(center,true,name,blueIcon,blueSelIcon)
+  return pin;
+}
+
+
+ function setCookie(cname,cvalue,exdays)
+ {
+   var d = new Date();
+   d.setTime(d.getTime()+(exdays*24*60*60*1000));
+   var expires = "expires="+d.toGMTString();
+   document.cookie = cname + "=" + cvalue + "; " + expires;
+ }
+
+
+ function getCookie(cname)
+ {
+   var name = cname + "=";
+   var ca = document.cookie.split(';');
+   for(var i=0; i<ca.length; i++)
+   {
+     var c = ca[i].trim();
+     if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+   }
+   return "";
+ }
+
+
+var timers = {
+ follow : { t:null,f:getfollow,interval:1000 },
+ showPosition : { t:null, f:showCurrentPosition,interval:1000},
+ send : { t:null,f:sendPosition,interval:5000 },
+ resend : { t:null,f:sendPosition,interval:200000 }
+};
+
+
+ var myLayout;
+
+ function checkClosed(name,def)
+ {
+    var val = params[name+"Closed"] || localStorage[name+"Closed"] || def;
+    if ( val == "true" ) val = true;
+    if ( val == "false" ) val = false;
+    return val;
+ }
+
+ function initPage()
+ {
+
+    params.forEach(function(element, index, array) {
+        params[element] = decodeURIComponent(params[element]);
+    });
+
+    var browser = navigator.userAgent;
+	// alert(browser);
+ 	var isiPad = browser.match(/iPad/i) != null;
+	var isWP = browser.match(/Windows Phone/i) != null;
+	if ( !(window.File && window.FileReader && window.FileList && window.Blob ) ) // || isiPad || isWP )
+	   $("#getLogFile").hide();
+
+/*
+   // ei tarvii koska getXoption hoitaa
+    var followusers = params["followusers"] || "";
+    var logname = params["logname"] || "";
+
+    if ( logname ) setOption("logname", logname);
+    if ( followusers ) setOption("usersTofollow", followusers);
+
+    // setCBOption("follow", params["follow"]);
+    // setCBOption("send", params["send"]);
+    // setCBOption("readGPS", params["gps"]);
+*/
+    //GetMap();
+    checkSavedValues();
+    if ( options.id != "" )
+	  $("#accountArea").hide();
+	else
+	  $("#followArea").hide();
+
+
+    var northClosed = checkClosed("north",false);
+    var southClosed = checkClosed("south",false);
+    var eastClosed = checkClosed("east",true);
+    var westClosed = true; //checkClosed("west",true);
+    if ( eastClosed && params["to"] ) eastClosed = false;
+
+ 	var w = window.innerWidth;
+	myLayout = $("body").layout({
+      onclose : function(name) {
+        localStorage[name+"Closed"] = true;
+      },
+      onopen : function(name) {
+        localStorage[name+"Closed"] = false;
+      },
+	   // applyDemoStyles: true,
+	   defaults: {
+		  fxName:               "slide",
+	      fxSpeed:               "1",
+	      spacing_closed:        0,
+	      spacing_open:        0,
+	      initClosed:            false,
+	   },
+	   east: {
+	      size: w*0.3,
+	      initClosed:            eastClosed
+	   },
+	   west: {
+	      size: w*0.9,
+	      initClosed:            westClosed
+	   },
+	   north: {
+	      spacing_closed:        0,
+	      spacing_open:        0,
+	      initClosed:            northClosed,
+	      //togglerLength_closed:  "10%"
+	   },
+	   south: {
+	      initClosed:            southClosed,
+	      //togglerLength_closed:  "50%"
+	   }
+	});
+
+    // myLayout.bindButton('#showRoutePane', 'toggle', 'east');
+    // myLayout.bindButton('#showOptionsPane', 'toggle', 'west');
+	  // myLayout.bindButton('#showInstructionsPane', 'toggle', 'south');
+    document.getElementById('logFile').addEventListener('change', handleFileSelect, false);
+    document.getElementById('routeFile').addEventListener('change', handleFileSelect, false);
+
+	$.each(mapModes, function(val, text) {
+      $('#combobox').append( new Option(val,val) );
+    });
+
+	$('#combobox').change(function() {
+      var t = $('#combobox :selected').text();
+      SelectMapMode(t);
+    });
+
+	$('#searchCombo').click(function() {
+      var t = $('#searchCombo :selected');
+      selectSearchPin(t);
+    });
+
+  // Handler for send new id -button
+	$("#getId").on("click", function(event) { orderId(); } );
+
+	checkFollow("send",false);
+	checkFollow("resend",false);
+  // sendPosition();
+}
+
+
+function orderId() {
+   var url = window.location.href.split("?");
+   var returl = url[0] + "?open=settings&email=" + options.email +  "&id=";
+   sendCyclo({order:1,returl:returl}, function(d, n){ $("#idMsg").text(d) }, null);
+}
+
+ function setOption(name,value)
+ {
+     var ex = 365;
+     options[name] = value;
+	   localStorage.setItem(name,value,ex);
+ }
+
+
+ function setOptionInt(name,value,def)
+ {
+     var ex = 365;
+     var val = parseInt(value) || def;
+     options[name] = val;
+	   localStorage.setItem(name, val, ex);
+ }
+
+
+ function getOptionValue(name)
+ {
+	   return localStorage[name];
+ }
+
+
+
+ function getOption(name,editName)
+ {
+    var edit =  $("#"+editName);
+    options[name] = params[name] || localStorage.getItem(name) || "";
+	if (options[name]!="")
+	  edit.val(options[name]); //document.getElementById(edit).value = options[name];
+	edit.on("change", function(event) {
+	  setOption(name,this.value);
+	} );
+    setOption(name,edit[0].value);
+ }
+
+ function getOptionInt(name,editName, def)
+ {
+    var edit =  $("#"+editName);
+    var val = parseInt(localStorage.getItem(name)) || def;
+    options[name] = params[name] || val || def;
+    if (options[name]!="")
+      edit.val(options[name]); //document.getElementById(edit).value = options[name];
+    edit.on("change", function(event) { setOptionInt(name,this.value, def);  } );
+    setOptionInt(name,edit[0].value,def);
+ }
+
+
+ function getBoolean(s) {
+     if (typeof(s) == typeof(true)) return s;
+     if ( s === '1') return true;
+     s = s.toUpperCase();
+     if ( s === "TRUE") return true;
+     if ( s === "YES") return true;
+     return false;
+ }
+
+
+ function setCBOption(name,value)
+ {
+     if ( value === undefined ) return;
+     var ex = 365;
+     value = getBoolean(value);
+     options[name] = value;
+	   localStorage.setItem(name,value,ex);
+ }
+
+
+ function getCBOption(name,f)
+ {
+    var cb = $("#"+name);
+    var value = params[name];
+    if ( value === undefined ) value = getBoolean(localStorage.getItem(name) || options[name] || false);
+    else value = getBoolean(value);
+    options[name]= value;
+    if (options[name]) {
+       document.getElementById(name).checked = true;
+       options[name] = true; // ??? ei kai tarviisi
+    } else options[name] = false;
+
+  	cb.on("click", function(event) {
+      setCBOption(name,this.checked);
+      if ( f != undefined ) f();
+  	} );
+    setCBOption(name,cb[0].checked);
+ }
+
+
+ function checkSavedValues()
+ {
+   getOption("followMeColor","editFollowMeColor");
+   getOptionInt("followMeWidth","editFollowMeWidth", 3);
+
+   getOption("email","editEmail");
+   getOption("id","editId");
+   getOption("usersTofollow","editUsersTofollow");
+   getOption("to","editTo");
+   getOption("from","editFrom");
+
+   getOption("tag","editTag");
+   getOption("logname","editLog");
+   getOption("interval","editInterval");
+   getOption("trackColors","editTrackColors");
+   getOption("routeColors","editRouteColors");
+
+   getCBOption("follow",function() { checkFollow("follow"); } );
+   getCBOption("followMe",function() { /*checkFollow("followMe");*/ } );
+   getCBOption("selectNewPin",function() { /*checkFollow("followMe");*/ } );
+   getCBOption("smallRaport",function() { changeRaportView(); } );
+   // getCBOption("showAccuracy");
+   getCBOption("HCenter");
+   getCBOption("send"); // ,sendPosition);
+   getCBOption("drawLogLine");
+   // getCBOption("readGPS",function() { checkFollow("readGPS"); });
+   getCBOption("readGPS",function() { checkGeoLocation(); });
+   checkFollow("follow");
+   // checkFollow("readGPS");
+   changeRaportView();
+
+/*
+   options.follow=getCookie("follow"); if (options.follow=="true") { document.getElementById('follow').checked = true; options.follow = true; } else options.follow = false;
+   options.showAccuracy=getCookie("showAccuracy"); if (options.showAccuracy=="true") { document.getElementById('showAccuracy').checked = true; options.showAccuracy = true; } else options.showAccuracy = false;
+   options.HCenter=getCookie("HCenter"); if (options.HCenter=="true") { document.getElementById('HCenter').checked = true; options.HCenter = true; } else options.HCenter = false;
+   options.showAccuracy=getCookie("showAccuracy"); if (options.showAccuracy=="true") { document.getElementById('showAccuracy').checked = true; options.showAccuracy = true; } else options.showAccuracy = false;
+   checkFollow("follow");
+*/
+ }
+
+
+ function saveCookies()
+ {
+    var ex = 365;
+	/*
+	options.follow = document.getElementById('follow').checked; setCookie("follow",options.follow,ex);
+	options.showAccuracy = document.getElementById('showAccuracy').checked; setCookie("showAccuracy",options.showAccuracy,ex);
+	options.HCenter = document.getElementById('HCenter').checked; setCookie("HCenter",options.HCenter,ex);
+	options.showAccuracy = document.getElementById('showAccuracy').checked; setCookie("showAccuracy",options.showAccuracy,ex);
+	*/
+ }
+
+
+
+ function getfollow()
+ {
+ /*
+    $.ajax({
+	  type: 'POST',
+	  url: "https://www.mit.jyu.fi/demowww/cyclo/",
+	  contentType: 'text/plain',
+	  xhrFields: { withCredentials: false },
+	   success: function() {
+       },
+	});
+	*/
+   clearError();
+   $.post( "https://www.mit.jyu.fi/demowww/cyclo/", { id: options.id, e: getEmailTag(), f : options.usersTofollow  })
+    .done(function( data ) { setPins(data) });
+ }
+
+ function setPins(data)
+ {
+    var lines = data.split("\n");
+	  for (var i in lines)
+	     setPin(lines[i]);
+ }
+
+function setErrorGen(name, s)
+{
+    var e = document.getElementById(name);
+    e.innerHTML += " " + s;
+    return s;
+}
+
+function clearErrorGen(name) {
+    var e = document.getElementById(name);
+  	e.innerHTML = "";
+	  return "";
+}
+
+function setMessage(s) { return setErrorGen('searchMsg', s); }
+function setError(s) { return setErrorGen('errorMsg', s); }
+function setErrorTrack(s) { return setErrorGen('errorMsgTrack', s); }
+function setErrorRoute(s) { return setErrorGen('errorMsgRoute', s); }
+
+function clearMessage() { return clearErrorGen('searchMsg'); }
+function clearError() { return clearErrorGen('errorMsg'); }
+function clearErrorTrack() { return clearErrorGen('errorMsgTrack'); }
+function clearErrorRoute() { return clearErrorGen('errorMsgRoute'); }
+
+
+ function newPin(center,drag,text, icon,iconsel)
+ {
+   var pin = new Microsoft.Maps.Pushpin(center, {
+     draggable: drag,
+	 text:text,
+	 icon:icon,
+	 height:48,
+	 width:48,
+	 anchor:new Microsoft.Maps.Point(24,48),
+   });
+   pin["selectedIcon"] = iconsel;
+   Microsoft.Maps.Events.addHandler(pin, 'mouseup', DisplayLoc);
+   Microsoft.Maps.Events.addHandler(pin,'click',selectPin);
+   map.entities.push(pin);
+   return pin;
+}
+
+ function setPin(line)
+ {
+    line = line.trim();
+    if ( line == "" ) return;
+    if ( line[0] != 'D' )  return setError(line);
+    var parts = line.split(":");
+    var n = parts[1].split("=");
+    var name = n[0];
+    var d = n[1].split(",");
+    var latVal = parseFloat(d[0]);
+    var longVal = Microsoft.Maps.Location.normalizeLongitude(parseFloat(d[1]));
+    var alt = parseFloat(d[3]);
+    var center = new Microsoft.Maps.Location(latVal, longVal, alt);
+    center.altitude = alt;
+    var pin;
+    var pline;
+    var lineVertices;
+    if ( name in followPinList ) {
+      pin = followPinList[name];
+      pline = followPolylineList[name];
+      lineVertices = followLocationsList[name];
+      var len = lineVertices.length;
+      var last = lineVertices[len-1];
+      var same = last.latitude == center.latitude && last.longitude == center.longitude;
+      if (!same ) {
+        if (options.drawLogLine) lineVertices.push(center);
+        else pline.getLocations().length = 0;
+        pin.setLocation(center);
+        if (lineVertices.length % 1 == 0) // To let it draw also with big zoom factors
+          pline.setLocations(lineVertices);
+      }
+    }
+    else {
+      // var pinInfobox = new Microsoft.Maps.Infobox(center, {title: name, visible: false});
+  	  pin = newPin(center,false,name.substring(0,4),greenIcon,greenSelIcon);
+  	  lineVertices = new Array(center);
+      pline = new Microsoft.Maps.Polyline(lineVertices);
+  	  followPinList[name] = pin;
+  	  followPolylineList[name] = pline;
+  	  followLocationsList[name] = lineVertices;
+  	  map.entities.push(pin);
+  	  map.entities.push(pline);
+  	  // map.entities.push(pinInfobox);
+	  }
+	  if ( pin == selectedPin ) map.setView({center:center});
+ }
+
+ var loadedTracks = [];
+
+ function showTrack(data, type, colors)
+ {
+
+    var ei = data.indexOf("Error:");
+    if ( data.indexOf("ERROR:") >= 0 || 0 <= ei && ei <= 100 ) {
+       setErrorTrack(data);
+       return;
+    }
+    var color = colors[loadedTracks.length % colors.length];
+    closeDiv("loadTrack");
+    var lines = data.split("\n");
+    var lineVertices = new Array();
+    for (var i in lines) {
+          var line = lines[i].trim();
+          var lat = 0;
+          var lng = 0;
+          var latVal = 0;
+          var longVal = 0;
+          if ( line === "" ) continue;
+          if ( type === "cyc" ) {
+              var p = line.split(",");
+              lat = p[0];
+              lng = p[1];
+              latVal = parseFloat(lat);
+              longVal = Microsoft.Maps.Location.normalizeLongitude(parseFloat(lng));
+          }
+          if ( type === "igc" ) {
+              // 0        1         2         3
+              // 0123456789012345678901234567890123456789
+              //  hhmmssddmmmmm dddmmmmm  pppppgggggspeed
+              // B1337166226608N02550102EA0091800913046
+              // B1323366227150N02548221EA0000000444
+              if ( line[0] !== "B" ) continue;
+              latVal = parseFloat(line.substr(7,2)) + parseFloat("0."+line.substr(9,4))*100.0/60.0;
+              longVal = parseFloat(line.substr(15,3)) + parseFloat("0."+line.substr(18,4))*100.0/60.0;
+              if ( line[14] !== "N" ) latVal = - latVal;
+              if ( line[23] !== "E" ) longVal = - longVal;
+          }
+          var pt = new Microsoft.Maps.Location(latVal, longVal);
+          lineVertices.push(pt);
+    }
+    line = new Microsoft.Maps.Polyline(lineVertices);
+    line.setOptions({strokeThickness: 3, strokeColor: color});
+    map.entities.push(line);
+    loadedTracks.push(line);
+ }
+
+ var loadedRoutes = [];
+
+ function removePolys(polys) {
+     if ( !polys ) return;
+     for ( var i in polys ) {
+         p = polys[i];
+         map.entities.remove(p);
+     }
+ }
+
+ function removePins(pins) {
+     if ( !pins ) return;
+     for ( var i in pins ) {
+         p = pins[i];
+         map.entities.remove(p);
+     }
+ }
+
+ function removeRoute(name) {
+     for (var i in loadedRoutes) {
+         var r = loadedRoutes[i];
+         if ( r.name === name ) {
+              map.entities.remove(r.line);
+              removePolys(r.polys);
+              removePolys(r.pins);
+              loadedRoutes.splice(i, 1);
+              return;
+         }
+     }
+ }
+
+
+ function isErrorOnData(data) {
+    var ei = data.indexOf("Error:");
+    if ( data.indexOf("ERROR:") >= 0 || 0 <= ei && ei <= 100 ) {
+       return true;
+    }
+    return false;
+ }
+
+ function showRoute(routename, data, type, colors, drawpins, froute)
+ {
+    removeRoute(routename);
+    if ( isErrorOnData(data) ) {
+       setErrorTrack(data);
+       setError(data);
+       return;
+    }
+    var dists = "";
+    var rline  =  "==============================================================";
+    var raport = ["nr  Nimi              säde      km yht km   käännepiste", rline];
+    var sraport = ["nr säde  km    käännepiste"];
+
+  // L   HOYSTO350                    0.0 % 61.54'24", 26.11'07"
+
+
+    closeDiv("loadRoute");
+
+
+    var sum = 0;
+    var minLeg = 10000000;
+    var sep = "";
+    var color = colors[loadedRoutes.length % colors.length];
+    var lines = data.split("\n");
+    var lineVertices = new Array();
+    var polys = [];
+    var pins = [];
+    var prevPt = null;
+    var prevOutside;
+    var prevRad = 0;
+    var firstPt = null;
+    for (var i in lines) {
+          var line = lines[i].trim();
+          var lat = 0;
+          var lng = 0;
+          var latVal = 0;
+          var longVal = 0;
+          if ( line === "" ) continue;
+          if ( type === "txt" ) {
+              // 62.4666234473693,22.4589770156482,EFKJ,0.4,0,0,0
+              // 62.15'38,22.58'25,Niskos15,5,0,0,0
+              // 62.5382468805446,22.6579360294378,Kihniö15,0.4,0,0,0
+              var p = line.split(",");
+              if ( p.length < 4) continue;
+              lat = p[0];
+              lng = p[1];
+              var name = p[2];
+              var rad = parseFloat(p[3]);
+              var outside = parseFloat(p[4]);
+              latVal = sToDeg(lat);
+              longVal = Microsoft.Maps.Location.normalizeLongitude(sToDeg(lng));
+          }
+          var pt = new Microsoft.Maps.Location(latVal, longVal);
+          if ( rad > 0 ) {
+                var path = Microsoft.Maps.SpatialMath.getRegularPolygon(pt, rad*1000, 36,  Microsoft.Maps.SpatialMath.Meters);
+                poly = new Microsoft.Maps.Polygon(path);
+                poly.setOptions({strokeThickness: 2, strokeColor: color});
+                var fillColor = color;
+                if ( outside ) {
+                    fillColor = new Microsoft.Maps.Color(10, 128, 128, 128);
+                    fillColor.a = 0.1;
+                    poly.setOptions({strokeThickness: 2, strokeColor: color, fillColor: fillColor});
+                }
+                map.entities.push(poly);
+                polys.push(poly)
+          }
+          lineVertices.push(pt);
+          var rtext = "";
+          var srtext = "";
+          if ( prevPt ) {
+              var d = WGS84_distance(prevPt, pt) - prevRad - rad;
+              if ( prevOutside ) d = prevOutside - rad;
+              if ( outside ) {
+                 d = rad - prevRad;
+                 prevOutside = rad;
+              }
+              if ( d < minLeg ) minLeg = d;
+              dists += sep + d.toFixed(3);
+              sum += d;
+              sep = " + ";
+              rtext = "" + (lineVertices.length-1) + " " + fixeds(name,-20) + fixeds(rad.toFixed(1),4) + " "
+                          + fixeds(d.toFixed(1),7)  + fixeds(d.toFixed(1),6)
+                         + "  " + ddmmss(latVal) + " " + ddmmss(longVal);
+              srtext = "" + (lineVertices.length-1) + " " + fixeds(rad.toFixed(1),4) + " "
+                         + fixeds(d.toFixed(1),5)
+                         + " " + ddmmss(latVal) + " " + ddmmss(longVal);
+          } else {
+              firstPt = pt;
+              rtext = "L" + " " + fixeds(name,-20) + fixeds(rad.toFixed(1),4) + " "
+                         + fixeds("",7) + fixeds("",6)
+                         + "  " + ddmmss(latVal) + " " + ddmmss(longVal);
+              srtext = "L" + " " + fixeds(rad.toFixed(1),4) + " "
+                         +  fixeds("",5)
+                         + " " + ddmmss(latVal) + " " + ddmmss(longVal);
+          }
+          raport.push(rtext);
+          raport.push("");
+          sraport.push(srtext);
+          prevPt = pt;
+          prevRad = rad;
+          if ( drawpins ) {
+              var pin = newPin(pt, false, name, blueIcon, blueSelIcon)
+              pins.push(pin);
+          }
+    }
+    if ( lineVertices.length === 0 ) return;
+    line = new Microsoft.Maps.Polyline(lineVertices);
+    line.setOptions({strokeThickness: 3, strokeColor: color});
+    map.entities.push(line);
+    var route = {name: routename, line: line, polys: polys, pins: pins, data: data};
+    loadedRoutes.push(route);
+    var dst = $("#distance");
+    var pross = "";
+    if ( lineVertices.length === 4 ) {
+        pross = " " + (minLeg/sum*100).toFixed(1) + "%"
+        raport[2] = raport[2].substr(0,34) + pross + raport[2].substr(40);
+    }
+    if (froute && froute != getName(routename)) return;
+    dst[0].innerText = dists + " = " + sum.toFixed(3) + " km" + pross;
+    var editRaport = document.getElementById('editRaport');
+    var editSmallRaport = document.getElementById('editSmallRaport');
+    raport[raport.length-2] = "M" + raport[raport.length-2].substr(1);
+    sraport[sraport.length-1] = "M" + sraport[sraport.length-1].substr(1);
+    raport[raport.length-1] = rline;
+    editRaport.value = raport.join("\n");
+    editSmallRaport.value = sraport.join("\n");
+ }
+
+
+ function removeTracks() {
+     for (var i=0; i<loadedTracks.length; i++) {
+         map.entities.remove(loadedTracks[i]);
+     }
+     loadedTracks = [];
+ }
+
+
+function addToRoute() {
+   var s = getPinText();
+   var t = document.getElementById('editRoute');
+   var tx = t.value.trim();
+   var n = tx.split("\n").length;
+   var name = "start";
+   if ( n > 0 && tx !== "" ) {
+      tx = tx + "\n";
+      name = "kp" + n;
+   }
+   var sp = s.split(" ");
+   if ( sp.length < 2) return;
+   if ( sp.length >= 3 && sp[2] != "H" ) name = sp[2];
+   var line = sp[0] + "," + sp[1] + "," + name + ",0.4,0,0,0";
+   t.value = tx + line;
+   drawRouteFromDialog(true);
+}
+
+
+function findRoute(rname) {
+   for (var i in loadedRoutes ) {
+       var r = loadedRoutes[i];
+       if ( r.name === rname ) return r;
+   }
+   return null;
+}
+
+
+function findPinIndex(route) {
+   for (var i in route.pins ) {
+       var p = route.pins[i];
+       if ( p == selectedPin ) return i;
+   }
+   return -1;
+}
+
+
+function moveRoutePoint() {
+   var rname = document.getElementById('editRouteName').value;
+   var route = findRoute(rname);
+   if ( route == null ) return;
+
+   var pinIndex = findPinIndex(route);
+
+   if ( pinIndex < 0 ) return;
+   var t = document.getElementById('editRoute');
+   var tx = t.value.trim();
+   var lines = tx.split("\n");
+   var n = lines.length;
+   if ( pinIndex >= n ) return addToRoute();
+
+   var s = getPinText();
+
+   var oldItems = lines[pinIndex].split(",");
+
+   var sp = s.split(" ");
+   if ( sp.length < 2) return;
+   if ( sp.length >= 3 && sp[2] != "H"  && oldItems.length >= 3 ) oldItems[2] = sp[2];
+
+   oldItems[0] = sp[0];
+   oldItems[1] = sp[1];
+
+   lines[pinIndex] = oldItems.join();
+
+
+   t.value = lines.join("\n");
+   drawRouteFromDialog(true);
+   var route = findRoute(rname);
+   selectPin(route.pins[pinIndex]);
+}
+
+function changeRoute() {
+    var rname = document.getElementById('editRouteName').value;
+    var route = findRoute(rname);
+    if ( route == null ) return;
+    var t = document.getElementById('editRoute');
+    t.value = route.data;
+}
+
+function forceRoute(name) {
+    var route = findRoute(name);
+    if ( route == null ) return;
+    document.getElementById('editRouteName').value = name;
+    var t = document.getElementById('editRoute');
+    t.value = route.data;
+}
+
+
+function deleteRoutePoint() {
+   var rname = document.getElementById('editRouteName').value;
+   var route = findRoute(rname);
+   if ( route == null ) return;
+
+   var pinIndex = findPinIndex(route);
+
+   if ( pinIndex < 0 ) return;
+   var t = document.getElementById('editRoute');
+   var tx = t.value.trim();
+   var lines = tx.split("\n");
+   var n = lines.length;
+   if ( pinIndex >= n ) return;
+
+   lines.splice(pinIndex, 1);
+
+   t.value = lines.join("\n");
+   drawRouteFromDialog(true);
+   var route = findRoute(rname);
+   selectPin(route.pins[pinIndex]);
+}
+
+
+
+function closeRoute() {
+   drawRouteFromDialog();
+   var t = document.getElementById('editRoute');
+   var tx = t.value.trim();
+   var lines = tx.split("\n");
+   t.value = tx + "\n" + lines[0];
+   drawRouteFromDialog(true);
+}
+
+
+function saveRoute() {
+   var t = document.getElementById('editRoute');
+   var tx = t.value.trim();
+   var name = document.getElementById('editRouteName').value.trim();
+   var ind = name.lastIndexOf("/");
+   var path = document.getElementById('editLog').value.trim() + "/";
+   if ( ind >= 0 ) path = "";
+   name =  path + name;
+   sendCyclo({saveRoute: name + ".txt", file: tx}, function (data, extra) {
+       setError(data);
+   }, null);
+
+
+}
+
+function drawRouteFromDialog(drawpins) {
+  showRoute(document.getElementById('editRouteName').value, document.getElementById('editRoute').value, 'txt', getRouteColors(), drawpins);
+}
+
+ function removeRoutes() {
+     for (var i=0; i<loadedRoutes.length; i++) {
+         var r = loadedRoutes[i];
+         map.entities.remove(r.line);
+         removePolys(r.polys);
+         removePins(r.pins);
+     }
+     loadedTracks = [];
+ }
+
+
+ var selectedPin = null;
+ var oldIcon = null;
+
+ function selectActivePin(pin)
+ {
+    if ( selectedPin != null ) {
+	   // selectedPin.setOptions({state:Microsoft.Maps.EntityState.none});
+	   selectedPin.setOptions({ icon: oldIcon });
+	}
+	if ( selectedPin == pin )
+	{
+	   selectedPin = null;
+	   oldIcon = null;
+	   return;
+	}
+    selectedPin = pin;
+	oldIcon = selectedPin.getIcon();
+    // selectedPin.setOptions({state:Microsoft.Maps.EntityState.highlighted});
+    selectedPin.setOptions({ icon: selectedPin.selectedIcon});
+    calcDistance();
+ }
+
+ function selectPin(e)
+ {
+    if ( !e ) return;
+    var pin = e;
+    if ( e.target ) pin = e.target;
+    selectActivePin(pin);
+ }
+
+
+ function showRoutePane()
+ {
+   myLayout.toggle('east');
+ }
+ /*
+  function handleFileSelect(evt) {
+    var files = evt.target.files; // FileList object
+
+    // files is a FileList of File objects. List some properties.
+    var output = [];
+    for (var i = 0, f; f = files[i]; i++) {
+      output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+                  f.size, ' bytes, last modified: ',
+                  f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+                  '</li>');
+    }
+    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+  }
+*/
+
+function getName(f) {
+    var s = f;
+    var i = s.lastIndexOf("\\");
+    if ( i < 0 )  i = s.lastIndexOf("/");
+    s = s.substr(i+1);
+    i = s.lastIndexOf(".");
+    if ( i >= 0 ) s = s.substr(0,i);
+    return s;
+}
+
+
+var knowTypes = ["cyc","igc","txt"];
+
+function handleFileSelect(evt) {
+    var files = evt.target.files; // FileList object
+    var re = /(?:\.([^.]+))?$/; // find last .XXX
+
+    // files is a FileList of File objects. List some properties.
+    var f = files[0];
+    if ( !f ) return;
+    var type = re.exec(f.name)[1];
+    if ( knowTypes.indexOf(type) < 0 ) {
+        alert("Tunnetaan vain tiedostotyypit " + knowTypes);
+        return;
+    }
+
+
+    var reader = new FileReader();
+    reader.onload = (function(theFile) {
+         if ( type === "txt") {
+            var data = theFile.target.result;
+            var name = getName(f.name);
+            showRoute(name, theFile.target.result, type, getRouteColors());
+            moveToDialog(name, data);
+         }
+         else
+             showTrack(theFile.target.result,type, getTrackColors());
+      });
+    reader.readAsText(f);
+}
+
+
+
+
+
+function getQuery(url, extra, f) {
+     $.get(url, function (data) {
+         f(data, extra);
+       });
+
+}
+
+var colors = ["blue", "red", "brown", "orange", "green", "black"];
+
+function getColors(name, editName) {
+    if (!options[name] ) {
+        options[name] = "blue,red,brown,orange,green,black";
+        document.getElementById(editName).value = options[name];
+    }
+    colors = [];
+    sc = options[name].split(",");
+    for (var i=0; i < sc.length; i++) {
+        var col = sc[i].trim();
+        if ( !col ) continue;
+        colors.push(col);
+    }
+    return colors;
+}
+
+function getTrackColors() {  return getColors('trackColors', 'editTrackColors'); }
+function getRouteColors() {  return getColors('routeColors', 'editRouteColors'); }
+
+function handleURLTrack() {
+     var colors = getTrackColors();
+     clearErrorTrack();
+     var lastpath = "";
+     var urlTracks = document.getElementById('editURLTrack').value.replaceAll(",","\n").split("\n");
+     for (var i=0; i<urlTracks.length; i++) {
+       var urlTrack = urlTracks[i].trim();
+       if ( !urlTrack ) continue;
+       var ext = "igc";
+       var ind = urlTrack.lastIndexOf("/");
+       if ( ind >= 0 ) lastpath = urlTrack.substr(0, ind);
+       if ( urlTrack.substr(ind+1) == "*" ) continue;
+       var url = urlTrack;
+       if (urlTrack.indexOf("igc") < 0) {
+         // url = "https://www.mit.jyu.fi/demowww/cyclo/index.php?e=" + options.email + "&id=" + options.id + "&getlog=" + urlTrack;
+         //url = encodeURI(url);
+         ext = "cyc"
+         sendCyclo({getlog: urlTrack, f: options.usersTofollow}, function (data, extra) {
+           showTrack(data, "cyc", extra);
+         }, colors);
+         continue;
+       }
+       if ( ind < 0 ) url = lastpath + "/" + urlTrack;
+       url = "https://www.mit.jyu.fi/demowww/cyclo/igc.php?u=" + url;
+       getQuery(url, colors, function (data, extra) {
+         showTrack(data, "igc", extra);
+       });
+     }
+}
+
+
+function moveToDialog(name, data) {
+     if ( isErrorOnData(data) ) return;
+     document.getElementById('editRouteName').value = name;
+     document.getElementById('editRoute').value = data;
+}
+
+function handleURLRoute(froute) {
+     var colors = getRouteColors();
+     clearErrorRoute();
+     var lastpath = options.logname;
+     var urlTracks = document.getElementById('editURLRoute').value.split("\n");
+     for (var i=0; i<urlTracks.length; i++) {
+       var urlTrack = urlTracks[i].trim();
+       if ( !urlTrack ) continue;
+       var ext = "txt";
+       var ind = urlTrack.lastIndexOf("/");
+       if ( ind >= 0 ) lastpath = urlTrack.substr(0, ind);
+       if ( urlTrack.substr(ind+1) == "*" ) continue;
+       var url = urlTrack;
+       var name = getName(urlTrack);
+       if (urlTrack.indexOf("txt") < 0) {
+         ext = "txt"
+         if ( ind < 0 ) name = lastpath + "/" + name;
+         else name = urlTrack;
+         urlTrack = name;
+         name = name + ".txt";
+         sendCyclo({getRoute: name}, function (data, extra) {
+           var n = getName(extra.name);
+           showRoute(extra.name, data, "txt", extra.colors, false, froute);
+           if (!froute || froute===n) moveToDialog(extra.name, data); // todo korjaa nimi useita dialogeja varten
+         }, {name: urlTrack, colors: colors});
+         continue;
+       }
+       if ( ind < 0 ) url = lastpath + "/" + urlTrack;
+       url = "https://www.mit.jyu.fi/demowww/cyclo/igc.php?u=" + url;
+       getQuery(url, {colors:colors, name: name}, function (data, extra) {
+           var n = getName(extra.name);
+           showRoute(n, data, "txt", extra.colors, false, froute);
+           if (!froute || froute===n) moveToDialog(n, data);
+       });
+     }
+}
+
+
+
+var menuOpen = false;
+function openNav() {
+    if ( menuOpen ) { closeNav(); return; }
+    var s = document.getElementById("mySidenav").style;
+    s.width = "300px";
+    s.height = "290px";
+    s.visibility = "visible";
+    s = document.getElementById("menu").style;
+    s.visibility = "visible";
+    menuOpen = true;
+}
+
+function closeNav() {
+    var s = document.getElementById("mySidenav").style;
+    s.visibility = "hidden";
+    s = document.getElementById("menu").style;
+    s.visibility = "hidden";
+    menuOpen = false;
+}
+
+function openSettings() {
+   myLayout.toggle('west');
+   closeNav();
+}
+
+
+function toggleDiv(name) {
+   closeNav();
+   var s = document.getElementById(name).style;
+   if ( !s ) return;
+   if (s.visibility === "visible")  s.visibility = "hidden";
+   else s.visibility = "visible";
+}
+
+
+function closeDiv(name) {
+   closeNav();
+   var s = document.getElementById(name).style;
+   if ( s ) s.visibility = "hidden";
+}
+
+function openDiv(name) {
+   closeNav();
+   var s = document.getElementById(name).style;
+   if ( s ) s.visibility = "visible";
+}
+
+function AutoGrowTextArea(textField)
+{
+  if (textField.clientHeight < textField.scrollHeight)
+  {
+    textField.style.height = textField.scrollHeight + "px";
+    if (textField.clientHeight < textField.scrollHeight)
+    {
+      textField.style.height =
+        (textField.scrollHeight * 2 - textField.clientHeight) + "px";
+    }
+  }
+}
+
+function changeRaportView() {
+//  return;
+     var sb = document.getElementById("editRaport").style;
+     var ss  = document.getElementById("editSmallRaport").style;
+    if ( options.smallRaport ) {
+//      closeDiv("editRaport");
+//      openDiv("editSmallRaport");
+      sb.height = "0px";
+      sb.visibility = "hidden";
+      ss.height = "auto";
+      ss.visibility = "inherit";
+    } else {
+//      openDiv("editRaport");
+//      closeDiv("editSmallRaport");
+      ss.height = "0px";
+      ss.visibility = "hidden";
+      sb.height = "auto";
+      sb.visibility = "inherit";
+    }
+}
+
+function googleDirections() {
+  var s = getPinText();
+  if (isCoordinate(s)) {
+    s = getNormalizedCoordinateString(s, ",")
+  }
+  var url = "https://www.google.com/maps/search/?api=1&query=" + s;
+  var win = window.open(url, '_blank');
+  win.focus();
+}
+
+
+// Skriptien loppu ========================================================================================
+</script>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<style>
+.ui-menu {
+   width: 250px;
+   margin-left: 25px;
+   margin-top: 40px;
+}
+html, body
+{
+   /* background-color:#b0c4de; */
+    height: 100%;
+}
+.link {
+  color: blue;
+  text-decoration: underline;
+}
+.errorClass {
+  color:#ff0000;
+  font-weight: bold;
+}
+div#mapDiv {
+}
+
+.navigateButton {
+ float: right;
+}
+ .logo {
+   position: absolute;
+   bottom:0;
+   margin-bottom: -3px;
+ }
+ .mapType {
+   position: absolute;
+   top:0;
+   margin-left: -8px;
+   margin-top: -2px;
+ }
+
+ .coord {
+    font-size: 8pt;
+ }
+ .settings {
+    font-size: 10pt;
+ }
+
+  .overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background: rgba(51,51,51,0.7);
+    z-index: 10;
+  }
+
+.popup {
+    padding: 5%;
+    position: absolute;
+    z-index: 400;
+    background-color: lightyellow;
+    visibility: hidden;
+    top: 30pt;
+    left: 5%;
+    /*width: calc(100% - 72px);
+    height: calc(100% - 120px);*/
+	  right: 5%;
+	  bottom: 10pt;
+    border-color: steelblue;
+    border-radius: 20px;
+    border-style: solid;
+    max-width: 800px;
+	  /* overflow:auto; */
+}
+
+.popupIn {
+    padding: 5%;
+    position: absolute;
+    top: 0pt;
+    left: 0pt;
+	  right: 0pt;
+	  bottom: 0pt;
+	  overflow:auto;
+    border-radius: 20px;
+}
+
+.driving {
+    padding: 0%;
+    top: 0pt;
+    left: 0pt;
+	  right: 0pt;
+	  bottom: 0pt;
+	  overflow:auto;
+    border-radius: 0px;
+}
+
+
+.directionsPanel {
+    padding: 0%;
+    top: 0pt;
+    left: 0pt;
+	  right: 0pt;
+	  bottom: 0pt;
+	  overflow:auto;
+    border-radius: 0px;
+}
+
+
+.hamburgerSpace {
+   margin-left: 35px;
+}
+.closebtn {
+    z-index: 1000;
+    position: absolute;
+    top: 0;
+    width: 20px;
+    right: 5px;
+    font-size: 36px;
+    /*margin-left: 50px; */
+}
+.closebtn2 {
+    z-index: 1000;
+    width: 20px;
+    font-size: 25px;
+    /*margin-left: 50px; */
+}
+.close {
+    margin-top: 20px;
+}
+
+.dragable {
+    left: 35px;
+    z-index: 501;
+    top: 35px;
+    width: fit-content;
+    /* flex-grow: 1; */
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 10px;
+    background-color: white;
+    visibility: hidden;
+}
+
+#routeDiv {
+    width: 550px;
+}
+
+.routeTextArea {
+   width: 98%;
+   height: 50%;
+}
+
+.raportTextArea {
+   width: 95%;
+   /* position: absolute; */
+   top: 0;
+   // bottom: 0;
+}
+
+
+.move {
+    width: 100%;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    height: 20px;
+    background-color: lightskyblue;
+}
+
+.clearButton {
+   margin-left: -1em;
+}
+
+@media only screen and (max-height: 600px) {
+  .popup {
+      z-index: 600;
+      top: 0pt;
+      bottom: 0pt;
+      padding-top: 0px;
+  }
+  .popupIn {
+      padding-top: 0px;
+  }
+}
+@media only screen and (max-width: 850px) {
+  .popup {
+      left: 2pt;
+	    right: 2pt;
+  }
+}
+@media only screen and (max-width: 600px) {
+  #routeDiv {
+    width: 98%;
+    left: 0px;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  .popup {
+      z-index: 600;
+      top: 0pt;
+      padding-left: 2px;
+      bottom: 0pt;
+      left: 0pt;
+	    right: 0pt;
+  }
+  .popupIn {
+      padding-top: 0px;
+      padding-left: 2px;
+  }
+}
+
+</style>
+
+</head>
+<body >
+<!--
+<div class="ui-layout-north">North</div>
+<div class="ui-layout-west">west</div>
+-->
+<div id="mySidenavHamburger" style="top: 0pt; left: 0pt; width: 30px; height: 35px; position: absolute; z-index:1600;  background-color: lightgray;">
+  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;<br></span>
+  <span style="font-size:30px;cursor:pointer" onclick="findMyPlace()">&#9737;</span>
+</div>
+
+
+
+<div id="mySidenav" style="top: 0pt; left: 0pt;  position: absolute; z-index:1500;  background-color: lightgray;" onclick="closeNav()">
+  <label class="closebtn" style="visible: hidden" onclick="closeNav()">&times;</label>
+
+  <ul id="menu" visibility="hidden">
+  <li><div onclick="toggleDiv('settings');">Asetukset...</div></li>
+  <li><div onclick="myLayout.toggle('north'); closeNav();">Pinnien lisääminen...</div></li>
+  <li><div onclick="showRoutePane(); closeNav()">Ajo-ohjeet...</div></li>
+  <li><div onclick="toggleDiv('loadTrack'); ">Lataa track-tiedosto...</div></li>
+  <li><div onclick="toggleDiv('loadRoute'); ">Lataa reittitiedosto...</div></li>
+  <li><div onclick="toggleDiv('routeDiv'); ">Reitin suunnittelu...</div></li>
+  <li><div onclick="toggleDiv('routeRaport'); ">Reittiraportti...</div></li>
+  <li><div onclick="googleDirections();">Ajo-ohjeet Google Mapsillä</div></li>
+  <li><div onclick="toggleDiv('about'); ">Pika-apu...</div></li>
+  </ul>
+  <!--Muista muuttaa korkeus openNav  (tai tee tähän tyyli automaattiseksi) -->
+</div>
+
+
+<div class="popup" id="loadTrack" style=" ">
+  <label class="closebtn" onclick="toggleDiv('loadTrack')">&times;</label>
+  <div class="popupIn">
+
+  <h2>Track-tiedoston hakeminen</h2>
+  <p>Track tiedosto voidaan hakea joko laitteelta tai netistä
+    (esim <a href="https://www.xcontest.org/finland/lennot/paivan-tulokset/" target="_blank">XContest</a>:
+    avaa lennon tiedot ja raahaa tai kopioi .igc tiedoston osoite)</p>
+  <p>Värilista: <input name="editTrackColors" id="editTrackColors" size="50" value="blue,red,brown,orange,green,black"></p>
+  <button type="button" onclick="removeTracks()" >Poista kartalla olevat trackit</button>
+  <hr />
+  <div>
+  <p>Tiedoston hakeminen laitteelta, valitse alta laitteessa oleva .igc tai .cyc -tiedosto:</p>
+	<div id="getLogFile"><label for="logFile">Track tiedosto: </label><input type="file" id="logFile" name="logFile"  /></div>
+  </div>
+  <hr />
+  <div>
+    <p>Tiedoston hakeminen netistä.  Kirjoita tai raahaa alle IGC-tiedoston URL-osoite:</p>
+   	<textarea  name="editURLTrack" id="editURLTrack" value="" cols="60" onkeyup="AutoGrowTextArea(this)"  ></textarea>
+	  <button type="button" onclick="handleURLTrack()" >Lataa track</button>
+  </div>
+	<p class="errorClass" id="errorMsgTrack"></p>
+
+   <button class="close" onclick="toggleDiv('loadTrack')">Sulje</button>
+  </div>
+</div>
+
+
+<div class="popup" id="loadRoute" style=" ">
+  <label class="closebtn" onclick="toggleDiv('loadRoute')">&times;</label>
+  <div class="popupIn">
+  <h2>Reittitiedoston hakeminen</h2>
+  <p>Reittitiedosto voidaan hakea joko laitteelta tai netistä.  Reittitiedoston tulee olla Riippuliito-ohjelman
+  syntaksin mukainen.</p>
+  <p>Värilista: <input name="editRouteColors" id="editRouteColors" size="50" value="blue,red,brown,orange,green,black"></p>
+  <button type="button" onclick="removeRoutes()" >Poista kartalla olevat retit</button>
+  <hr />
+  <div>
+  <p>Tiedoston hakeminen laitteelta, valitse alta laitteessa oleva reitin .txt -tiedosto:</p>
+	<div id="getRouteFile"><label for="routeFile">Reittitiedosto: </label><input type="file" id="routeFile" name="routeFile"  /></div>
+  </div>
+  <hr />
+  <div>
+    <p>Tiedoston hakeminen netistä.  Kirjoita tai raahaa alle reitin .txt-tiedoston URL-osoite:</p>
+   	<textarea  name="editURLRoute" id="editURLRoute" value="" cols="60" onkeyup="AutoGrowTextArea(this)"  ></textarea>
+   	<!-- <input type="text" name="editURLRoute" id="editURLRoute" value="" size="35"  /> -->
+	  <button type="button" onclick="handleURLRoute()" >Lataa reitti</button>
+  </div>
+	<p class="errorClass" id="errorMsgRoute"></p>
+
+   <button class="close" onclick="toggleDiv('loadRoute')">Sulje</button>
+  </div>
+</div>
+
+
+<div class="popup" id="about" style=" ">
+  <label class="closebtn" onclick="toggleDiv('about')">&times;</label>
+  <div class="popupIn">
+  <h2>Pika-ohjeet</h2>
+  <p>Dataa tähän karttaan voit lähettää <a href="https://trac.cc.jyu.fi/projects/dotnet/wiki/CycloLite">CycloLite</a>llä,
+  <a href="https://play.google.com/store/apps/details?id=jyu.sendpos&hl=en_IE">SendPos Androidilla</a>
+    tai <a href="s.html">Lähetys-sivulla</a>.</p>
+  <p>
+    Tunnukset voit tehdä <a href="javascript:void(0)" onclick="toggleDiv('about'); toggleDiv('settings')">asetuksista</a> tai
+  <a href="account.html">tilien hallinta</a>-sivulla.
+  </p>
+  <p>
+  <a href="https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta" target="blank">Ohjeet</a>.
+  </p>
+   <button class="close" onclick="toggleDiv('about')">Sulje</button>
+  </div>
+</div>
+
+
+<div class="popup" id="settings" style="">
+  <label class="closebtn" onclick="toggleDiv('settings')">&times;</label>
+  <div class="popupIn">
+    <h2>Asetukset</h2>
+    <input type="checkbox" id="HCenter" value="HCenter"  />Pidä H keskellä<br />
+    <!-- <input type="checkbox" id="showAccuracy" value="showAccuray"  />Näytä tarkkuusympyrä<br /> -->
+    <input type="checkbox" id="readGPS" value="readGPS"  />Lue GPS:ää<br />
+    <input type="checkbox" name="followMe" id="followMe" value="followMe"  />Piirrä oma jälki
+    <input type="text" name="editFollowMeColor" id="editFollowMeColor" value="orange" size="8" />
+    <input type="text" name="editFollowMeWidth" id="editFollowMeWidth" value="3" size="1" /> pt<br />
+    <input type="checkbox" name="selectNewPin" id="selectNewPin" value="selectNewPin"  />Valitse uusi pin aktiiviseksi
+    <br /><br />
+
+
+    <div class="ui-widget" id="followDiv">
+      <div id="followArea">
+        <button type="button" onclick="$('#followArea').toggle(); $('#accountArea').toggle();" >Tilaa käyttäjätunnus (ID)...</button>
+        <div id="accountArea2"><p>Oman paikan lähettäminen ja muiden seuraaminen:</p>
+          <label for="editTag">Kartalla näkyvä tunnus: </label></td><td><input type="text" name="editTag" id="editTag" value="" size="5" /><br>
+          <label for="editLog">logname: </label></td><td><input type="text" name="editLog" id="editLog" value="" size="12" /><br>
+          <label for="editInterval">interval/ms: </label></td><td><input type="text" name="editInterval" id="editInterval" value="5000" size="8" /><br>
+        </div>
+        <label for="editUsersTofollow">Seurattavat käyttäjät: </label><input type="text" name="editUsersTofollow" id="editUsersTofollow" value="" size="15"   /><br />
+        <br />
+        <button type="button" onclick="getfollow(); closeDiv('settings');">Hae muiden paikka</button> (jos automaatti ei ole päällä)<br />
+        <br />
+        <input type="checkbox" name="follow" id="follow" value="follow"  />Seuraa muita automaattisesti<br />
+        <input type="checkbox" name="drawLogLine" id="drawLogLine" value="drawLogLine"  />Piirrä viivaa seurattavista<br />
+        <input type="checkbox" id="send" value="send"  />Lähetä omaa paikkaa<br />
+       <button class="close" onclick="toggleDiv('settings')">Sulje</button>
+      </div>
+      <div id="accountArea">
+        <br />
+
+        <label for="editEmail">Email: </label><input type="text" name="editEmail" id="editEmail" value="" size="25" /><br />
+        <label for="editId">id: </label><input type="text" name="editId" id="editId" value="" size="15" /><br />
+        <br />
+        <button id="getId">Hae uusi ID</button>
+        <br />
+        <br />
+        <span class="idMsg" id = "idMsg"></span>
+        <br />
+        <button type="button" onclick="$('#followArea').toggle(); $('#accountArea').toggle();" >Palaa seuranta-asetuksiin...</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<div id="routeDiv" class="dragable">
+    <label class="closebtn" style="top: -10px" onclick="closeDiv('routeDiv');">&times;</label>
+    <div id="routeDivHanlde" class="move" >
+      &nbsp;Reitin muokkaus
+    </div>
+    <div id="routeDivIn">
+      <div id="editRouteButtons">
+        <label>Reitin nimi: </label>
+        <input class=".input" type="text" name="editRouteName" id="editRouteName" value="1" size="10" onkeyup="changeRoute()" />
+        <button type="button" onclick="addToRoute()" >Lisää reittiin</button>
+        <button type="button" onclick="moveRoutePoint()" >Siirrä</button>
+        <button type="button" onclick="deleteRoutePoint()" >Poista</button>
+        <button type="button" onclick="closeRoute()" >Sulje reitti</button>
+      </div>
+      <textarea  name="editRoute" id="editRoute" class="routeTextArea"  rows="5"   >
+      </textarea><br>
+      <button type="button" onclick="drawRouteFromDialog(true);" >Piirrä reitti</button>
+      <button type="button" onclick="saveRoute();" >Tallenna reitti</button>
+      <button type="button" onclick="removeRoutes();" >Poista reitit</button>
+   </div>
+</div>
+
+<div id="routeRaport" class="dragable" style="top: 80px; width: 550px;">
+    <label class="closebtn" style="top: -10px; left: 20%; " onclick="closeDiv('routeRaport');">&times;</label>
+    <div id="routeRaportHanlde" class="move" >
+      &nbsp;Reittiraportti
+    </div>
+    <div id="routeRaportIn">
+      <input type="checkbox" name="smallRaport" id="smallRaport" value="smallRapoprt" />Pieni raportti<br>
+      <textarea  name="editRaport" id="editRaport" class="raportTextArea"  rows="10"   >
+      </textarea>
+      <textarea  name="editSmallRaport" id="editSmallRaport" class="raportTextArea"  rows="5" style='height: 0; visibility: hidden'  >
+      </textarea>
+   </div>
+</div>
+
+
+<div class="ui-layout-north">
+  <label class="closebtn" style="top: -10px" onclick="myLayout.toggle('north')">&times;</label>
+  <div id="pinDiv" style="margin-left: 35px">
+    <!-- <label class="hamburgerSpace"> </label> -->
+    <input type="text" name="editPinLoc" id="editPinLoc" value="" size="35" onkeyup="checkAddPinText()" />
+    <span class ="clearButton" id="buttonClearText" onclick="setPinText('')">x</span>
+    <button type="button" id="buttonAddPin" onclick="addPin()">Etsi</button>
+    <span id="searchSpan" style="visibility: hidden">
+      <select id="searchCombo" ></select>
+      <span class="searchClass" id="searchMsg"></span>
+      <label class="closebtn2" style="margin-top: 10px;" onclick="clearSearchResults()">&times;</label>
+    </span>
+    <span class="errorClass" id="errorMsg"></span>
+  </div>
+</div>
+
+
+<div class="ui-layout-center">
+  <div id='mapDiv' ></div>
+  <div class="logo"></div>
+  <div class="mapType">
+    <div class="ui-widget">
+      <label class="hamburgerSpace"> </label>&nbsp;
+      <select id="combobox"></select> <span style="background: white;" id="distance">0 km</span>
+    </div>
+  </div>
+</div>
+
+
+<div class="ui-layout-west settings">
+</div>
+
+
+<div class="ui-layout-east" style="border-style: solid; border-width: thin;">
+  <label class="closebtn"  style="top: -13px;" onclick="showRoutePane();">&times;</label>
+  <div class="popupIn">
+    <div id='addressDiv'>
+      Ajo-ohjeet, kirjoita osoitteet tai koordinaatit:<br />
+      <input type="text" name="editFrom" id="editFrom" value="Jyväskylä, Tontuntie 11" size="40"  />
+      <button type="button" onclick='moveEditTo("editFrom")'>S</button>
+      <button type="button" onclick='moveITo("editFrom")'>I</button>
+      <br />
+      =&gt;
+      <input type="text" name="editTo" id="editTo" value="Jyväskylä, Mattilanniemi 2" size="40"  />
+      <button type="button" onclick='moveEditTo("editTo")'>S</button><br />
+      <input type="checkbox" name="RouteMode" id="RouteMode" value="walk" />Kävely
+      <button type="button" onclick="findDriving()">Etsi reitti</button>
+        <a class="link" onclick="copyRouteToUrl()">Laita&nbsp;URLiin</a>
+    </div>
+    <div class="driving">
+      <div id='itineraryDiv'></div>
+    </div>
+  </div>
+</div>
+
+
+<div class="ui-layout-south">
+</div>
+
+
+ <div style="bottom: 0pt; right: 0pt; position: absolute; z-index:390; background-color: white;">
+   	<span class="coord" id="coord"></span>
+   <a class="link" onclick="copyToUrl()">Laita&nbsp;URLiin</a>
+ </div>
+
+
+</body>
+</html>
