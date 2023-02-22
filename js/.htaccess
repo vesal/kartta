@@ -1,0 +1,24 @@
+Options -Indexes
+Order Deny,Allow
+Allow from All
+
+<Files js>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files index.php>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files BluePushpin.png>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files k.html>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files "">
+  Order Allow,Deny
+  Allow from all
+</Files>

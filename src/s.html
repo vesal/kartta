@@ -1,0 +1,339 @@
+<!DOCTYPE HTML>
+<html>
+   <head>
+      <title>Send position</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	  <meta name="viewport" content="initial-scale=1.0, user-scalable=no,width=device-width">
+<script type="text/javascript" src="https://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0&s=1"></script>
+<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+<script src="js/jquery-ui-1.10.3.custom.min.js"></script>
+<script src="js/jquery.layout-latest.min.js"></script>
+<!-- <script src="js/CanvasPushpinModule.js"></script> -->
+<link rel="stylesheet" href="css\smoothness\jquery-ui-1.10.3.custom.min.css">
+<script type="text/javascript">
+$(document).ready(function () {
+	//$('body').layout({ applyDemoStyles: true });
+  initPage();
+});
+</script>
+<script type="text/javascript">
+ function getUrlVars()
+ {
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+ }
+
+ var params = getUrlVars();
+ var map = null;
+ var canvasLayer;
+ var directionsManager = null;
+ var geoLocationProvider = null;
+ var currentPosPin = null;
+ var hitPin = null;
+
+
+ var mouseDown = false;
+
+
+ function displayError(e)
+ {
+	alert(e.message);
+ }
+
+
+function ddmmssToDeg(s)
+{
+   if ( s.length != 6 ) return 0;
+   if ( s.indexOf(",") >= 0 ) return 0;
+   if ( s.indexOf(".") >= 0 ) return 0;
+   var dd = parseFloat(s.substr(0, 2));
+   var mm = parseFloat(s.substr(2, 2));
+   var ss = parseFloat(s.substr(4, 2));
+   return dd + mm/60 + ss/3600;
+}
+
+
+ function setCookie(cname,cvalue,exdays)
+ {
+   var d = new Date();
+   d.setTime(d.getTime()+(exdays*24*60*60*1000));
+   var expires = "expires="+d.toGMTString();
+   document.cookie = cname + "=" + cvalue + "; " + expires;
+ }
+
+
+ function getCookie(cname)
+ {
+   var name = cname + "=";
+   var ca = document.cookie.split(';');
+   for(var i=0; i<ca.length; i++)
+   {
+     var c = ca[i].trim();
+     if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+   }
+   return "";
+ }
+
+var timers = {
+ send : { t:null,f:sendPosition,interval:5000 },
+ resend : { t:null,f:sendPosition,interval:200000 }
+}
+
+ function checkFollow(timer,clear)
+ {
+    var tim = timers[timer];
+    if ( options[timer] && !clear)
+       tim.t = setInterval(function(){
+	     tim.f();
+		},tim.interval);
+	else
+       clearInterval(tim.t);
+ }
+
+ var myLayout;
+
+ function initPage()
+ {
+    var browser = navigator.userAgent;
+	// alert(browser);
+ 	var isiPad = browser.match(/iPad/i) != null;
+	var isWP = browser.match(/Windows Phone/i) != null;
+	//if ( !(window.File && window.FileReader && window.FileList && window.Blob ) || isiPad || isWP )
+	//   $("#getLogFile").hide();
+
+    checkCookies();
+    // if ( options.id != "" )
+	checkFollow("send",false);
+	checkFollow("resend",false);
+	sendPosition();
+}
+
+ var options = {
+   email:"",
+   id:"",
+   logname:"",
+   interval:"5000",
+   send:true,
+   resend:true
+ }
+
+
+ function setOption(name,value)
+ {
+     var ex = 365;
+     options[name] = value;
+	 setCookie(name,value,ex);
+ }
+
+
+ function getOption(name,editName)
+ {
+    var edit = $("#"+editName);
+    options[name] = getCookie(name);
+	if (options[name]!="")
+	  edit.val(options[name]); //document.getElementById(edit).value = options[name];
+	edit.on("change", function(event) {
+	  setOption(name,this.value);
+	} );
+ }
+
+ function setCBOption(name,value)
+ {
+     var ex = 365;
+     options[name] = value;
+	 setCookie(name,value,ex);
+ }
+
+
+ function getCBOption(name,f)
+ {
+    var cb = $("#"+name);
+    options[name]=getCookie(name);
+	if (options[name]=="true") {
+	   document.getElementById(name).checked = true;
+	   options[name] = true; // ??? ei kai tarviisi
+	} else options[name] = false;
+
+	cb.on("click", function(event) {
+	  setCBOption(name,this.checked);
+	  if ( f != undefined ) f();
+	} );
+ }
+
+
+ function checkCookies()
+ {
+   getOption("email","editEmail");
+   getOption("tag","editTag");
+   getOption("id","editId");
+   getOption("logname","editLog");
+   getOption("interval","editInterval");
+
+ }
+
+
+ function saveCookies()
+ {
+ }
+
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(postPosition, errorCallBack, {enableHighAccuracy: true});
+    } else {
+        setError("Geolocation is not supported by this browser.");
+    }
+}
+
+ function errorCallBack()
+ {
+   var c = document.getElementById('coord');
+   c.innerHTML = "VIRHE ";
+ }
+
+
+var sending = false;
+ function sendPosition()
+ {
+   checkFollow("send",true);
+   clearError();
+   getLocation();
+ }
+
+ function fixed(d,n)
+ {
+    if ( d == null ) return "NaN";
+	return d.toFixed(n);
+ }
+
+ function postPosition(position)
+ {
+    if ( sending ) return;
+    sending = true;
+    checkFollow("send",true);
+ /*
+    $.ajax({
+	  type: 'POST',
+	  url: "https://www.mit.jyu.fi/demowww/cyclo/",
+	  contentType: 'text/plain',
+	  xhrFields: { withCredentials: false },
+	   success: function() {
+       },
+	});
+	*/
+   clearError();
+   // var position ="62.4596956,25.7324266,0,433,41478.4036846991,2.390,254.9,3.0,3.0";
+   var pos = fixed(position.coords.latitude,7) + "," +
+             fixed(position.coords.longitude,7) + "," +
+			 "0" + "," +
+             fixed(((position.coords.altitude)*3.280839895),0) + "," +
+			 fixed((position.timestamp/1000/3600/24)+25569.00,10) + "," +
+			 fixed(position.coords.speed,1) + "," +
+			 fixed(position.coords.heading,1) + "," +
+			 fixed(position.coords.accuracy,1) + "," +
+			 fixed(position.coords.altitudeAccuracy,1);
+
+   var tag =  "";
+   if ( options.tag ) tag = "+" + options.tag;
+
+   $.post( "https://www.mit.jyu.fi/demowww/cyclo/", { id: options.id, e: options.email+tag, d : pos, log:options.logname  })
+    .done(function( data ) {
+		setError(data);
+		timers["send"].interval = options.interval;
+		checkFollow("send",false);
+		sending = false;
+	  }
+	);
+   var c = document.getElementById('coord');
+   c.innerHTML = " " + pos;
+ }
+
+ function setError(s)
+ {
+    var e = document.getElementById('errorMsg');
+	e.innerHTML += " " + s;
+	return s;
+ }
+
+ function clearError()
+ {
+    var e = document.getElementById('errorMsg');
+	e.innerHTML = "";
+	return "";
+ }
+
+
+</script>
+<style>
+html, body
+{
+   /* background-color:#b0c4de; */
+    height: 100%;
+}
+.errorClass {
+  color:#ff0000;
+  font-weight: bold;
+}
+div#mapDiv {
+}
+
+.navigateButton {
+ float: right;
+}
+ .logo {
+   position: absolute;
+   bottom:0;
+   margin-bottom: -3px;
+ }
+ .mapType {
+   position: absolute;
+   top:0;
+   margin-left: 250px;
+   margin-top: -2px;
+ }
+</style>
+</head>
+<body >
+</div>
+<!--
+<div class="ui-layout-north">North</div>
+<div class="ui-layout-west">west</div>
+-->
+<div class="ui-layout-north">
+  <div id="pinDiv">
+  <div class="ui-widget">
+  </div>
+
+
+  </div>
+  <div class="ui-widget" id="followDiv">
+	<span class="errorClass" id="errorMsg"></span><br />
+	<span id="accountArea">
+	<table>
+	<tr><td><label for="editEmail">Email: </label></td><td><input type="text" name="editEmail" id="editEmail" value="" size="25" /></td></tr>
+	<tr><td><label for="editTag">Kartalla näkyvä tunnus: </label></td><td><input type="text" name="editTag" id="editTag" value="" size="25" /></td></tr>
+	<tr><td><label for="editId">Sähköpostissa tullut id: </label></td><td><input type="text" name="editId" id="editId" value="" size="12" /></td></tr>
+	<tr><td><label for="editLog">logname: </label></td><td><input type="text" name="editLog" id="editLog" value="" size="12" /></td></tr>
+	<tr><td><label for="editInterval">interval/ms: </label></td><td><input type="text" name="editInterval" id="editInterval" value="" size="12" /></td></tr>
+	</table>
+	<span id="coord"></span>
+	</span>
+  </div>
+</div>
+
+
+
+<div class="ui-layout-south">
+  <div id='instructions'>
+  Tunnukset voit tehdä <a href="account.html">tilien hallinta</a>-sivulla.
+  </p>
+  </div>
+</div>
+</body>
+</html>

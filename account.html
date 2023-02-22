@@ -1,0 +1,364 @@
+﻿<!DOCTYPE HTML>
+<html>
+   <head>
+      <title>Cyclo Account</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	  <meta name="viewport" content="initial-scale=1.0, user-scalable=no,width=device-width">
+<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+<script src="js/jquery-ui-latest.min.js"></script>
+<script src="js/jquery.layout-latest.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function () {
+	//$('body').layout({ applyDemoStyles: true });
+    initPage(); 	
+});
+
+ function getUrlVars()
+ {
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+ }
+ 
+ var params = getUrlVars();
+ 
+ function setCookie(cname,cvalue,exdays)
+ {
+   var d = new Date();
+   d.setTime(d.getTime()+(exdays*24*60*60*1000));
+   var expires = "expires="+d.toGMTString();
+   document.cookie = cname + "=" + cvalue + "; " + expires;
+ }
+
+ 
+ function getCookie(cname)
+ {
+   var name = cname + "=";
+   var ca = document.cookie.split(';');
+   for(var i=0; i<ca.length; i++) 
+   {
+     var c = ca[i].trim();
+     if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+   }
+   return "";
+ } 
+
+ var options = { 
+   email:"",
+   id:""
+  }
+ 
+ 
+ function setOption(name,value)
+ {
+     var ex = 365;
+     options[name] = value; 
+	 setCookie(name,value,ex);
+ }
+ 
+ function getOption(name,editName,overrideValue,f)
+ { 
+    var edit = $("#"+editName);
+    options[name] = getCookie(name); 
+	if ( overrideValue !==undefined ) options[name] = overrideValue;  
+	if (options[name]!="") 
+	  edit.val(options[name]); //document.getElementById(edit).value = options[name];
+	edit.on("change", function(event) { 
+	  var s = this.value;
+	  if ( f !== undefined ) s = f(s);
+	  this.value = s;
+	  setOption(name,s); 
+	} );  
+ }
+ 
+ function checkCookies()
+ {
+
+   // options.email=getCookie("email"); if (email!="") document.getElementById('editEmail').value = email;
+   getOption("email","editEmail",params["e"]);
+   getOption("id","editId",params["id"],cleanNumbers);
+ }
+ 
+ function initPage()
+ {
+	$("body").layout({
+	   applyDemoStyles: true,
+	   defaults: {
+		  fxName:               "slide",
+	      fxSpeed:               "slow",
+	      spacing_closed:        14,
+	      initClosed:            false
+	   },
+	   west: {
+	      size: 120
+	   },
+	   north: {
+	      //togglerLength_closed:  "10%"
+	   },
+	   south: {
+	      //togglerLength_closed:  "50%"
+	   }
+	});
+	
+    checkCookies();
+	$("#getId").on("click", function(event) { sendCyclo({order:1},function(d){ $("#idMsg").text(d) });} );
+	$("#getActiveLogname").on("click",getActiveLogName);
+	$("#moveName").on("click",moveLogName);
+
+	getActiveLogName(function() { initGrant("OneLog"); }); // muuten ei ehdi alustua oikein
+	initGrant("Active");
+	initGrant("Default");
+	initGrant("Trust");
+	$("#getLogs").on("click",getLogs);
+	getLogs();
+    $("#result").on("change",moveLogName);
+ }
+ 
+ 
+ function getLogs()
+ {
+    var mask = $("#editLoglistMask").val();
+	if ( mask == "" ) mask = "*";
+    sendCyclo({dir:mask},function(d){
+	  // $("#result").text(d); }
+	  var lines = d.split("\n");
+	  var listbox = $("#result");
+	  listbox.empty();
+	  //$("#result> option").each(function(i, option){ 
+	  //  $(option).remove(); 
+	  //}
+	  //);
+	  lines.sort();
+      for(var i=0; i<lines.length; i++) 
+	  {
+	     var line = lines[i].trim();
+		 if ( line == "" ) continue;
+		 var item = '<option value="'+line+'">'+line+'</option>';
+		 listbox.append(item);
+	  }
+	  }
+	);
+ }
+ 
+ function moveLogName()
+ {
+    var selectedOpts = $("#result").val();
+	if ( selectedOpts == "" ) return;
+	var edit = $("#editOneLog");
+	edit.val(selectedOpts);
+	getGrant("OneLog",$("#resultOneLog"));
+}
+ 
+ function initGrant(logName)
+ {
+    var ln = logName.toLowerCase();
+	$("#get"+logName).on("click", function(event) { getGrant(ln,$("#result"+logName));	} );
+	$("#set"+logName).on("click", function(event) { setGrant(ln,$("#result"+logName).val());	} );
+    getGrant(ln,$("#result"+logName));
+ }
+ 
+ function setGrant(logName,grant)
+ {
+	grant = grant.trim();
+    grant = grant.replace(/\n/g,',');
+	grant = grant.trim();
+	if ( grant == "" ) grant = "-";
+    sendCyclo({log:checkLogName(logName),g:grant},function(d){$("#idMsg").text(d); });
+ }
+ 
+ function getGrant(logName,grantRes)
+ {
+    sendCyclo({log:checkLogName(logName),qg:1},function(d){
+	  d = d.replace(/,/g,'\n');
+	  grantRes.val(d); 
+	});
+ }
+ 
+ function Sort(elementId) {
+    // Convert the listbox options to a javascript array and sort (ascending)
+    var sortedList = $.makeArray($("#" + elementId + " option"))
+        .sort(function(a, b) {
+            return $(a).text() < $(b).text() ? -1 : 1;
+        });
+    // Clear the options and add the sorted ones
+    $("#" + elementId).empty().html(sortedList);
+ }
+ 
+ function getActiveLogName(f)
+ {
+    sendCyclo({},function(d){
+	  var edit = $("#editOneLog");
+	  d = d.replace(/.*\/(.*)=.*/,'$1').trim();
+	  edit.val(d); 
+	  if ( typeof f == 'function' ) f();
+	});
+ }
+ 
+ function checkLogName(logName)
+ {
+    var ln = logName.toLowerCase();   
+    if ( ln == "onelog" ) 
+	  ln = $("#editOneLog").val().toLowerCase();
+	return ln;
+ }
+ 
+ 
+ function cleanNumbers(s)
+ {
+    return s.replace(/[^0-9]/g,'').trim();
+ }
+ 
+ 
+ function sendCyclo(command,f)
+ {
+ /*
+    $.ajax({
+	  type: 'POST',
+	  url: "https://www.mit.jyu.fi/demowww/cyclo/",
+	  contentType: 'text/plain',
+	  xhrFields: { withCredentials: false },
+	   success: function() {
+       },
+	}); 
+	*/
+   clearError();
+   options.id = cleanNumbers(options.id);
+   var params = $.extend({}, command, { id: options.id, e: options.email  });
+   $.post( "index.php", params )
+    .done(function( data ) { 
+	  f(data)
+	 } );
+ }
+
+ function setError(s)
+ {
+    var e = document.getElementById('errorMsg');
+	e.innerHTML += " " + s;
+	return s;
+ }
+ 
+ function clearError()
+ {
+    var e = document.getElementById('errorMsg');
+	e.innerHTML = "";
+	return "";
+ }
+ 
+ // var selectedOpts = $('#source-listbox').val();
+ 
+</script>
+<style>
+html, body 
+{ 
+   /* background-color:#b0c4de; */
+    height: 100%; 
+} 
+.errorClass {
+  color:#ff0000;
+  font-weight: bold;
+}
+div#mapDiv {
+}
+
+div#accountDiv {
+  border-top:2px solid blue;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.setlog { 
+   border-top:2px solid blue;
+}
+
+.loglistarea {
+ height: 85%;
+}
+</style>
+</head>
+<body>
+</div>
+<!--
+<div class="ui-layout-north">North</div>
+<div class="ui-layout-west">west</div>
+-->
+<div class="ui-layout-north">
+<h1>Hallitse CycloLite -tiliäsi</h1>
+</div>
+<div class="ui-layout-west">
+  <input type="text" id="editLoglistMask" value="*" size="10" />
+  <button id="getLogs">Hae logilista</button></br>
+  <!--
+  <textarea class="loglistarea" id="result" rows="10", cols="30">
+  </textarea>
+  -->
+  <select class="loglistarea" id="result" size="20">
+   <option value="1">1</option>
+  </select><br />
+  <button id="moveName">Siirrä nimi</button></br>
+</div>
+<div class="ui-layout-center">
+  <div class="idMsg" id = "idMsg"></div>
+  <div id="accountDiv">  
+    <p>
+    <strong>Omat tunnukset:</strong>
+	email: <input type="text" id="editEmail" value="" size="25" /> 	id: <input type="text" id="editId" value="" size="10" /> <button id="getId">Hae uusi ID</button>
+	<span class="errorClass" id="errorMsg"></span>
+    </p>	
+  </div>	  
+  <div id="activeDiv" class="setlog">
+  <p>
+    Kuka saa katsoa aktiivisen login nimen? (kirjoita all, jos haluat että kaikki)<br />
+    <textarea id="resultActive" rows="3", cols="25">
+    </textarea>
+	<button id="getActive">Hae</button>
+    <button id="setActive">Aseta</button>
+	</p>
+  </div>
+  <div id="defaultDiv" class="setlog">
+  <p>
+    Kuka saa katsoa oletuksena mitä tahansa logia? <br />
+    <textarea id="resultDefault" rows="3", cols="25">
+    </textarea>
+    <button id="getDefault">Hae</button>
+    <button id="setDefault">Aseta</button>
+	</p>
+  </div>
+  <div id="trustDiv" class="setlog">
+  <p>
+    Kehen luotat niin, ettei tarvitse koskaan antaa oikeuksia erikseen? <br />
+	Yleensä tähän tulee vain omat eri postiosoitteet, joita käytetään CycloLitessä. <br />
+    <textarea id="resultTrust" rows="3", cols="25">
+    </textarea>
+    <button id="getTrust">Hae</button>
+    <button id="setTrust">Aseta</button>
+	</p>
+  </div>
+  <div id="oneLogDiv" class="setlog">
+  <p>
+    Login <input type="text" id="editOneLog" value="" size="25" /> 
+	oikeudet. 
+    <button id="getActiveLogname">Hae</button> aktiivisen login nimi.
+	<br />
+    <textarea id="resultOneLog" rows="3", cols="25">
+    </textarea>
+    <button id="getOneLog">Hae</button>
+    <button id="setOneLog">Aseta</button>
+	</p>
+  </div>
+</div>  
+<div class="ui-layout-south">
+  <div id='instructions'>
+  <p>Dataa voit lähettää/katsoa <a href="https://trac.cc.jyu.fi/projects/dotnet/wiki/CycloLite">CycloLite</a>llä.
+  Samalla sivulla on lisäohjeita tunnuksista. 
+  Logeja voit seurata <a href="k.html">kartalta</a>.
+  </p>
+  </div>
+</div>
+</body>
+</html>

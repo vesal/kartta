@@ -1,0 +1,57 @@
+AddHandler mod_python .py
+PythonHandler mod_python.publisher
+#Options +ExecCGI
+#AddHandler cgi-script .py
+
+Options -Indexes
+Order Deny,Allow
+Deny from All
+
+<Files js>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files css>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files index.php>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files bbark.php>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files igc.php>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files hello.py>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files BluePushpin.png>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files k.html>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files k2.html>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files s.html>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files account.html>
+  Order Allow,Deny
+  Allow from all
+</Files>
+<Files "">
+  Order Allow,Deny
+  Allow from all
+</Files>
