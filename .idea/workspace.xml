@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,20 +17,28 @@
       </list>
     </option>
   </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
   <component name="ProjectId" id="1f2Ifyc2NPs6Tv5p0elvvTk2EL6" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="DefaultHtmlFileTemplate" value="HTML File" />
-    <property name="WebServerToolWindowFactoryState" value="true" />
-    <property name="editor.config.ad.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../tim" />
-    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
-    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="restartRequiresConfirmation" value="false" />
-  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "true",
+    "last_opened_file_path": "E:/riippu/kartta",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "settings.editor.selected.configurable": "project.propDebugger",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="E:\riippu\kartta\src" />
@@ -60,8 +71,9 @@
       </list>
     </recent_temporary>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration" cleanupOnStartRun="true">
-    <configuration>C:\Users\Vesa\AppData\Roaming\Subversion</configuration>
+    <configuration>C:\Users\vesal\AppData\Roaming\Subversion</configuration>
     <supportedVersion>125</supportedVersion>
     <option name="FORCE_UPDATE" value="true" />
   </component>
@@ -79,84 +91,35 @@
       <workItem from="1595686386423" duration="30802000" />
       <workItem from="1596200395262" duration="3750000" />
       <workItem from="1597485963879" duration="12000" />
+      <workItem from="1677061770185" duration="18169000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="2" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="452" y="168" key="#Plugins" timestamp="1595686408368">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state x="452" y="168" key="#Plugins/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1595686408368" />
-    <state x="637" y="337" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1595686220517">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state x="637" y="337" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1595686220517" />
-    <state x="655" y="252" key="#xdebugger.evaluate" timestamp="1595860847557">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state x="655" y="252" key="#xdebugger.evaluate/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1595860847557" />
-    <state x="688" y="418" key="AbstractVcsHelper.FilterDialog.org.jetbrains.idea.svn.history.SvnVersionFilterComponent" timestamp="1595489098259">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state x="688" y="418" key="AbstractVcsHelper.FilterDialog.org.jetbrains.idea.svn.history.SvnVersionFilterComponent/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1595489098259" />
-    <state width="954" height="582" key="DebuggerActiveHint" timestamp="1595878623853">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state width="954" height="582" key="DebuggerActiveHint/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1595878623853" />
-    <state width="1865" height="313" key="GridCell.Tab.0.bottom" timestamp="1597476199621">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state width="1865" height="313" key="GridCell.Tab.0.bottom/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1597476199621" />
-    <state width="1865" height="313" key="GridCell.Tab.0.center" timestamp="1597476199621">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state width="1865" height="313" key="GridCell.Tab.0.center/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1597476199621" />
-    <state width="1865" height="313" key="GridCell.Tab.0.left" timestamp="1597476199621">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state width="1865" height="313" key="GridCell.Tab.0.left/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1597476199621" />
-    <state width="1865" height="313" key="GridCell.Tab.0.right" timestamp="1597476199621">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state width="1865" height="313" key="GridCell.Tab.0.right/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1597476199621" />
-    <state width="1865" height="313" key="GridCell.Tab.1.bottom" timestamp="1597476199621">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state width="1865" height="313" key="GridCell.Tab.1.bottom/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1597476199621" />
-    <state width="1865" height="313" key="GridCell.Tab.1.center" timestamp="1597476199621">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state width="1865" height="313" key="GridCell.Tab.1.center/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1597476199621" />
-    <state width="1865" height="313" key="GridCell.Tab.1.left" timestamp="1597476199621">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state width="1865" height="313" key="GridCell.Tab.1.left/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1597476199621" />
-    <state width="1865" height="313" key="GridCell.Tab.1.right" timestamp="1597476199621">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state width="1865" height="313" key="GridCell.Tab.1.right/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1597476199621" />
-    <state width="1865" height="313" key="GridCell.Tab.2.bottom" timestamp="1597476199621">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state width="1865" height="313" key="GridCell.Tab.2.bottom/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1597476199621" />
-    <state width="1865" height="313" key="GridCell.Tab.2.center" timestamp="1597476199621">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state width="1865" height="313" key="GridCell.Tab.2.center/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1597476199621" />
-    <state width="1865" height="313" key="GridCell.Tab.2.left" timestamp="1597476199621">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state width="1865" height="313" key="GridCell.Tab.2.left/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1597476199621" />
-    <state width="1865" height="313" key="GridCell.Tab.2.right" timestamp="1597476199621">
-      <screen x="0" y="30" width="1920" height="1170" />
-    </state>
-    <state width="1865" height="313" key="GridCell.Tab.2.right/0.30.1920.1170/-1920.0.1920.1170@0.30.1920.1170" timestamp="1597476199621" />
+    <option name="version" value="3" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/k.html</url>
+          <line>555</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/k.html</url>
+          <line>2868</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/k.html</url>
+          <line>2420</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="19" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">

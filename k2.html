@@ -20,15 +20,9 @@
 <!-- <script src="js/CanvasPushpinModule.js"></script> -->
 <script src="https://rawcdn.githack.com/nextapps-de/winbox/0.2.0/dist/winbox.bundle.js"></script>
 <style>
-
-.hide {
-    display: none;
-}
-
 .wb-body {
     right: 0;
     top: 15px;
-    overflow: unset;
 }
 .wb-icon {
     height: 15px;
@@ -62,11 +56,8 @@
     extra: false,
     tpR: "0",
     hasWakeLock: false,
-    useComps: false,
-    useCompsWindow: false,
+    useComps: true,
   };
-
-let namedComponents = {};
 
 /* View in fullscreen
 * https://www.w3schools.com/howto/howto_js_fullscreen.asp
@@ -118,16 +109,8 @@ const clearTrip = function (comp) {
 }
 
 const getTrip = function(comp, position) {
-   let coord = {latitude: position.coords.latitude, longitude: position.coords.longitude};
-   if (!startstop.checked) {
-     setAutoComp(comp, "lastPos", coord);
-     if ( comp.temp === undefined ) {
-        comp.temp = getAutoComp(comp, "distSum", 0);
-        return comp.temp;
-     }
-     return null;
-   }
    let old = comp.lastPos;
+   let coord = {latitude: position.coords.latitude, longitude: position.coords.longitude};
    if (old === undefined) {
       old = getAutoComp(comp, "lastPos", coord);
    }
@@ -146,45 +129,22 @@ const getTrip = function(comp, position) {
 
 const clearElap = function(comp) {
    setAutoComp(comp, "elapZero", (new Date()).getTime());
-   setAutoComp(comp, "elapSum", 0);
-}
-
-const startCounters = function(start) {
-   let trip = namedComponents["Trip"];
-   let elap = namedComponents["Elap"];
-   if (elap) {
-       if (start) setAutoComp(elap, "elapZero", (new Date()).getTime());
-       else setAutoComp(elap, "elapSum", elap.sum);
-   }
-}
-
-const msToHMS = function(ms) {
-   const h = Math.floor(ms / 1000 / 60 / 60);
-   ms -= h* 1000 * 60 *60;
-   const m = Math.floor(ms / 1000 / 60);
-   ms -= m* 1000 * 60;
-   const s = Math.floor(ms / 1000);
-   return h + ":" + d2(m) + ":" + d2(s);
 }
 
 const getElap = function(comp, now) {
-   if (!startstop.checked) {
-      if ( comp.temp !== undefined) return null;
-      comp.temp = getAutoComp(comp, "elapSum", 0);
-      return msToHMS(comp.temp);
-   }
    let old = comp.elapZero;
    if (old === undefined) {
       // old = getAutoComp(comp, "elapZero", now, value => new Date(value));
       old = getAutoComp(comp, "elapZero", now.getTime());
    }
    // let diff = now.getTime() - old.getTime();
-   let nowt = now.getTime();
-   let diff = nowt - old;
-   const elapSum = getAutoComp(comp, "elapSum", 0);
-   diff += elapSum;
-   comp.sum = diff;
-   return msToHMS(diff);
+   let diff = now.getTime() - old;
+   const h = Math.floor(diff / 1000 / 60 / 60);
+   diff -= h* 1000 * 60 *60;
+   const m = Math.floor(diff / 1000 / 60);
+   diff -= m* 1000 * 60;
+   const s = Math.floor(diff / 1000);
+   return h + ":" + d2(m) + ":" + d2(s);
 }
 
 const getTime = function(comp, now) {
@@ -195,12 +155,12 @@ const getTime = function(comp, now) {
 
 
 const componentsList = {
-  "Speed": {inUse: true,  label: "Nopeus",  unit: "km/h", font: "50px", back: "", len: 5, des: 1,  f: getSpeed, type: 0},
-  "Trip":  {inUse: true,  label: "Matka",   unit: "km",   font: "40px", back: "", len:-4, des: 3,  f: getTrip,  type: 0, click: clearTrip},
-  "Alt":   {inUse: true,  label: "Korkeus", unit: "m",    font: "30px", back: "", len: 4, des: 0,  f: getAlt,   type: 0},
-  "Dir":   {inUse: true,  label: "Suunta",  unit: "deg",  font: "20px", back: "", len: 3, des: 0,  f: getDir,   type: 0},
-  "Elap":  {inUse: true,  label: "Aika",    unit: "aika", font: "20px", back: "", len: 3, des: -1, f: getElap,  type: 1, click: clearElap},
-  "Time":  {inUse: false, label: "Kello",   unit: "",     font: "20px", back: "", len: 3, des: -1, f: getTime,  type: 1},
+  "Speed": {inUse: true,  label: "Nopeus",  unit: "km/h", font: "50px", back: "rgba(255, 255, 255, 0.6)", len: 5, des: 1,  f: getSpeed, type: 0},
+  "Trip":  {inUse: true,  label: "Matka",   unit: "km",   font: "40px", back: "rgba(255, 255, 255, 0.6)", len:-4, des: 3,  f: getTrip,  type: 0, click: clearTrip},
+  "Alt":   {inUse: true,  label: "Korkeus", unit: "m",    font: "30px", back: "rgba(255, 255, 255, 0.6)", len: 4, des: 0,  f: getAlt,   type: 0},
+  "Dir":   {inUse: true,  label: "Suunta",  unit: "deg",  font: "20px", back: "rgba(255, 255, 255, 0.6)", len: 3, des: 0,  f: getDir,   type: 0},
+  "Elap":  {inUse: true,  label: "Aika",    unit: "aika", font: "20px", back: "rgba(255, 255, 255, 0.6)", len: 3, des: -1, f: getElap,  type: 1, click: clearElap},
+  "Time":  {inUse: false, label: "Kello",   unit: "",     font: "20px", back: "rgba(255, 255, 255, 0.6)", len: 3, des: -1, f: getTime,  type: 1},
 //  "Temp":  {inUse: true,  label: "Temp",    unit: "temp", font: "10px", back: "rgba(255, 255, 255, 0.6)", len: 3, des: -1, f: null,     type: 2},
 }
 
@@ -226,10 +186,10 @@ function requestWakeLock()  {
     navigator.wakeLock.request('screen').then(function(wl) {
       wakeLock = wl;
       wakeLock.addEventListener('release', function() {
-        // alert('Screen Wake Lock was released'); */
+         alert('Screen Wake Lock was released'); 
         });
       document.addEventListener('visibilitychange', handleVisibilityChange);
-      // alert('Screen Wake Lock is active');
+      alert('Screen Wake Lock is active');
     });
   } catch (err) {
     alert(err.name + err.message);
@@ -259,7 +219,7 @@ function endWakeLock() {
    wakeLock.release();
    document.removeEventListener('visibilitychange', handleVisibilityChange);
    wakeLock = null;
-   // alert('Wake Lock released');
+   alert('Wake Lock released');
 }
 
 
@@ -1562,7 +1522,6 @@ function checkClosed(name,def) {
 //=================================================================
 
 let compsdiv = null;
-let startstop = {checked: false};  // Matki checkboxia jos ei luotu
 
 function checkShowComponents() {
    let cb = options.useComps;
@@ -1580,25 +1539,21 @@ function checkShowComponents() {
 function adjustComponents() {
    saveComponents();
    const compsdiv = document.getElementById("showComps");
-   compsdiv.style.backgroundColor = document.getElementById("editCompsBackground").value;
-   compsdiv.style.color = document.getElementById("editCompsColor").value;
+   compsdiv.style.backgroundColor = document.getElementById("editCompsBackgroud").value;
    createComps();
    checkTimer("showTime", timecomponents.length === 0 || !options.useComps);
 }
 
 function readComponents() {
-  let bs = localStorage.getItem("editCompsBackground");
-  if (bs) document.getElementById("editCompsBackground").value = bs;
-
-  bs = localStorage.getItem("editCompsColor");
-  if (bs) document.getElementById("editCompsColor").value = bs;
+  let bs = localStorage.getItem("editCompsBackgroud");
+  if (bs) document.getElementById("editCompsBackgroud").value = bs;
 
   for (const name in componentsList) {
      const comp = componentsList[name];
      let s = localStorage.getItem(name);
      if ( s ) comp.editFont.value = s;
      s = localStorage.getItem(name + "Col");
-     if ( s !== null ) comp.editCol.value = s;
+     if ( s ) comp.editCol.value = s;
      s = localStorage.getItem(name + "Cb");
      if ( s !== null) {
        comp.cbUse.checked = s === "1";
@@ -1608,8 +1563,7 @@ function readComponents() {
 }
 
 function saveComponents() {
-  localStorage.setItem("editCompsBackground", document.getElementById("editCompsBackground").value);
-  localStorage.setItem("editCompsColor", document.getElementById("editCompsColor").value);
+  localStorage.setItem("editCompsBackgroud", document.getElementById("editCompsBackgroud").value);
   for (const name in componentsList) {
      const comp = componentsList[name];
      localStorage.setItem(name, comp.editFont.value);
@@ -1652,9 +1606,15 @@ function addTDEdit(tr, name, size, text) {
 
 function createCompsSettings() {
 
+  new WinBox("Meters", {
+    mount: document.getElementById("showComps"),
+    height : 310,
+    width: 150,
+    y: "bottom",
+  });
   compsdiv = document.getElementById("showComps");
   const table = document.getElementById("tableCompsSettings");
-  table.innerHTML = "<tr><td></td><td>Mittari</td><td>Fontti</td><td>Taustan väri</td></tr>";
+  table.innerHTML = "<tr><td></td><td>Komponentti</td><td>Fontti</td><td>Taustan väri</td></tr>";
 
   for (const name in componentsList) {
      const comp = componentsList[name];
@@ -1677,87 +1637,18 @@ function createCompsSettings() {
 }
 
 function showCompsDiv(show) {
-   if (show) {
-     compsdiv.style.display = "inherit";
-     if (compsWindow) compsWindow.show();
-   } else {
-     compsdiv.style.display = "none";
-     if (compsWindow) compsWindow.hide();
-   }
-}
-
-
-let compsWindow = null;
-
-function readWindowPos(w) {
-   if (w === null ) return;
-   const s = localStorage.getItem(w.id + 'Pos');
-   if ( s === null ) return;
-   let xywh = s.split(";");
-   w.x = parseInt(xywh[0]);
-   w.y = parseInt(xywh[1]);
-   w.width = parseInt(xywh[2]);
-   w.height = parseInt(xywh[3]);
-   w.move(w.x, w.y);
-   w.resize(w.width, w.height);
-}
-
-function saveWindowPos(w) {
-   if (w === null ) return;
-   const s = `${w.x};${w.y};${w.width};${w.height}`;
-   localStorage.setItem(w.id + 'Pos', s);
+   if (show)
+      compsdiv.style.display = "inherit";
+   else
+      compsdiv.style.display = "none";
 }
 
 
 function createComps() {
   readComponents();
-  if (options.useCompsWindow && compsWindow === null) {
-    compsWindow = new WinBox("Mittarit", {
-      id: "compsWindow",
-      mount: document.getElementById("showComps"),
-      height: 310,
-      width: 150,
-      y: "bottom",
-      onresize: function(w,h) { saveWindowPos(compsWindow); },
-      onmove: function(x,y) { saveWindowPos(compsWindow); },
-      onclose: function(force) { compsWindow = null; return false; },
-      // background: document.getElementById("editCompsBackground").value,
-    });
-    readWindowPos(compsWindow);
-    // compsWindow.onmove = function(x,y) { saveWindowPos(compsWindow); };
-    // compsWindow.onresize = function(w,h) { saveWindowPos(compsWindow); };
-  }
-  if (!options.useCompsWindow && compsWindow !== null) {
-      compsWindow.close(true);
-      compsWindow = null;
-  }
-
-  if ( compsWindow !== null ) {
-     const sheet = document.styleSheets[4]; // TODO: keksi oikea tapa löytää
-     let bc = document.getElementById("editCompsBackground").value;
-     if (bc.startsWith("rgba(") || bc.startsWith("hsla(") ) {
-         bc = bc.replace(/,[^,]*\)/, ",1)");
-     }
-     if (sheet && sheet.cssRules) {
-       if (sheet.cssRules[0].cssText.startsWith("#compsWindow .wb-body")) sheet.deleteRule(0);
-       sheet.insertRule(`#compsWindow .wb-body {background: ${bc}}`, 0);
-     }
-  }
-
   geocomponents = [];
   timecomponents = [];
-  compsdiv.innerHTML = '<span style="top: 0px;  position: absolute" onclick="showCompsDiv(false)"><</span>'+
-          ''  ; //'<br />';
-
-  startstop = document.createElement("input");
-  startstop.setAttribute("type", "checkbox");
-  startstop.onclick = function() {
-    localStorage.setItem("startstop", startstop.checked ? "1": "0");
-    startCounters(startstop.checked);
-  }
-  startstop.checked = localStorage.getItem("startstop") !== "0"; // oletus päällä
-  compsdiv.appendChild(startstop);
-
+  compsdiv.innerHTML = '<span style="top: 0px;  position: absolute" onclick="showCompsDiv(false)"><</span>';
   for (const name in componentsList) {
     const comp = componentsList[name];
     comp.div = null;
@@ -1775,12 +1666,10 @@ function createComps() {
       compdiv.style.display = "inline-block"
       compsdiv.appendChild(compdiv);
       comp.div = compdiv;
-      if (comp.unit) {
-        const labelspan = document.createElement("span");
-        labelspan.innerHTML = comp.unit;
-        compdiv.appendChild(labelspan);
-        compdiv.appendChild(document.createElement("br"));
-      }
+      const labelspan = document.createElement("span");
+      labelspan.innerHTML = comp.unit;
+      compdiv.appendChild(labelspan);
+      compdiv.appendChild(document.createElement("br"));
       const compspan = document.createElement("span");
       compspan.setAttribute("id", name.toLowerCase() + "Comp");
       compspan.style.fontSize = comp.editFont.value;
@@ -1791,7 +1680,6 @@ function createComps() {
       comp.span = compspan;
       if ( comp.type === 0)  geocomponents.push(comp);
       if ( comp.type === 1)  timecomponents.push(comp);
-      namedComponents[name] = comp;
       // const space = document.createElement("span");
       // space.innerHTML = "&nbsp;&nbsp;"
       // compsdiv.appendChild(space);
@@ -1802,7 +1690,6 @@ function setTimeCompsValues() {
     const now = new Date();
     for (let comp of timecomponents) {
         let v = comp.f(comp, now);
-        if (v === null) continue;
         comp.span.innerText = v;
         comp.value = v;
     }
@@ -1815,7 +1702,7 @@ function setGeoCompsValues(position) {
     // componentsList["Dir"].span.innerHTML = Math.round(position.coords.heading);
     for (let comp of geocomponents) {
         let v = comp.f(comp, position);
-        if (v === null) continue;
+        if (v === null) v = 0;
         let d = comp.len;
         if (d < 0) {
            let s = v.toPrecision(-d).substr(0,-d+1);
@@ -1844,6 +1731,7 @@ function setGeoCompsValues(position) {
 
 function initPage() {
   // noinspection JSUnusedLocalSymbols
+  createCompsSettings();
 
   params.forEach(function(element, index, array) {
     params[element] = decodeURIComponent(params[element]);
@@ -1870,7 +1758,6 @@ function initPage() {
   */
   //GetMap();
   checkSavedValues();
-  createCompsSettings();
   if ( options.id !== "" )
 	  $("#accountArea").hide();
 	else
@@ -2072,8 +1959,6 @@ function checkSavedValues() {
   // getCBOption("readGPS",function() { checkTimer("readGPS"); });
   getCBOption("readGPS",function() { checkGeoLocation(); });
   getCBOption("useComps",function() { checkShowComponents(); });
-  getCBOption("useCompsWindow");
-
   checkTimer("follow", !options.follow);
   // checkTimer("readGPS");
   changeRaportView();
@@ -3173,13 +3058,6 @@ div#mapDiv {
   display: inline-block;
   text-align: center;
   padding: 0px 7px 0px 7px;
-  line-height: 0.9;
-  font-size: x-small;
-}
-
-.data {
-    font-family: sans-serif;
-    font-weight: bold;
 }
 
 textarea#tracklog {
@@ -3369,13 +3247,11 @@ textarea#tracklog {
         <input type="checkbox" name="drawLogLine" id="drawLogLine" value="drawLogLine"  />Piirrä viivaa seurattavista<br />
         <input type="checkbox" id="send" value="send"  />Lähetä omaa paikkaa<br />
         <hr>
-        <div id="compArea"><p>Mittareiden arvot</p>
-          <input type="checkbox" name="useComps" id="useComps" value="useComps"  />Näytä mittarit<br />
+        <div id="compArea"><p>Komponenttien arvot</p>
+          <input type="checkbox" name="useComps" id="useComps" value="useComps"  />Näytä komponentit<br />
           <div id="showCompsSettings">
-            <input type="checkbox" id="useCompsWindow" value="useCompsWindow"  />Näytä ikkunassa<br />
-            <span><br>Taustan väri: </span> <input type="text" id="editCompsBackground" value="rgba(0,0,0,1.0)"  /><br />
-            <span><br>Fontin väri: </span> <input type="text" id="editCompsColor" value="white"  /><br />
-            <span style="font-size: 10px">Ruksi mittarit joita haluat käyttää</span>
+            <span><br>Taustan väri: </span> <input type="text" id="editCompsBackgroud" value="rgba(255,255,255,0.8)"  /><br />
+            <span style="font-size: 10px">Ruksi komponentit joita haluat käyttää</span>
             <table id="tableCompsSettings">
             </table>
           </div>
@@ -3507,13 +3383,13 @@ textarea#tracklog {
 <div class="ui-layout-south">
 </div>
 
- <div id="openShowComps"  style="bottom: 3em; left: 0; position: absolute; z-index:390" onclick="showCompsDiv(true)">
+ <div id="openShowComps" class="data" style="bottom: 3em; left: 0; position: absolute; z-index:390" onclick="showCompsDiv(true)">
    <span style="font-size: 30px;">></span>
  </div>
- <div id="showComps" class="showComps" style="z-index: 500; bottom: 0px; left: 0; position: absolute; z-index:390">
+ <div id="showComps" class="data" style="bottom: 10px; left: 0; position: absolute; z-index:390">
  </div>
 
- <div style="bottom: 0; right: 0; position: absolute; z-index:370; background-color: white;">
+ <div style="bottom: 0; right: 0; position: absolute; z-index:390; background-color: white;">
    	<span class="coord" id="coord"></span>
    <a class="link" onclick="copyToUrl()">Laita&nbsp;URLiin</a>
  </div>
