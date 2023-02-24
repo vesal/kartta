@@ -2423,6 +2423,7 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
       color = jso.c;
       linewidth = parseInt(jso.w);
       if (isNaN(linewidth)) linewidth = 3;
+      if (jso.p === "t") drawpins = true;
   }
   let outside = 0;
   let rad = 0;
