@@ -511,11 +511,13 @@ function mapHit(e)  {
   const loc = e.target.tryPixelToLocation(point);
   setHitPinLoc(loc);
   DisplayLocPin(hitPin);
+  lastHitPoint = loc;
   if ( isChecked("autoAddToRoute")) addToRoute();
 }
 
 
 let dst;
+let lastHitPoint = null;
 
 function setHitPinLoc(loc) {
   hitPin.setLocation(loc);
@@ -525,9 +527,14 @@ function setHitPinLoc(loc) {
 let selectedPin = null;
 
 function calcDistance() {
-  if ( !selectedPin ) return;
+  let d = 0;
   if ( !hitPin ) return;
-  const d = WGS84_distance(selectedPin.getLocation(), hitPin.getLocation());
+  if ( !selectedPin ) {
+    if (!lastHitPoint) return;
+    d = WGS84_distance(lastHitPoint, hitPin.getLocation());
+  } else {
+    d = WGS84_distance(selectedPin.getLocation(), hitPin.getLocation());
+  }
   if (!dst) dst = $("#distance");
   // dst.css( "border" , "3px solid red" );
   dst[0].innerText = "" + d.toFixed(3) + " km";
@@ -2418,12 +2425,14 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
   let line = lines[0].trim();
   var color = null;
   var linewidth = 3;
+  var fillArea = false;
   const jso = makeJSON(line, 7, routeOptions);
   if (jso) {
       color = jso.c;
       linewidth = parseInt(jso.w);
       if (isNaN(linewidth)) linewidth = 3;
       if (jso.p === "t") drawpins = true;
+      if (jso.f === "t") fillArea = true;
   }
   let outside = 0;
   let rad = 0;
@@ -2534,6 +2543,10 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
   line = new Microsoft.Maps.Polyline(lineVertices);
   line.setOptions({strokeThickness: linewidth, strokeColor: color});
   map.entities.push(line);
+  if (fillArea) {
+    const area = new Microsoft.Maps.Polygon(lineVertices);
+    map.entities.push(area);
+  }
   const route = {name: routename, line: line, polys: polys, pins: pins, data: data};
   loadedRoutes.push(route);
   const dst = $("#distance");
