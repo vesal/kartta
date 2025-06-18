@@ -2545,6 +2545,7 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
   map.entities.push(line);
   if (fillArea) {
     const area = new Microsoft.Maps.Polygon(lineVertices);
+    area.setOptions({strokeThickness: 0, strokeColor: color});
     map.entities.push(area);
   }
   const route = {name: routename, line: line, polys: polys, pins: pins, data: data};
