@@ -2559,6 +2559,10 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
   if (froute && froute !== getName(routename)) return;
   dst[0].innerText = dists + " = " + sum.toFixed(3) + " km" + pross;
   const editRaport = document.getElementById('editRaport');
+  const xctracklink = document.getElementById('xctracklink');
+  let rext = ""
+  if (routename.indexOf('.') === -1) rext = ".txt";
+  xctracklink.href = "https://www.mit.jyu.fi/demowww/cyclo/xc.php?t=" + routename + rext;
   const editSmallRaport = document.getElementById('editSmallRaport');
   raport[raport.length-1] = "M" + raport[raport.length-1].substr(1);
   sraport[sraport.length-1] = "M" + sraport[sraport.length-1].substr(1);
@@ -3485,7 +3489,8 @@ textarea#tracklog {
       &nbsp;Reittiraportti
     </div>
     <div id="routeRaportIn">
-      <input type="checkbox" name="smallRaport" id="smallRaport" value="smallRapoprt" />Pieni raportti<br>
+      <input type="checkbox" name="smallRaport" id="smallRaport" value="smallRapoprt" />Pieni raportti
+      <a href="" id="xctracklink" target="_blank" rel="noopener noreferrer">XCTrack</a><br>
       <textarea  name="editRaport" id="editRaport" class="raportTextArea"  rows="10"   >
       </textarea>
       <textarea  name="editSmallRaport" id="editSmallRaport" class="raportTextArea"  rows="7" style='height: 0; visibility: hidden'  >
