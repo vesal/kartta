@@ -375,7 +375,7 @@ function GetMap() {
     });
  }
 
-
+let routeOptions = {w:3};
 
 function ContinueGetMap() {
   // Initialize the map
@@ -384,6 +384,7 @@ function ContinueGetMap() {
   const lat = params["lat"] || localStorage.lat || 62.25;
   const load = params["load"] || localStorage.load || "";
   const route = params["route"] || localStorage.route || "";
+  routeOptions = makeJSON(params["routeoptions"] || localStorage.routeOptions || "", 0, routeOptions);
   const froute = params["froute"] || localStorage.froute || "";
   const opens = params["open"] || "";
 
@@ -510,11 +511,13 @@ function mapHit(e)  {
   const loc = e.target.tryPixelToLocation(point);
   setHitPinLoc(loc);
   DisplayLocPin(hitPin);
+  lastHitPoint = loc;
   if ( isChecked("autoAddToRoute")) addToRoute();
 }
 
 
 let dst;
+let lastHitPoint = null;
 
 function setHitPinLoc(loc) {
   hitPin.setLocation(loc);
@@ -524,9 +527,14 @@ function setHitPinLoc(loc) {
 let selectedPin = null;
 
 function calcDistance() {
-  if ( !selectedPin ) return;
+  let d = 0;
   if ( !hitPin ) return;
-  const d = WGS84_distance(selectedPin.getLocation(), hitPin.getLocation());
+  if ( !selectedPin ) {
+    if (!lastHitPoint) return;
+    d = WGS84_distance(lastHitPoint, hitPin.getLocation());
+  } else {
+    d = WGS84_distance(selectedPin.getLocation(), hitPin.getLocation());
+  }
   if (!dst) dst = $("#distance");
   // dst.css( "border" , "3px solid red" );
   dst[0].innerText = "" + d.toFixed(3) + " km";
@@ -2380,10 +2388,52 @@ function isErrorOnData(data) {
   return data.indexOf("ERROR:") >= 0 || 0 <= ei && ei <= 100;
 }
 
+function parseBool(val) {
+    if ((val.toLowerCase() === 'true' || val.toLowerCase() === 'yes'))
+        return true;
+    if ((val.toLowerCase() === 'false' || val.toLowerCase() === 'no'))
+        return false;
+
+    return null;
+}
+
+function makeJSON(line, start, def) {
+   const p = line.split(",");
+   if (p.length < start) return null;
+   let jso = {};
+   if (def) jso = JSON.parse(JSON.stringify(def));
+   for (let i=start; i < p.length; i++) {
+       const nv = p[i].split(":");
+       if (nv.length < 2) continue;
+       let sval = nv[1];
+       let val = sval;
+       let ival = parseInt(sval);  // tarvitaan, riittääkö float?
+       if (!isNaN(ival)) val = ival;
+       let fval = parseFloat(sval);
+       if (!isNaN(fval)) val = fval;
+       let bval = parseBool(sval);
+       if (bval != null) val = bval;
+       jso[nv[0]] = val;
+   }
+   return jso;
+}
 
 // returns lastPin
 function showRoute(routename, data, type, colors, drawpins, froute) {
-  let line;
+  const lines = data.split("\n");
+  if (lines.length === 0) return;
+  let line = lines[0].trim();
+  var color = null;
+  var linewidth = 3;
+  var fillArea = false;
+  const jso = makeJSON(line, 7, routeOptions);
+  if (jso) {
+      color = jso.c;
+      linewidth = parseInt(jso.w);
+      if (isNaN(linewidth)) linewidth = 3;
+      if (jso.p === "t") drawpins = true;
+      if (jso.f === "t") fillArea = true;
+  }
   let outside = 0;
   let rad = 0;
   let name = "";
@@ -2404,8 +2454,7 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
   let sum = 0;
   let minLeg = 10000000;
   let sep = "";
-  const color = colors[loadedRoutes.length % colors.length];
-  const lines = data.split("\n");
+  if (!color) color = colors[loadedRoutes.length % colors.length];
   const lineVertices = [];
   const polys = [];
   const pins = [];
@@ -2492,8 +2541,13 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
 
   if ( lineVertices.length === 0 ) return;
   line = new Microsoft.Maps.Polyline(lineVertices);
-  line.setOptions({strokeThickness: 3, strokeColor: color});
+  line.setOptions({strokeThickness: linewidth, strokeColor: color});
   map.entities.push(line);
+  if (fillArea) {
+    const area = new Microsoft.Maps.Polygon(lineVertices);
+    area.setOptions({strokeThickness: 0, strokeColor: color});
+    map.entities.push(area);
+  }
   const route = {name: routename, line: line, polys: polys, pins: pins, data: data};
   loadedRoutes.push(route);
   const dst = $("#distance");

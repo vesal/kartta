@@ -1,4 +1,4 @@
-﻿<!DOCTYPE HTML>
+<!DOCTYPE HTML>
 <html>
    <head>
       <title>Cyclo Account</title>
@@ -230,7 +230,9 @@ $(document).ready(function () {
    clearError();
    options.id = cleanNumbers(options.id);
    var params = $.extend({}, command, { id: options.id, e: options.email  });
-   $.post( "index.php", params )
+   // $.post( "index.php", params ) // TODO: check path
+   $.post( "https://www.mit.jyu.fi/demowww/cyclo/index.php", params )
+
     .done(function( data ) { 
 	  f(data)
 	 } );
