@@ -1,6 +1,6 @@
 # Kartta
 
-- ks: <https://r.jyu.fi/kartta>
+- ks: <https://tim.pm/kartta>
 - ohjeet: <https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta>
 
 
