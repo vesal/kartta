@@ -58,10 +58,10 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="JavaScript Debug.account.html" />
       <item itemvalue="JavaScript Debug.dr" />
       <item itemvalue="JavaScript Debug.k.html" />
       <item itemvalue="JavaScript Debug.s.html" />
-      <item itemvalue="JavaScript Debug.account.html" />
     </list>
     <recent_temporary>
       <list>
@@ -92,7 +92,7 @@
       <workItem from="1596200395262" duration="3750000" />
       <workItem from="1597485963879" duration="12000" />
       <workItem from="1677061770185" duration="21545000" />
-      <workItem from="1677946835873" duration="3930000" />
+      <workItem from="1677946835873" duration="5754000" />
     </task>
     <servers />
   </component>
@@ -109,7 +109,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/src/k.html</url>
-          <line>2882</line>
+          <line>2883</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
