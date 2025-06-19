@@ -2349,10 +2349,19 @@ function showTrack(data, type, colors) {
   trackList.innerText = trackText;
 }
 
+function logMapEntities() {
+  console.log("Number of entities:", map.entities.getLength());
+  for (let i = 0; i < map.entities.getLength(); i++) {
+      console.log("Entity", i, map.entities.get(i));
+  }
+}
+
 const loadedRoutes = [];
 
 function removePolys(polys) {
   if ( !polys ) return;
+  logMapEntities();
+
   for (let i=0; i < polys.length; i++) {
      const p = polys[i];
      map.entities.remove(p);
@@ -2422,6 +2431,9 @@ function makeJSON(line, start, def) {
 function showRoute(routename, data, type, colors, drawpins, froute) {
   const lines = data.split("\n");
   if (lines.length === 0) return;
+
+  logMapEntities();
+
   let line = lines[0].trim();
   var color = null;
   var linewidth = 3;
@@ -2455,7 +2467,13 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
   let minLeg = 10000000;
   let sep = "";
   if (!color) color = colors[loadedRoutes.length % colors.length];
-  const lineVertices = [];
+
+  // const lineVertices = [];
+  // Muutettu: useita polygoneja
+  const allLineVertices = [];
+  let lineVertices = [];
+  allLineVertices.push(lineVertices);
+
   const polys = [];
   const pins = [];
   let prevPt = null;
@@ -2465,11 +2483,28 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
   let lastPin = null;
   for (let i=0; i < lines.length; i++) {
     line = lines[i].trim();
+    if (line === "") continue;
+    if (line[0] === "-") {
+      // Aloita uusi polygon
+      if (lineVertices.length > 0) {
+        // Piirrä edellinen polyline
+        let polyline = new Microsoft.Maps.Polyline(lineVertices);
+        polyline.setOptions({strokeThickness: linewidth, strokeColor: color});
+        map.entities.push(polyline);
+        polys.push(polyline);
+      }
+      lineVertices = [];
+      allLineVertices.push(lineVertices);
+      prevPt = null;
+      prevRad = 0;
+      prevOutside = undefined;
+      continue;
+    }
+
     let lat = 0;
     let lng = 0;
     let latVal = 0;
     let longVal = 0;
-    if ( line === "" ) continue;
     if ( type === "txt" ) {
         // 62.4666234473693,22.4589770156482,EFKJ,0.4,0,0,0
         // 62.15'38,22.58'25,Niskos15,5,0,0,0
@@ -2539,6 +2574,7 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
     }
   }
 
+  /*
   if ( lineVertices.length === 0 ) return;
   line = new Microsoft.Maps.Polyline(lineVertices);
   line.setOptions({strokeThickness: linewidth, strokeColor: color});
@@ -2548,11 +2584,29 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
     area.setOptions({strokeThickness: 0, strokeColor: color});
     map.entities.push(area);
   }
+  */
+
+  // Piirrä viimeinen polyline
+  for (let i = allLineVertices.length-1; i < allLineVertices.length; i++) {
+    if (allLineVertices[i].length === 0) continue;
+    let polyline = new Microsoft.Maps.Polyline(allLineVertices[i]);
+    polyline.setOptions({strokeThickness: linewidth, strokeColor: color});
+    map.entities.push(polyline);
+    polys.push(polyline)
+    if (fillArea) {
+      const area = new Microsoft.Maps.Polygon(allLineVertices[i]);
+      area.setOptions({strokeThickness: 0, strokeColor: color});
+      map.entities.push(area);
+    }
+  }
+
+  if ( lineVertices.length === 0 ) return;
+
   const route = {name: routename, line: line, polys: polys, pins: pins, data: data};
   loadedRoutes.push(route);
   const dst = $("#distance");
   let pross = "";
-  if ( lineVertices.length === 4 ) {
+  if ( allLineVertices[0].length === 4 ) { // kolmio
       pross = " " + (minLeg/sum*100).toFixed(1) + "%"
       raport[2] = raport[2].substr(0,34) + pross + raport[2].substr(40);
   }
@@ -2569,6 +2623,9 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
   //raport[raport.length-1] = rline;
   editRaport.value = raport.join("\n");
   editSmallRaport.value = sraport.join("\n");
+
+  logMapEntities();
+
   return lastPin;
 }
 
