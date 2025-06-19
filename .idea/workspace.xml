@@ -31,7 +31,8 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "JavaScript Debug.k.html.executor": "Run",
+    "JavaScript Debug.k.executor": "Debug",
+    "JavaScript Debug.k.html.executor": "Debug",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "true",
@@ -50,14 +51,17 @@
       <recent name="E:\riippu\kartta\src" />
     </key>
   </component>
-  <component name="RunManager" selected="JavaScript Debug.k.html">
+  <component name="RunManager" selected="JavaScript Debug.k">
     <configuration name="account.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/kartta/src/account.html">
       <method v="2" />
     </configuration>
     <configuration name="dr" type="JavascriptDebugType" uri="http://localhost:63342/kartta/src/dr.html">
       <method v="2" />
     </configuration>
-    <configuration name="k.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/kartta/src/k.html?lat=61.88961&amp;lon=25.94575&amp;zoom=15&amp;mapName=Google%20satellite&amp;route=!havu/81,!havu/82,!havu/83,!havu/8r34&amp;readGPS=false&amp;routeoptions=c:red,w:10" useBuiltInWebServerPort="true">
+    <configuration name="k" type="JavascriptDebugType" uri="http://localhost:8080/k.html">
+      <method v="2" />
+    </configuration>
+    <configuration name="k.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:8080/kartta/k.html?lat=61.88961&amp;lon=25.94575&amp;zoom=15&amp;mapName=Google%20satellite&amp;route=!havu/81,!havu/82,!havu/83,!havu/8r34&amp;readGPS=false&amp;routeoptions=c:red,w:10">
       <method v="2" />
     </configuration>
     <configuration name="s.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/kartta/src/s.html">
@@ -65,6 +69,7 @@
     </configuration>
     <list>
       <item itemvalue="JavaScript Debug.dr" />
+      <item itemvalue="JavaScript Debug.k" />
       <item itemvalue="JavaScript Debug.k.html" />
       <item itemvalue="JavaScript Debug.s.html" />
       <item itemvalue="JavaScript Debug.account.html" />
@@ -107,7 +112,7 @@
       <workItem from="1597485963879" duration="12000" />
       <workItem from="1677061770185" duration="21545000" />
       <workItem from="1677946835873" duration="5754000" />
-      <workItem from="1750258780717" duration="3508000" />
+      <workItem from="1750258780717" duration="13088000" />
     </task>
     <servers />
   </component>
@@ -116,6 +121,26 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/k.html</url>
+          <line>2532</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/k.html</url>
+          <line>2492</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/k.html</url>
+          <line>2593</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
