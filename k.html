@@ -2424,28 +2424,52 @@ function makeJSON(line, start, def) {
        if (bval != null) val = bval;
        jso[nv[0]] = val;
    }
-   return jso;
+   if (jso && Object.keys(jso).length > 0) return jso;
+   return null;
 }
+
+function colorWithAlpha(color, alpha) {
+    // Luo väliaikainen elementti
+    const temp = document.createElement("div");
+    temp.style.color = color;
+    document.body.appendChild(temp);
+    // Selaimen normalisoima väri
+    const computed = getComputedStyle(temp).color;
+    document.body.removeChild(temp);
+
+    // Etsi rgb-arvot
+    const m = computed.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+    if (m) {
+        return `rgba(${m[1]},${m[2]},${m[3]},${alpha})`;
+    }
+    // Jos jo rgba, korvaa alpha
+    const m2 = computed.match(/^rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)$/);
+    if (m2) {
+        return `rgba(${m2[1]},${m2[2]},${m2[3]},${alpha})`;
+    }
+    // Palauta alkuperäinen, jos ei tunnistettu
+    return color;
+}
+
+function colorFromString(s) {
+  if (!s) return null;
+  let p = (""+s).split("/");
+  if (p.length < 2) return s;
+  return colorWithAlpha(p[0], parseFloat(p[1]) / 100);
+}
+
 
 // returns lastPin
 function showRoute(routename, data, type, colors, drawpins, froute) {
-  const lines = data.split("\n");
+  const lines = (data+"\n-\n").split("\n"); // lisätään lopussa - merkki, jotta viimeinen polygon piirretään
   if (lines.length === 0) return;
 
   logMapEntities();
 
   let line = lines[0].trim();
-  var color = null;
-  var linewidth = 3;
-  var fillArea = false;
-  const jso = makeJSON(line, 7, routeOptions);
-  if (jso) {
-      color = jso.c;
-      linewidth = parseInt(jso.w);
-      if (isNaN(linewidth)) linewidth = 3;
-      if (jso.p === "t") drawpins = true;
-      if (jso.f === "t") fillArea = true;
-  }
+  let color = colors[loadedRoutes.length % colors.length];;
+  let linewidth = 3;
+  let fillArea = "";
   let outside = 0;
   let rad = 0;
   let name = "";
@@ -2466,7 +2490,7 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
   let sum = 0;
   let minLeg = 10000000;
   let sep = "";
-  if (!color) color = colors[loadedRoutes.length % colors.length];
+
 
   // const lineVertices = [];
   // Muutettu: useita polygoneja
@@ -2481,18 +2505,29 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
   let prevRad = 0;
   let firstPt = null;
   let lastPin = null;
+  let vertices = 0;
+
   for (let i=0; i < lines.length; i++) {
     line = lines[i].trim();
     if (line === "") continue;
     if (line[0] === "-") {
       // Aloita uusi polygon
-      if (lineVertices.length > 0) {
-        // Piirrä edellinen polyline
+      if (lineVertices.length === 0) continue;
+
+      // Piirrä edellinen polyline
+      if (!fillArea) {
         let polyline = new Microsoft.Maps.Polyline(lineVertices);
         polyline.setOptions({strokeThickness: linewidth, strokeColor: color});
         map.entities.push(polyline);
         polys.push(polyline);
       }
+      if (fillArea) {
+        const area = new Microsoft.Maps.Polygon(lineVertices);
+        area.setOptions({strokeThickness: linewidth, strokeColor: color, fillColor: fillArea});
+        map.entities.push(area);
+        polys.push(area);
+      }
+
       lineVertices = [];
       allLineVertices.push(lineVertices);
       prevPt = null;
@@ -2519,6 +2554,14 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
       latVal = sToDeg(lat);
       longVal = Microsoft.Maps.Location.normalizeLongitude(sToDeg(lng));
     }
+    const jso = makeJSON(line, 7, null);
+    if (jso) {
+        if (jso?.c != null) color = colorFromString(jso.c);
+        if (jso?.w != null) linewidth = parseInt(jso.w);
+        if (isNaN(linewidth)) linewidth = 3;
+        if (jso?.p != null) drawpins = jso.p === "t";
+        if (jso?.f != null) fillArea = colorFromString(jso.f);
+    }
     const pt = new Microsoft.Maps.Location(latVal, longVal);
     if ( rad > 0 ) {
       const path = Microsoft.Maps.SpatialMath.getRegularPolygon(pt, rad * 1000, 36, Microsoft.Maps.SpatialMath.Meters);
@@ -2534,6 +2577,7 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
       polys.push(poly)
     }
     lineVertices.push(pt);
+    vertices++;
     let rtext = "";
     let srtext = "";
     if ( prevPt ) {
@@ -2544,7 +2588,7 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
          prevOutside = rad;
       }
       if ( d < minLeg ) minLeg = d;
-      dists += sep + d.toFixed(3);
+      if (name) dists += sep + d.toFixed(3);
       sum += d;
       sep = " + ";
       rtext = "" + (lineVertices.length-1) + " " + fixeds(name,-20) + fixeds(rad.toFixed(1),4) + " "
@@ -2567,40 +2611,14 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
     sraport.push(srtext);
     prevPt = pt;
     prevRad = rad;
-    if ( drawpins ) {
+    if ( drawpins && name ) {
       const pin = newPin(pt, false, name, blueIcon, blueSelIcon);
       pins.push(pin);
       lastPin = pin;
     }
   }
 
-  /*
-  if ( lineVertices.length === 0 ) return;
-  line = new Microsoft.Maps.Polyline(lineVertices);
-  line.setOptions({strokeThickness: linewidth, strokeColor: color});
-  map.entities.push(line);
-  if (fillArea) {
-    const area = new Microsoft.Maps.Polygon(lineVertices);
-    area.setOptions({strokeThickness: 0, strokeColor: color});
-    map.entities.push(area);
-  }
-  */
-
-  // Piirrä viimeinen polyline
-  for (let i = allLineVertices.length-1; i < allLineVertices.length; i++) {
-    if (allLineVertices[i].length === 0) continue;
-    let polyline = new Microsoft.Maps.Polyline(allLineVertices[i]);
-    polyline.setOptions({strokeThickness: linewidth, strokeColor: color});
-    map.entities.push(polyline);
-    polys.push(polyline)
-    if (fillArea) {
-      const area = new Microsoft.Maps.Polygon(allLineVertices[i]);
-      area.setOptions({strokeThickness: 0, strokeColor: color});
-      map.entities.push(area);
-    }
-  }
-
-  if ( lineVertices.length === 0 ) return;
+  if ( vertices === 0 ) return;
 
   const route = {name: routename, line: line, polys: polys, pins: pins, data: data};
   loadedRoutes.push(route);
@@ -2884,7 +2902,10 @@ function handleFileSelect(evt) {
     if ( type === "txt") {
       const data = theFile.target.result;
       const name = getName(f.name);
-      showRoute(name, theFile.target.result, type, getRouteColors());
+      try {
+        showRoute(name, data, type, getRouteColors());
+      } catch (e) {
+      }
       moveToDialog(name, data);
     } else
       showTrack(theFile.target.result,type, getTrackColors());
@@ -2987,7 +3008,11 @@ function handleURLRoute(froute) {
       name = name + ".txt";
       sendCyclo({getRoute: name}, function (data, extra) {
         const n = getName(extra.name);
-        showRoute(extra.name, data, "txt", extra.colors, false, froute);
+        try {
+          showRoute(extra.name, data, "txt", extra.colors, false, froute);
+        } catch (e) {
+
+        }
         if (!froute || froute===n) moveToDialog(extra.name, data); // TODO: korjaa nimi useita dialogeja varten
        }, {name: urlTrack, colors: colors});
       continue;
