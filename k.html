@@ -3,7 +3,7 @@
 <!--suppress JSUnresolvedFunction, JSUnresolvedVariable, HtmlFormInputWithoutLabel -->
 <html lang="">
   <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
       <title>Kartta</title>
       <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	  <meta name="viewport" content="initial-scale=1.0, user-scalable=no,width=device-width">
@@ -12,7 +12,8 @@
 
 <script src="https://code.jquery.com/jquery-latest.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.2/jquery.ui.touch-punch.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.2/jquery.ui.touch-punch.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <!-- <script src="js/CanvasPushpinModule.js"></script> -->
 <link rel="stylesheet" href="css/smoothness/jquery-ui-1.10.3.custom.min.css">
 
@@ -513,6 +514,12 @@ function mapHit(e)  {
   DisplayLocPin(hitPin);
   lastHitPoint = loc;
   if ( isChecked("autoAddToRoute")) addToRoute();
+  /*
+  getElevation(loc.latitude, loc.longitude, function (elev) {
+    if (elev === null) return;
+    hitPin.setDescription("Korkeus: " + elev.toFixed(2) + " m");
+  });
+   */
 }
 
 
@@ -576,92 +583,6 @@ const belectro = {
   }
 };
 
-// Converts WGS84 (lat, lon in degrees) to EPSG:3067 (x, y in meters)
-function wgs84toEPSG3067(lat, lon) {
-    // Constants for ETRS-TM35FIN / EPSG:3067
-    const a = 6378137.0; // GRS80 major axis
-    const f = 1 / 298.257222101; // GRS80 flattening
-    const k0 = 0.9996; // scale factor
-    const lon0 = 27.0; // Central meridian for TM35FIN
-    const E0 = 500000.0; // False easting
-    const N0 = 0.0; // False northing
-
-    // Convert degrees to radians
-    const degToRad = Math.PI / 180.0;
-    lat = lat * degToRad;
-    lon = lon * degToRad;
-    const lon0Rad = lon0 * degToRad;
-
-    const e = Math.sqrt(2 * f - f * f);
-    const n = f / (2 - f);
-
-    const A1 = a / (1 + n) * (1 + n * n / 4 + n ** 4 / 64);
-
-    const h1 = n / 2 - 2 * n ** 2 / 3 + 5 * n ** 3 / 16 + 41 * n ** 4 / 180;
-    const h2 = 13 * n ** 2 / 48 - 3 * n ** 3 / 5 + 557 * n ** 4 / 1440;
-    const h3 = 61 * n ** 3 / 240 - 103 * n ** 4 / 140;
-    const h4 = 49561 * n ** 4 / 161280;
-
-    const Q = Math.asinh(Math.tan(lat));
-    const Qp = Math.atanh(e * Math.sin(lat));
-    const beta = Math.asin(Math.tanh(Q - e * Qp));
-
-    const l = lon - lon0Rad;
-    const eta = Math.atanh(Math.cos(beta) * Math.sin(l));
-    const xi = Math.asin(Math.sin(beta) * Math.cosh(eta));
-
-    let x = k0 * A1 * (xi +
-        h1 * Math.sin(2 * xi) * Math.cosh(2 * eta) +
-        h2 * Math.sin(4 * xi) * Math.cosh(4 * eta) +
-        h3 * Math.sin(6 * xi) * Math.cosh(6 * eta) +
-        h4 * Math.sin(8 * xi) * Math.cosh(8 * eta)
-    ) + N0;
-
-    let y = k0 * A1 * (eta +
-        h1 * Math.cos(2 * xi) * Math.sinh(2 * eta) +
-        h2 * Math.cos(4 * xi) * Math.sinh(4 * eta) +
-        h3 * Math.cos(6 * xi) * Math.sinh(6 * eta) +
-        h4 * Math.cos(8 * xi) * Math.sinh(8 * eta)
-    ) + E0;
-
-    // x = northing, y = easting
-    return { north: x, east : y };
-}
-
-function kapsiTileUrl(lat, lon, zoom) {
-    if (lat < 30 || lat > 80) return "";
-    if (lon < 10 || lon > 32) return "";
-    if (zoom < 3 || zoom > 18) return "";
-    const {north, east} = wgs84toEPSG3067(lat, lon);
-    const originEast = -548576;
-    const originNorth = 8388608;
-    const scale0 = 8192*256; //; 4194304;
-    zoom -= 3;
-    // const scale = scale0 / Math.pow(2, zoom-3);
-    const resolutions = [8192, 4096, 2048, 1024, 512, 256, 128,
-	                      64, 32, 16, 8, 4, 2, 1, 0.5, 0.25];
-    const scale = resolutions[zoom]*256;
-    const tileX = Math.round((east - originEast) / scale);
-    const tileY = Math.round((originNorth - north) / scale);
-    console.log(`Kapsi Tile: lat=${lat.toFixed(4)}, lon=${lon.toFixed(4)},`);
-    console.log(`north=${north.toFixed(0)}, east=${east.toFixed(0)}, zoom=${zoom}, tileX=${tileX}, tileY=${tileY}`);
-    console.log(`deast=${((east - originEast) / scale).toFixed(3)}, dnorth=${((originNorth - north) / scale).toFixed(3)}`);
-    return `https://tiles.kartat.kapsi.fi/peruskartta_3067/${zoom}/${tileX}/${tileY}.jpg`;
-}
-
-function bingTileToLatLon(x, y, z) {
-    const n = Math.pow(2, z);
-    const lon_deg = x / n * 360.0 - 180.0;
-    const lat_rad = Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n)));
-    const lat_deg = lat_rad * 180.0 / Math.PI;
-    return { lat: lat_deg, lon: lon_deg };
-}
-
-function getKapsiTilePath(tile) {
-    // Step 1: Bing tile x/y/z to lat/lon (center of tile)
-    const { lat, lon } = bingTileToLatLon(tile.x + 0.5, tile.y + 0.5, tile.zoom);
-    return kapsiTileUrl(lat, lon, tile.zoom);
-}
 
 // noinspection CheckImageSize
 const mapModes = {
@@ -698,8 +619,17 @@ const mapModes = {
 	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
 	"Kapsi Ilma"         : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/ortokuva_3067/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
 	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'
+
                              },
+https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/default/WGS84_Pseudo-Mercator/18/72651/149809.png?api-key=
+https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/12/1116/2297.png?api-key=
 	 */
+  "MML maasto"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/maastokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
+	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+  "MML tausta"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
+	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+  "MML ilma"           : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
+	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
 	"b-bark SuomiTopo"   : { f:function(tile) {
                             return String.format(belectro.link, tile.zoom, tile.x, tile.y);
 						               },
@@ -1508,11 +1438,6 @@ function DisplayLocPin(pin)
   if ( !(alt === undefined) ) alts = " " + (alt/3.280839895).toFixed(0) + " m";
   setPinText(pinLoc.latitude.toFixed(5) + " " + pinLoc.longitude.toFixed(5) + " " + pin.getText() + alts);
   calcDistance();
-    const lat = pinLoc.latitude;
-    const lon = pinLoc.longitude;
-    const {north, east} = wgs84toEPSG3067(lat, lon);  // TODO: posta
-    console.log(`Kapsi Click: lat=${lat}, lon=${lon}, north=${north}, east=${east}, zoom=${zoom}`);
-
 }
 
 function ddmmssToDeg(s)
@@ -2552,6 +2477,15 @@ function colorFromString(s) {
 }
 
 
+function updateXctrackLink(routename) {
+  const link = document.getElementById("xctrackLink");
+  if (!link) return;
+  routename = forcePathToRouteName(routename);
+  link.href = "https://www.xctrack.org/#/track/" + routename;
+  link.innerText = "XcTrack: " + stripRouteName(routename);
+}
+
+
 // returns lastPin
 function showRoute(routename, data, type, colors, drawpins, froute) {
   const lines = (data+"\n-\n").split("\n"); // lisätään lopussa - merkki, jotta viimeinen polygon piirretään
@@ -2724,10 +2658,7 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
   if (froute && froute !== getName(routename)) return;
   dst[0].innerText = dists + " = " + sum.toFixed(3) + " km" + pross;
   const editRaport = document.getElementById('editRaport');
-  const xctracklink = document.getElementById('xctracklink');
-  let rext = ""
-  if (routename.indexOf('.') === -1) rext = ".txt";
-  xctracklink.href = "https://www.mit.jyu.fi/demowww/cyclo/xc.php?t=" + routename + rext;
+  updateXctrackLink(routename);
   const editSmallRaport = document.getElementById('editSmallRaport');
   raport[raport.length-1] = "M" + raport[raport.length-1].substr(1);
   sraport[sraport.length-1] = "M" + sraport[sraport.length-1].substr(1);
@@ -2882,19 +2813,33 @@ function closeRoute() {
   drawRouteFromDialog(true);
 }
 
+function stripRouteName(routename) {
+  const ind = routename.lastIndexOf("/");
+  if ( ind >= 0 ) routename = routename.substr(ind + 1);
+  const ext = '.txt';
+  if ( routename.indexOf(ext) >= 0 ) routename = routename.substr(0, routename.length - ext.length);
+  return routename;
+}
+
+function forcePathToRouteName(routename) {
+  const ind = routename.lastIndexOf("/");
+  let path = document.getElementById('editLog').value.trim() + "/";
+  if ( ind >= 0 ) path = "";
+  let ext = '.txt'
+  if ( routename.indexOf(ext) >= 0 ) ext = "";
+  return path + routename + ext;
+}
 
 function saveRoute() {
   const t = document.getElementById('editRoute');
   const tx = t.value.trim();
   let name = document.getElementById('editRouteName').value.trim();
-  const ind = name.lastIndexOf("/");
-  let path = document.getElementById('editLog').value.trim() + "/";
-  if ( ind >= 0 ) path = "";
-  name =  path + name;
+  name = forcePathToRouteName(name);
   // noinspection JSUnusedLocalSymbols
-  sendCyclo({saveRoute: name + ".txt", file: tx}, function (data, extra) {
+  sendCyclo({saveRoute: name, file: tx}, function (data, extra) {
     setError(data);
    }, null);
+  updateXctrackLink(name);
 }
 
 
@@ -3104,7 +3049,7 @@ function handleURLRoute(froute) {
         try {
           showRoute(extra.name, data, "txt", extra.colors, false, froute);
         } catch (e) {
-
+          console.log("Error showing route:", e);
         }
         if (!froute || froute===n) moveToDialog(extra.name, data); // TODO: korjaa nimi useita dialogeja varten
        }, {name: urlTrack, colors: colors});
@@ -3212,9 +3157,150 @@ function googleDirections() {
   if (isCoordinate(s)) {
     s = getNormalizedCoordinateString(s, ",")
   }
-  const url = "https://www.google.com/maps/search/?api=1&query=" + s;
+  // const url = "https://www.google.com/maps/search/?api=1&query=" + s;
+    const url = "https://www.google.com/maps/dir/?api=1" +
+                "&destination=" + encodeURIComponent(s) + "&travelmode=driving";
   const win = window.open(url, '_blank');
   win.focus();
+}
+
+function showQrInDiv(text) {
+    // Remove existing QR div if present
+    const oldDiv = document.getElementById("qrDiv");
+    if (oldDiv) oldDiv.remove();
+
+    // Create the container div with the same class as route window
+    const div = document.createElement("div");
+    div.id = "qrDiv";
+    div.className = "dragable";
+    div.style.top = "120px";
+    div.style.left = "120px";
+    div.style.width = "300px";
+    div.style.height = "320px";
+    div.style.position = "absolute";
+    div.style.background = "#fff";
+    div.style.zIndex = 2000;
+
+    // Move handle
+    const handle = document.createElement("div");
+    handle.className = "move";
+    handle.innerHTML = "&nbsp;QR-koodi";
+    div.appendChild(handle);
+
+    // Close button
+    const closeBtn = document.createElement("label");
+    closeBtn.className = "closebtn";
+    closeBtn.style.top = "-10px";
+    closeBtn.innerHTML = "&times;";
+    closeBtn.onclick = function() { div.remove(); };
+    div.appendChild(closeBtn);
+
+    // QR code container
+    const qrDiv = document.createElement("div");
+    qrDiv.style.margin = "20px";
+    div.appendChild(qrDiv);
+
+    document.body.appendChild(div);
+
+    // Make draggable
+    $(div).draggable({ handle: ".move" });
+
+    // Generate QR code
+    new QRCode(qrDiv, {
+        text: text,
+        width: 256,
+        height: 256,
+        correctLevel: QRCode.CorrectLevel.L
+    });
+}
+
+// Example usage:
+
+function showQrInNewWindow() {
+    let text = document.getElementById('editRoute').value;
+    // text = new TextDecoder("utf-8").decode(new TextEncoder().encode(text)); // Ensure text is properly encoded
+    // text = encodeURIComponent(text);
+    const xctJson = routeTxtToXCTSK(text);
+    showQrInDiv(xctJson);
+}
+
+function getElevation(lat, lon, callback) {
+    // const url = `https://avoin-karttakuva.maanmittauslaitos.fi/maastopalvelu/elevation?lat=${lat}&lon=${lon}`;
+    const url = `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lon}`;
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            // The elevation is in data.elevation
+            callback(data.results[0].elevation);
+        })
+        .catch(err => {
+            console.error("Elevation fetch error:", err);
+            callback(null);
+        });
+}
+
+function encodeNum(num) {
+    num = Math.round(num);
+    let pnum = num << 1;
+    if (num < 0) {
+        pnum = ~pnum;
+    }
+    let result = [];
+    if (pnum === 0) {
+        result.push(String.fromCharCode(63));
+    } else {
+        while (pnum > 0x1F) {
+            result.push(String.fromCharCode(((pnum & 0x1F) | 0x20) + 63));
+            pnum >>= 5;
+        }
+        result.push(String.fromCharCode(pnum + 63));
+    }
+    return result.join('');
+}
+
+function encodeCompetitionTurnpoint(lon, lat, alt, radius) {
+    return (
+        encodeNum(Math.round(lon * 1e5)) +
+        encodeNum(Math.round(lat * 1e5)) +
+        encodeNum(alt) +
+        encodeNum(radius)
+    );
+}
+
+function asciiJSONStringify(obj) {
+    return JSON.stringify(obj).replace(/[\u007F-\uFFFF]/g, function(c) {
+        return '\\u' + ('0000' + c.charCodeAt(0).toString(16)).slice(-4);
+    });
+}
+
+function routeTxtToXCTSK(txt) {
+
+    const lines = txt.trim().split("\n");
+    const t = [];
+    for (let i = 0; i < lines.length; i++) {
+        const [lat, lon, name, radius, out] = lines[i].split(",");
+        const obj = {
+            z: encodeCompetitionTurnpoint(parseFloat(lon), parseFloat(lat), 154, parseFloat(radius)*1000),
+            n: name
+        };
+        if (out && parseInt(out) === 1) obj.out = 1; // lisää out vain jos 1
+        // Set SSS and ESS types by order or name if needed
+        if (i === 0) { // tehdään kopio ensimmäisestä
+          const startObj = {...obj};
+          t.push(startObj);
+          obj.t = 2;
+        } // SSS
+        if (i === lines.length - 1) obj.t = 3; // ESS
+        t.push(obj);
+    }
+    const xctsk = {
+        version: 2,
+        taskType: "CLASSIC",
+        t: t,
+        s: { t: 2, d: 2, g: ["06:00:00Z"] },
+        g: { t: 2, d: "20:00:00Z" }
+    };
+    return "XCTSK:" + asciiJSONStringify(xctsk);
 }
 
 
@@ -3247,6 +3333,12 @@ html, body {
 }
 
 div#mapDiv {
+}
+
+#qrDiv {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .navigateButton {
@@ -3664,8 +3756,9 @@ textarea#tracklog {
       &nbsp;Reittiraportti
     </div>
     <div id="routeRaportIn">
-      <input type="checkbox" name="smallRaport" id="smallRaport" value="smallRapoprt" />Pieni raportti
-      <a href="" id="xctracklink" target="_blank" rel="noopener noreferrer">XCTrack</a><br>
+      <input type="checkbox" name="smallRaport" id="smallRaport" value="smallRapoprt" />Pieni raportti&nbsp;
+      <a id="xctrackLink" target="_blank" rel="noopener noreferrer" href="Tallenna_tehtava_ensin"></a>&nbsp;
+      <a id="xctrackQR"  href="javascript:void(0)" onclick="showQrInNewWindow()">QR</a><br>
       <textarea  name="editRaport" id="editRaport" class="raportTextArea"  rows="10"   >
       </textarea>
       <textarea  name="editSmallRaport" id="editSmallRaport" class="raportTextArea"  rows="7" style='height: 0; visibility: hidden'  >
