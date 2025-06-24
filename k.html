@@ -576,6 +576,92 @@ const belectro = {
   }
 };
 
+// Converts WGS84 (lat, lon in degrees) to EPSG:3067 (x, y in meters)
+function wgs84toEPSG3067(lat, lon) {
+    // Constants for ETRS-TM35FIN / EPSG:3067
+    const a = 6378137.0; // GRS80 major axis
+    const f = 1 / 298.257222101; // GRS80 flattening
+    const k0 = 0.9996; // scale factor
+    const lon0 = 27.0; // Central meridian for TM35FIN
+    const E0 = 500000.0; // False easting
+    const N0 = 0.0; // False northing
+
+    // Convert degrees to radians
+    const degToRad = Math.PI / 180.0;
+    lat = lat * degToRad;
+    lon = lon * degToRad;
+    const lon0Rad = lon0 * degToRad;
+
+    const e = Math.sqrt(2 * f - f * f);
+    const n = f / (2 - f);
+
+    const A1 = a / (1 + n) * (1 + n * n / 4 + n ** 4 / 64);
+
+    const h1 = n / 2 - 2 * n ** 2 / 3 + 5 * n ** 3 / 16 + 41 * n ** 4 / 180;
+    const h2 = 13 * n ** 2 / 48 - 3 * n ** 3 / 5 + 557 * n ** 4 / 1440;
+    const h3 = 61 * n ** 3 / 240 - 103 * n ** 4 / 140;
+    const h4 = 49561 * n ** 4 / 161280;
+
+    const Q = Math.asinh(Math.tan(lat));
+    const Qp = Math.atanh(e * Math.sin(lat));
+    const beta = Math.asin(Math.tanh(Q - e * Qp));
+
+    const l = lon - lon0Rad;
+    const eta = Math.atanh(Math.cos(beta) * Math.sin(l));
+    const xi = Math.asin(Math.sin(beta) * Math.cosh(eta));
+
+    let x = k0 * A1 * (xi +
+        h1 * Math.sin(2 * xi) * Math.cosh(2 * eta) +
+        h2 * Math.sin(4 * xi) * Math.cosh(4 * eta) +
+        h3 * Math.sin(6 * xi) * Math.cosh(6 * eta) +
+        h4 * Math.sin(8 * xi) * Math.cosh(8 * eta)
+    ) + N0;
+
+    let y = k0 * A1 * (eta +
+        h1 * Math.cos(2 * xi) * Math.sinh(2 * eta) +
+        h2 * Math.cos(4 * xi) * Math.sinh(4 * eta) +
+        h3 * Math.cos(6 * xi) * Math.sinh(6 * eta) +
+        h4 * Math.cos(8 * xi) * Math.sinh(8 * eta)
+    ) + E0;
+
+    // x = northing, y = easting
+    return { north: x, east : y };
+}
+
+function kapsiTileUrl(lat, lon, zoom) {
+    if (lat < 30 || lat > 80) return "";
+    if (lon < 10 || lon > 32) return "";
+    if (zoom < 3 || zoom > 18) return "";
+    const {north, east} = wgs84toEPSG3067(lat, lon);
+    const originEast = -548576;
+    const originNorth = 8388608;
+    const scale0 = 8192*256; //; 4194304;
+    zoom -= 3;
+    // const scale = scale0 / Math.pow(2, zoom-3);
+    const resolutions = [8192, 4096, 2048, 1024, 512, 256, 128,
+	                      64, 32, 16, 8, 4, 2, 1, 0.5, 0.25];
+    const scale = resolutions[zoom]*256;
+    const tileX = Math.round((east - originEast) / scale);
+    const tileY = Math.round((originNorth - north) / scale);
+    console.log(`Kapsi Tile: lat=${lat.toFixed(4)}, lon=${lon.toFixed(4)},`);
+    console.log(`north=${north.toFixed(0)}, east=${east.toFixed(0)}, zoom=${zoom}, tileX=${tileX}, tileY=${tileY}`);
+    console.log(`deast=${((east - originEast) / scale).toFixed(3)}, dnorth=${((originNorth - north) / scale).toFixed(3)}`);
+    return `https://tiles.kartat.kapsi.fi/peruskartta_3067/${zoom}/${tileX}/${tileY}.jpg`;
+}
+
+function bingTileToLatLon(x, y, z) {
+    const n = Math.pow(2, z);
+    const lon_deg = x / n * 360.0 - 180.0;
+    const lat_rad = Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n)));
+    const lat_deg = lat_rad * 180.0 / Math.PI;
+    return { lat: lat_deg, lon: lon_deg };
+}
+
+function getKapsiTilePath(tile) {
+    // Step 1: Bing tile x/y/z to lat/lon (center of tile)
+    const { lat, lon } = bingTileToLatLon(tile.x + 0.5, tile.y + 0.5, tile.zoom);
+    return kapsiTileUrl(lat, lon, tile.zoom);
+}
 
 // noinspection CheckImageSize
 const mapModes = {
@@ -605,13 +691,15 @@ const mapModes = {
 	                         c:'(c) <a href="http://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
 	"Outdoors"           : { f:function(tile) { return String.format("https://tile.thunderforest.com/outdoors/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
 	                         c:'(c) <a href="http://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
-	"Kapsi peruskartta"  : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/peruskartta/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
+	/* Ei voi käyttää, koska ei ole enää saatavilla WGS84, vaan vain EPSG:3067
+  "Kapsi peruskartta"  : { f:function(tile) { return getKapsiTilePath(tile); },
 	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
-	"Kapsi Tausta"       : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/taustakartta/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
+	"Kapsi Tausta"       : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/taustakartta_3067/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
 	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
-	"Kapsi Ilma"         : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/ortokuva/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
+	"Kapsi Ilma"         : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/ortokuva_3067/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
 	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'
                              },
+	 */
 	"b-bark SuomiTopo"   : { f:function(tile) {
                             return String.format(belectro.link, tile.zoom, tile.x, tile.y);
 						               },
@@ -1420,6 +1508,11 @@ function DisplayLocPin(pin)
   if ( !(alt === undefined) ) alts = " " + (alt/3.280839895).toFixed(0) + " m";
   setPinText(pinLoc.latitude.toFixed(5) + " " + pinLoc.longitude.toFixed(5) + " " + pin.getText() + alts);
   calcDistance();
+    const lat = pinLoc.latitude;
+    const lon = pinLoc.longitude;
+    const {north, east} = wgs84toEPSG3067(lat, lon);  // TODO: posta
+    console.log(`Kapsi Click: lat=${lat}, lon=${lon}, north=${north}, east=${east}, zoom=${zoom}`);
+
 }
 
 function ddmmssToDeg(s)
