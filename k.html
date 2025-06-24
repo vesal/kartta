@@ -2481,7 +2481,7 @@ function updateXctrackLink(routename) {
   const link = document.getElementById("xctrackLink");
   if (!link) return;
   routename = forcePathToRouteName(routename);
-  link.href = "https://www.xctrack.org/#/track/" + routename;
+  link.href = "https://www.mit.jyu.fi/demowww/cyclo/xc.php?t=" + routename;
   link.innerText = "XcTrack: " + stripRouteName(routename);
 }
 
