@@ -44,7 +44,7 @@
 
 const helpServerUrl = "https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta";
 
-function prefixLinks() {
+function prefixHelpLinks() {
     document.querySelectorAll('a.help').forEach(link => {
         const hash = link.getAttribute('href');
         if (hash && hash.startsWith('#')) {
@@ -78,6 +78,12 @@ function prefixLinks() {
     useComps: false,
     useCompsWindow: false,
   };
+
+const areaDatas = [
+  {name: "Ilmatilat", url: "https://flyk.com/api/airspaces.geojson", cb: "area1cb"},
+  {name: "Suplementit", url: "https://flyk.com/api/supplements.geojson", cb: "area2cb"},
+  {name: "Varaukset", url: "https://flyk.com/api/reservations.geojson", cb: "area3cb"},
+];
 
 let namedComponents = {};
 
@@ -311,7 +317,9 @@ $(document).ready(function () {
   readComponents();
   checkShowComponents();
   adjustComponents();
-  prefixLinks();
+  prefixHelpLinks();
+
+
 });
 </script>
 <script type="text/javascript">
@@ -480,6 +488,7 @@ function ContinueGetMap() {
             openDiv(ops[i].trim());
     }
   }
+  checkAreas();
 }
 
 
@@ -650,9 +659,12 @@ https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/
 						               },
 	                         c:'<span>Render:</span> <a href="https://www.b-bark.com" target="_blank"><img style="vertical-align:middle" src="css/b_bark_logo.png" width="20%" height="20%"  alt=""/></a><br />(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a><br />',
                              i: belectro.init },
-  "DeLorme World Base" : { f:function(tile) { return String.format("https://server.arcgisonline.com/ArcGIS/rest/services/Specialty/DeLorme_World_Base_Map/MapServer/tile/{0}/{2}/{1}",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="http://www.esri.com/legal/software-license" target="_blank">ArgGIS</a>'},
-	"World Imagery"      : { f:function(tile) { return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{0}/{2}/{1}",tile.zoom ,tile.x, tile.y);},
+  "World Topo Map":      {f: function(tile) {
+                            return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{0}/{2}/{1}", tile.zoom, tile.x, tile.y);
+                          },
+                          c: '(c) <a href="https://www.esri.com/" target="_blank">Esri</a>'
+                          },
+  "World Imagery"      : { f:function(tile) { return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{0}/{2}/{1}",tile.zoom ,tile.x, tile.y);},
 	                         c:'(c) <a href="http://www.esri.com/~/media/Files/Pdfs/legal/pdfs/e204_e300.pdf" target="_blank">ArgGIS</a>'},
 	"Ilmailu merged"      : { f:function(tile) {
                               const airac = "1806";
@@ -680,16 +692,20 @@ function SelectMapMode(mode) {
    logo.empty();
    mapmode = mode;
    // map.entities.remove(tilelayer);
-   // map.layers.remove(tilelayer);
+   map.layers.remove(tilelayer);
+   tilelayer = null;
 	 map.layers.clear();
 
 	if ( mapmode !== "Bing Maps normal")	{
        // map.entities.push(tilelayer);
+     const tileSource = new Microsoft.Maps.TileSource({uriConstructor: getTilePath});
+     tilelayer = new Microsoft.Maps.TileLayer({ mercator: tileSource, opacity: 1 });
 	   map.layers.insert(tilelayer);
   	 map.setOptions( { mapTypeId: Microsoft.Maps.MapTypeId.mercator, allowHidingLabelsOfRoad : true } );
   	 map.setView({ labelOverlay: Microsoft.Maps.LabelOverlay.hidden });
+     // map.setView({ labelOverlay: Microsoft.Maps.LabelOverlay.visible });
 	} else {
-		map.setOptions( { mapTypeId: Microsoft.Maps.MapTypeId.road, allowHidingLabelsOfRoad : false } );
+		map.setOptions( { mapTypeId: Microsoft.Maps.MapTypeId.road, allowHidingLabelsOfRoad : true } );
     map.setView({ labelOverlay: Microsoft.Maps.LabelOverlay.visible });
 	}
   logo.append(mm.c);
@@ -2059,22 +2075,22 @@ function setCBOption(name,value) {
 
 
 function getCBOption(name,f) {
-  const cb = $("#" + name);
+  const cb = document.getElementById(name);
   let value = params[name];
   if ( value === undefined ) value = getBoolean(localStorage.getItem(name) || options[name] || false);
   else value = getBoolean(value);
   options[name]= value;
   if (options[name]) {
-     document.getElementById(name).checked = true;
+     cb.checked = true;
      options[name] = true; // ??? ei kai tarviisi
   } else options[name] = false;
 
   // noinspection JSUnusedLocalSymbols
-  cb.on("click", function(event) {
-    setCBOption(name,this.checked);
-    if ( f !== undefined ) f(this.checked);
-  } );
-  setCBOption(name,cb[0].checked);
+  cb.addEventListener("click", function(event) {
+    setCBOption(name, this.checked);
+    if (typeof f !== "undefined") f(this.checked);
+  });
+  setCBOption(name,cb.checked);
 }
 
 
@@ -2114,6 +2130,29 @@ function checkSavedValues() {
   getCBOption("readGPS",function() { checkGeoLocation(); });
   getCBOption("useComps",function() { checkShowComponents(); });
   getCBOption("useCompsWindow");
+
+  const cb1 = document.getElementById('area1cb');
+  const cb2 = document.getElementById('area1cbCopy');
+
+
+
+  for (let area of areaDatas) {
+    getCBOption(area.cb, function() { checkArea(area);});
+    getCBOption(area.cb+ "Own", function() { checkAreaColor(area);});
+    getOption(area.cb + "Opt", area.cb + "Opt")
+  }
+
+  // Sync the two checkboxes
+  cb1.addEventListener('change', syncCheckboxes);
+  cb2.addEventListener('change', syncCheckboxes);
+  function syncCheckboxes(e) {
+      cb1.checked = cb2.checked = e.target.checked;
+      if (e.target === cb2) {
+        // Trigger cb1's change event so all logic runs
+        cb1.dispatchEvent(new Event('click', { bubbles: true }));
+      }
+  }
+  cb2.checked = cb1.checked;
 
   checkTimer("follow", !options.follow);
   // checkTimer("readGPS");
@@ -2383,6 +2422,7 @@ function showTrack(data, type, colors) {
 }
 
 function logMapEntities() {
+  return;
   console.log("Number of entities:", map.entities.getLength());
   for (let i = 0; i < map.entities.getLength(); i++) {
       console.log("Entity", i, map.entities.get(i));
@@ -2497,7 +2537,7 @@ function updateXctrackLink(routename) {
   if (!link) return;
   routename = forcePathToRouteName(routename);
   link.href = "https://www.mit.jyu.fi/demowww/cyclo/xc.php?t=" + routename;
-  link.innerText = "XcTrack: " + stripRouteName(routename);
+  link.innerText = "XCTrack: " + stripRouteName(routename);
 }
 
 
@@ -2686,6 +2726,101 @@ function showRoute(routename, data, type, colors, drawpins, froute) {
   return lastPin;
 }
 
+function showArea(name, geojson, opts) {
+    if (!geojson || !geojson.features) return;
+    const polys = [];
+    let color = 'blue';
+    let linewidth = 2;
+    let fillArea = 'rgba(0, 128, 255, 0.3)';
+    if (opts) {
+      const jso = makeJSON(opts, 0, null);
+      if (jso) {
+          if (jso?.c != null) color = colorFromString(jso.c);
+          if (jso?.w != null) linewidth = parseInt(jso.w);
+          if (isNaN(linewidth)) linewidth = 2;
+          if (jso?.f != null) fillArea = colorFromString(jso.f);
+      }
+    }
+    for (const feature of geojson.features) {
+        if (feature.geometry.type !== "Polygon") continue;
+        if (feature.properties.active === false &&
+           feature.properties.becomingActive === false) continue; // Skip inactive areas
+
+        let fillcolor = fillArea;
+        let strokeColor = color
+        let strokeThickness = linewidth;
+        if (feature.properties.airspaceclass === "Restricted") {
+            // Use a different color for restricted areas
+            fillcolor = 'rgba(255, 0, 0, 0.3)';
+            strokeColor = 'red';
+            strokeThickness = 2;
+        } else if (feature.properties.airspaceclass === "Prohibited") {
+            // Use a different color for prohibited areas
+            fillcolor = 'rgba(255, 0, 0, 0.5)';
+            strokeColor = 'darkred';
+            strokeThickness = 5;
+        }
+
+        for (const ring of feature.geometry.coordinates) {
+            // GeoJSON: [lng, lat]
+            const locations = ring.map(coord => new Microsoft.Maps.Location(coord[1], coord[0]));
+            let polygonOptions = {strokeThickness: strokeThickness,
+                                  strokeColor: "transparent",
+                                  fillColor: "transparent"};
+            if (fillcolor) polygonOptions.fillColor = fillcolor;
+            if (strokeColor) polygonOptions.strokeColor = strokeColor;
+            const polygon = new Microsoft.Maps.Polygon(locations, polygonOptions);
+            map.entities.push(polygon);
+            polys.push(polygon);
+        }
+    }
+    const route = {name: name, line: null, polys: polys, pins: null, data: null};
+    loadedRoutes.push(route);
+}
+
+function getArea(area) {
+  fetch(area.url)
+    .then(response => {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    })
+    .then(data => {
+      // Use your JSON data here
+      let opts = null;
+      if (options[area.cb + "Own"]) {
+        opts = document.getElementById(area.cb + "Opt").value;
+      }
+      showArea(area.name, data, opts);
+    })
+    .catch(error => {
+      console.error('Fetch error:', error);
+    });
+}
+
+function checkArea(area) {
+  if (options[area.cb]) {
+    getArea(area);
+  } else {
+    removeRoute(area.name);
+  }
+}
+
+function checkAreaColor(area) {
+  if (!options[area.cb]) return;
+  removeRoute(area.name);
+  getArea(area);
+}
+
+function checkAreas() {
+   for (let area of areaDatas) {
+      const cb = document.getElementById(area.cb);
+      if (!cb) continue;
+      cb.nextSibling.nodeValue = area.name;
+      if (options[area.cb]) {
+        getArea(area);
+      }
+   }
+}
 
 function removeTracks() {
   for (let i=0; i<loadedTracks.length; i++) {
@@ -3359,10 +3494,17 @@ div#mapDiv {
 .navigateButton {
   float: right;
 }
+
 .logo {
    position: absolute;
    bottom:0;
    margin-bottom: -3px;
+ }
+
+.areaCB {
+   position: absolute;
+   top: 10px;
+   right: 3px;
  }
 
  .mapType {
@@ -3549,11 +3691,13 @@ li.ui-menu-item {
       top: 0;
       bottom: 0;
       padding-top: 0;
-  }
-  .popupIn {
-      padding-top: 0;
-  }
 }
+
+.popupIn {
+    padding-top: 0;
+}
+
+
 @media only screen and (max-width: 850px) {
   .popup {
       left: 2pt;
@@ -3609,6 +3753,7 @@ li.ui-menu-item {
   <li><span onclick="toggleDiv('loadRoute'); ">Lataa reittitiedosto...</span>  <a target="help" class="help" href="#loadroute">?</a></li>
   <li><span onclick="toggleDiv('routeDiv'); ">Reitin suunnittelu...</span> <a target="help" class="help" href="#routeplan">?</a></li>
   <li><span onclick="toggleDiv('routeRaport'); ">Reittiraportti...</span> <a target="help" class="help" href="#routeraport">?</a></li>
+  <li><span onclick="toggleDiv('loadAreas'); ">Alueet...</span>  <a target="help" class="help" href="#areas">?</a></li>
   <li><span onclick="googleDirections();">Ajo-ohjeet Google Mapsillä</span> <a target="help" class="help" href="#googledirections">?</a></li>
   <li><span onclick="openFullscreen(document.documentElement)">Fullscreen</span></li>
   <li><span onclick="toggleDiv('about'); ">Pika-apu...</span></li>
@@ -3723,7 +3868,7 @@ li.ui-menu-item {
         <input type="checkbox" name="drawLogLine" id="drawLogLine" value="drawLogLine"  />Piirrä viivaa seurattavista<br />
         <input type="checkbox" id="send" value="send"  />Lähetä omaa paikkaa<br />
         <hr>
-        <div id="compArea"><p>Mittareiden arvot</p>
+        <div id="compArea"><p>Mittareiden arvot <a target="help" class="help" href="#gauges">?</a></p>
           <input type="checkbox" name="useComps" id="useComps" value="useComps"  />Näytä mittarit<br />
           <div id="showCompsSettings">
             <input type="checkbox" id="useCompsWindow" value="useCompsWindow"  />Näytä ikkunassa<br />
@@ -3788,12 +3933,47 @@ li.ui-menu-item {
     <div id="routeRaportIn">
       <input type="checkbox" name="smallRaport" id="smallRaport" value="smallRapoprt" />Pieni raportti&nbsp;
       <a id="xctrackLink" target="_blank" rel="noopener noreferrer" href="Tallenna_tehtava_ensin"></a>&nbsp;
-      <a id="xctrackQR"  href="javascript:void(0)" onclick="showQrInNewWindow()">QR</a><br>
+      <a id="xctrackQR"  href="javascript:void(0)" onclick="showQrInNewWindow()">QR</a>
+      <a target="help" class="help" href="#routeraport">?</a>
+      <br>
       <textarea  name="editRaport" id="editRaport" class="raportTextArea"  rows="10"   >
       </textarea>
       <textarea  name="editSmallRaport" id="editSmallRaport" class="raportTextArea"  rows="7" style='height: 0; visibility: hidden'  >
       </textarea>
    </div>
+</div>
+
+
+<div class="popup" id="loadAreas" style=" ">
+  <label class="closebtn" onclick="toggleDiv('loadAreas')">&times;</label>
+  <div class="popupIn">
+    <h2>Alueet</h2>
+    <p>Valitse mitä alueita haluat käyttää</p>
+    <div id="loadAreasIn">
+      <table>
+        <tr><th>Alue</th><th>Oma väritys</th><th>Optiot</th></tr>
+        <tr><td><label><input type="checkbox" name="area1cb" id="area1cb" value="area1" />Alue 1</label></td>
+            <td><input type="checkbox" name="area1cbOwn" id="area1cbOwn" value="area1" /></td>
+            <td><input type="text" name="area1cbOpt" id="area1cbOpt" value="c:gray/60,w:8,f:" /></td>
+        </tr>
+        <tr><td><label><input type="checkbox" name="area2cb" id="area2cb" value="area2" />Alue 1</label></td>
+            <td><input type="checkbox" name="area2cbOwn" id="area2cbOwn" value="area2" /></td>
+            <td><input type="text" name="area2cbOpt" id="area2cbOpt" value="c:red/60,w:8,f:red/30" /></td>
+        </tr>
+        <tr><td><label><input type="checkbox" name="area3cb" id="area3cb" value="area3" />Alue 1</label></td>
+            <td><input type="checkbox" name="area3cbOwn" id="area3cbOwn" value="area3" /></td>
+            <td><input type="text" name="area3cbOpt" id="area3cbOpt" value="c:red/80,w:8,f:red/30" /></td>
+        </tr>
+      </table>
+      <br>
+      <p>Tarkista kuitenkin alueiden korkeudet ja voimassaoloajat <a id="flykLink" href="https://flyk.com/map?lang=fi&pilot#p=7.11/60.837/27.172" target="flyk">FLYK-kartasta</a>!</p>
+      <!--
+      <p>Muut alueet: (kirjoita URL-osoiteet, joista saadaan ladattua alueiden JSONit)</p>
+      <textarea  name="editRaport" id="editLoadAreas" class="loadAreasTextArea"  rows="10">
+      </textarea>
+      -->
+   </div>
+  </div>
 </div>
 
 
@@ -3823,6 +4003,9 @@ li.ui-menu-item {
       <label class="hamburgerSpace"> </label>&nbsp;
       <select id="combobox"></select> <span style="background: white;" id="distance">0 km</span>
     </div>
+  </div>
+  <div class="areaCB">
+    <label for="area1cbCopy">✈️</label><br><input type="checkbox" title="Ilmatilat" id="area1cbCopy" name="area1cbCopy" value="area1cbCopy" />
   </div>
 </div>
 
