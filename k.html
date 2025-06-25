@@ -39,7 +39,19 @@
 }
 
 </style>
+
 <script type="text/javascript">
+
+const helpServerUrl = "https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta";
+
+function prefixLinks() {
+    document.querySelectorAll('a.help').forEach(link => {
+        const hash = link.getAttribute('href');
+        if (hash && hash.startsWith('#')) {
+            link.setAttribute('href',  helpServerUrl + hash);
+        }
+    });
+}
 
   const options = {
     email: "",
@@ -299,6 +311,7 @@ $(document).ready(function () {
   readComponents();
   checkShowComponents();
   adjustComponents();
+  prefixLinks();
 });
 </script>
 <script type="text/javascript">
@@ -627,6 +640,8 @@ https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/
   "MML maasto"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/maastokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
 	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
   "MML tausta"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
+	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+  "MML selko"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/selkokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
 	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
   "MML ilma"           : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
 	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
@@ -3514,8 +3529,22 @@ textarea#tracklog {
     width: 100%;
 }
 
-@media only screen and (max-height: 600px) {
-  .popup {
+li a.help {
+    padding: unset !important;
+    display: inline !important;
+    /* float: right; */
+    position: absolute !important;
+    right: 30px;
+}
+
+a.help {
+}
+
+li.ui-menu-item {
+    line-height: 1.5em;
+}
+
+.popup {
       z-index: 600;
       top: 0;
       bottom: 0;
@@ -3572,17 +3601,17 @@ textarea#tracklog {
   <label class="closebtn" style="visibility: hidden" onclick="closeNav()">&times;</label>
 
   <ul id="menu" style="visibility: hidden">
-  <li><div onclick="toggleDiv('settings');">Asetukset...</div></li>
-  <li><div onclick="myLayout.toggle('north'); closeNav();">Pinnien lisääminen...</div></li>
-  <li><div onclick="showRoutePane(); closeNav()">Ajo-ohjeet...</div></li>
-  <li><div onclick="toggleDiv('loadTrack'); ">Lataa track-tiedosto...</div></li>
-  <li><div onclick="myLayout.toggle('west'); ">Näytä track-tiedot</div></li>
-  <li><div onclick="toggleDiv('loadRoute'); ">Lataa reittitiedosto...</div></li>
-  <li><div onclick="toggleDiv('routeDiv'); ">Reitin suunnittelu...</div></li>
-  <li><div onclick="toggleDiv('routeRaport'); ">Reittiraportti...</div></li>
-  <li><div onclick="googleDirections();">Ajo-ohjeet Google Mapsillä</div></li>
-  <li><div onclick="openFullscreen(document.documentElement)">Fullscreen</div></li>
-  <li><div onclick="toggleDiv('about'); ">Pika-apu...</div></li>
+  <li><span onclick="toggleDiv('settings');">Asetukset...</span> <a target="help" class="help" href="#settings">?</a></li>
+  <li><span onclick="myLayout.toggle('north'); closeNav();">Pinnien lisääminen...</span> <a target="help" class="help" href="#addpins">?</a></li>
+  <li><span onclick="showRoutePane(); closeNav()">Ajo-ohjeet...</span> <a target="help" class="help" href="#directions">?</a></li>
+  <li><span onclick="toggleDiv('loadTrack'); ">Lataa track-tiedosto...</span> <a target="help" class="help" href="#loadtrack">?</a></li>
+  <li><span onclick="myLayout.toggle('west'); ">Näytä track-tiedot</span> <a target="help" class="help" href="#showtrackdetails">?</a></li>
+  <li><span onclick="toggleDiv('loadRoute'); ">Lataa reittitiedosto...</span>  <a target="help" class="help" href="#loadroute">?</a></li>
+  <li><span onclick="toggleDiv('routeDiv'); ">Reitin suunnittelu...</span> <a target="help" class="help" href="#routeplan">?</a></li>
+  <li><span onclick="toggleDiv('routeRaport'); ">Reittiraportti...</span> <a target="help" class="help" href="#routeraport">?</a></li>
+  <li><span onclick="googleDirections();">Ajo-ohjeet Google Mapsillä</span> <a target="help" class="help" href="#googledirections">?</a></li>
+  <li><span onclick="openFullscreen(document.documentElement)">Fullscreen</span></li>
+  <li><span onclick="toggleDiv('about'); ">Pika-apu...</span></li>
   </ul>
   <!--Muista muuttaa korkeus openNav  (tai tee tähän tyyli automaattiseksi) -->
 </div>
@@ -3747,7 +3776,8 @@ textarea#tracklog {
       <button type="button" onclick="saveRoute();" >Tallenna reitti</button>
       <button type="button" onclick="removeRoutes();" >Poista reitit</button>
       <input type="checkbox" name="autoAddToRoute" id="autoAddToRoute" value="autoAdd" />Lisää klikkaamalla
-   </div>
+      <button type="button" onclick="toggleDiv('routeRaport'); ">Raportti</button>
+    </div>
 </div>
 
 <div id="routeRaport" class="dragable" style="top: 80px; width: 550px;">
@@ -3774,6 +3804,7 @@ textarea#tracklog {
     <input type="text" name="editPinLoc" id="editPinLoc" value="" size="35" onkeyup="checkAddPinText()" />
     <span class ="clearButton" id="buttonClearText" onclick="setPinText('')">x</span>
     <button type="button" id="buttonAddPin" onclick="addPin()">Etsi</button>
+    <a target="help" class="help" href="#find">?</a>
     <span id="searchSpan" style="visibility: hidden">
       <select id="searchCombo" ></select>
       <span class="searchClass" id="searchMsg"></span>
