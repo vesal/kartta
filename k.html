@@ -2,6 +2,7 @@
 <!--suppress JSUnresolvedFunction, JSUnresolvedVariable, HtmlFormInputWithoutLabel -->
 <html lang="">
   <head>
+    <link rel="icon" href="data:,">
     <meta charset="UTF-8">
       <title>Kartta</title>
       <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -2975,8 +2976,14 @@ function stripRouteName(routename) {
 }
 
 function forcePathToRouteName(routename) {
-  const ind = routename.lastIndexOf("/");
+  if ( !routename ) routename = "r";
+  let ind = routename.lastIndexOf("/");
+  if (routename[0] !== '!' && ind >= 0) {
+    routename = routename.slice(ind + 1);
+    ind = -1;
+  }
   let path = document.getElementById('editLog').value.trim() + "/";
+  if (!path.startsWith("!")) path = "/";
   if ( ind >= 0 ) path = "";
   let ext = '.txt'
   if (path === "/") path = options.email + "/";
@@ -3193,11 +3200,7 @@ function handleURLRoute(froute) {
     let url = urlTrack;
     let name = getName(urlTrack);
     if (urlTrack.indexOf("txt") < 0) {
-      ext = "txt"
-      if ( ind < 0 ) name = lastpath + "/" + name;
-      else name = urlTrack;
-      urlTrack = name;
-      name = name + ".txt";
+      name = forcePathToRouteName(urlTrack);
       sendCyclo({getRoute: name}, function (data, extra) {
         const n = getName(extra.name);
         try {

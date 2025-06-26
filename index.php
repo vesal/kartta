@@ -501,6 +501,10 @@ function saveRoute($email,$routename,$file) {
     error("No right to save: $routename $email");
   }
   if (strrpos($routename,".txt") === false ) error("Only .txt can be saved: $routename");
+  $dir = dirname($routename);
+  if (!is_dir($dir)) {
+      mkdir($dir, 0777, true);
+  }
   if ( !writefile("$routename","$file") ) error("Could be not write $routename");
   ok("$routename");
 }
