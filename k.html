@@ -2197,7 +2197,9 @@ function getfollow()  {
 
   clearError();
   $.post( "https://www.mit.jyu.fi/demowww/cyclo/", { id: options.id, e: getEmailTag(), f : options.usersTofollow  })
-  .done(function( data ) { setPins(data) });
+  .done(function( data ) {
+    setPins(data)
+  });
 }
 
 
