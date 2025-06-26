@@ -493,9 +493,11 @@ function saveData($email,$logname,$data) {
 
 // =============================================================================================
 function saveRoute($email,$routename,$file) {
-// saves the users datapoint to last and to tracfile (.cyc)
+// saves route tuo ! directory or to users directory
   $file = str_replace("\\", "", $file);
-  if (!startsWith($routename,"!") ) error("No right to save: $routename");
+  if (!startsWith($routename,"!") && !startsWith($routename,$email."/") ) {
+    error("No right to save: $routename");
+  }
   if (strrpos($routename,".txt") === false ) error("Only .txt can be saved: $routename");
   if ( !writefile("$routename","$file") ) error("Could be not write $routename");
   ok("$routename");
@@ -505,7 +507,9 @@ function saveRoute($email,$routename,$file) {
 // =============================================================================================
 function getRoute($email,$routename) {
 // saves the users datapoint to last and to tracfile (.cyc)
-  if (!startsWith($routename,"!") ) error("No right to read: $routename");
+  if (!startsWith($routename,"!") && !startsWith($routename,$email."/") ) {
+    error("No right to read: $routename");
+  }
   if (strrpos($routename,".txt") === false ) error("Only .txt can be read: $routename");
   // print("filename: $routename\n");
   $result = rfile($routename);
