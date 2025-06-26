@@ -492,10 +492,23 @@ function saveData($email,$logname,$data) {
 }
 
 // =============================================================================================
+function purifyEmail($email) {
+  $i = strpos($email, "+");
+  if (!$i) return $email;
+  $p = strpos($email, "@");
+  if ($p < $i)
+    return substr($email, 0, $i);
+  else
+    return substr($email, 0, $i) . substr($email, $p);
+}
+
+
+// =============================================================================================
 function saveRoute($email,$routename,$file) {
 // saves route tuo ! directory or to users directory
+  $em = purifyEmail($email);
   $file = str_replace("\\", "", $file);
-  if (!startsWith($routename,"!") && !startsWith($routename,"$email/") ) {
+  if (!startsWith($routename,"!") && !startsWith($routename,"$em/") ) {
     error("No right to save: $routename $email");
   }
   if (strrpos($routename,".txt") === false ) error("Only .txt can be saved: $routename");
