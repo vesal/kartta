@@ -504,8 +504,14 @@ let mapmode;
 function copyToUrl() {
   let tr = document.getElementById("editURLTrack").value.trim().replaceAll("\n", ",");
   if ( tr !== "" ) tr = "&load="+tr;
-  let ro = document.getElementById("editURLRoute").value.trim().replaceAll("\n", ",");
+  let ro = document.getElementById("editRouteName").value.trim();
+  if (ro === "") {
+    ro = document.getElementById("editURLRoute").value.trim().replaceAll("\n", ",");
+  }
   if ( ro !== "" ) ro = "&route="+ro;
+  if (isDivVisible("routeRaport")) {
+    ro += "&open=routeRaport";
+  }
   const pos = map.getCenter();
   const url = "k.html?" +
     "lat=" + pos.latitude.toFixed(5) +
@@ -3258,6 +3264,11 @@ function openSettings() {
 }
 */
 
+function isDivVisible(id) {
+    const div = document.getElementById(id);
+    if (!div) return false;
+    return div.style.visibility === "visible";
+}
 
 function toggleDiv(name) {
   closeNav();
