@@ -501,7 +501,7 @@ function saveRoute($email,$routename,$file) {
   if (!startsWith($routename,"!") && !startsWith($routename,"$emPrefix") ) {
     error("No right to save: $routename $email");
   }
-  if (strrpos($routename,".txt") === false ) error("Only .txt can be saved: $routename");
+  if (strlen($routename) < 4 || substr($routename, -4) !== ".txt") error("Only .txt can be saved: $routename");
   $dir = dirname($routename);
   $check = $dir;
 

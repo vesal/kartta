@@ -2976,19 +2976,21 @@ function stripRouteName(routename) {
 }
 
 function forcePathToRouteName(routename) {
+  // "" => "$email/r.txt" tai "!sm25/r.txt" jos log = "!sm25
+  // "2" => "$email/2.txt" tai "!sm25/2.txt" jos log = "!sm25
+  // "a/2" => "$email/a/2.txt" tai "!sm25/a/2.txt" jos log = "!sm25
+  // "!a/2" => "!a/2.txt" aina
+  // "/2" => "$email/2.txt" aina
   if ( !routename ) routename = "r";
-  let ind = routename.lastIndexOf("/");
-  if (routename[0] !== '!' && ind >= 0) {
-    routename = routename.slice(ind + 1);
-    ind = -1;
+  let path = "";
+  if (!routename.startsWith("!")) {
+    let ind = routename.lastIndexOf("/");
+    path = document.getElementById('editLog').value.trim() + "/";
+    if (!path.startsWith("!")) path = options.email + "/";
   }
-  let path = document.getElementById('editLog').value.trim() + "/";
-  if (!path.startsWith("!")) path = "/";
-  if ( ind >= 0 ) path = "";
   let ext = '.txt'
-  if (path === "/") path = options.email + "/";
   if ( routename.indexOf(ext) >= 0 ) ext = "";
-  return path + routename + ext;
+  return (path + routename + ext).replace(/\/+/g, '/');
 }
 
 function saveRoute() {
