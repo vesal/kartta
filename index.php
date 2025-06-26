@@ -502,6 +502,9 @@ function saveRoute($email,$routename,$file) {
   }
   if (strrpos($routename,".txt") === false ) error("Only .txt can be saved: $routename");
   $dir = dirname($routename);
+  if (preg_match('/[^!a-zA-Z0-9_\-\/]/', $dir) || strpos($dir, '.') !== false) {
+      error("Invalid directory name: $dir");
+  }
   if (!is_dir($dir)) {
       mkdir($dir, 0777, true);
   }
