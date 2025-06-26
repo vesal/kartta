@@ -1,4 +1,3 @@
-
 <!DOCTYPE HTML>
 <!--suppress JSUnresolvedFunction, JSUnresolvedVariable, HtmlFormInputWithoutLabel -->
 <html lang="">
@@ -46,6 +45,8 @@ const helpServerUrl = "https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta";
 
 function prefixHelpLinks() {
     document.querySelectorAll('a.help').forEach(link => {
+        link.target = "help";
+        link.innerText = " ?";
         const hash = link.getAttribute('href');
         if (hash && hash.startsWith('#')) {
             link.setAttribute('href',  helpServerUrl + hash);
@@ -2985,6 +2986,7 @@ function saveRoute() {
   const tx = t.value.trim();
   let name = document.getElementById('editRouteName').value.trim();
   name = forcePathToRouteName(name);
+  if (name.startsWith("/")) name = name.substr(1); // remove leading slash
   // noinspection JSUnusedLocalSymbols
   sendCyclo({saveRoute: name, file: tx}, function (data, extra) {
     setError(data);
@@ -3501,10 +3503,11 @@ div#mapDiv {
    margin-bottom: -3px;
  }
 
-.areaCB {
+.area1CBcopy {
    position: absolute;
-   top: 10px;
-   right: 3px;
+   top: 0px;
+   right: 0px;
+   background-color: white;
  }
 
  .mapType {
@@ -3680,6 +3683,7 @@ li a.help {
 }
 
 a.help {
+    text-decoration: none !important;
 }
 
 li.ui-menu-item {
@@ -3745,16 +3749,16 @@ li.ui-menu-item {
   <label class="closebtn" style="visibility: hidden" onclick="closeNav()">&times;</label>
 
   <ul id="menu" style="visibility: hidden">
-  <li><span onclick="toggleDiv('settings');">Asetukset...</span> <a target="help" class="help" href="#settings">?</a></li>
-  <li><span onclick="myLayout.toggle('north'); closeNav();">Pinnien lisääminen...</span> <a target="help" class="help" href="#addpins">?</a></li>
-  <li><span onclick="showRoutePane(); closeNav()">Ajo-ohjeet...</span> <a target="help" class="help" href="#directions">?</a></li>
-  <li><span onclick="toggleDiv('loadTrack'); ">Lataa track-tiedosto...</span> <a target="help" class="help" href="#loadtrack">?</a></li>
-  <li><span onclick="myLayout.toggle('west'); ">Näytä track-tiedot</span> <a target="help" class="help" href="#showtrackdetails">?</a></li>
-  <li><span onclick="toggleDiv('loadRoute'); ">Lataa reittitiedosto...</span>  <a target="help" class="help" href="#loadroute">?</a></li>
-  <li><span onclick="toggleDiv('routeDiv'); ">Reitin suunnittelu...</span> <a target="help" class="help" href="#routeplan">?</a></li>
-  <li><span onclick="toggleDiv('routeRaport'); ">Reittiraportti...</span> <a target="help" class="help" href="#routeraport">?</a></li>
-  <li><span onclick="toggleDiv('loadAreas'); ">Alueet...</span>  <a target="help" class="help" href="#areas">?</a></li>
-  <li><span onclick="googleDirections();">Ajo-ohjeet Google Mapsillä</span> <a target="help" class="help" href="#googledirections">?</a></li>
+  <li><span onclick="toggleDiv('settings');">Asetukset...</span> <a class="help" href="#settings"></a></li>
+  <li><span onclick="myLayout.toggle('north'); closeNav();">Pinnien lisääminen...</span> <a class="help" href="#addpins"></a></li>
+  <li><span onclick="showRoutePane(); closeNav()">Ajo-ohjeet...</span> <a class="help" href="#directions"></a></li>
+  <li><span onclick="toggleDiv('loadTrack'); ">Lataa track-tiedosto...</span> <a class="help" href="#loadtrack"></a></li>
+  <li><span onclick="myLayout.toggle('west'); ">Näytä track-tiedot</span> <a class="help" href="#showtrackdetails"></a></li>
+  <li><span onclick="toggleDiv('loadRoute'); ">Lataa reittitiedosto...</span>  <a class="help" href="#loadroute"></a></li>
+  <li><span onclick="toggleDiv('routeDiv'); ">Reitin suunnittelu...</span> <a class="help" href="#routeplan"></a></li>
+  <li><span onclick="toggleDiv('routeRaport'); ">Reittiraportti...</span> <a class="help" href="#routeraport"></a></li>
+  <li><span onclick="toggleDiv('loadAreas'); ">Alueet...</span>  <a class="help" href="#areas"></a></li>
+  <li><span onclick="googleDirections();">Ajo-ohjeet Google Mapsillä</span> <a class="help" href="#googledirections"></a></li>
   <li><span onclick="openFullscreen(document.documentElement)">Fullscreen</span></li>
   <li><span onclick="toggleDiv('about'); ">Pika-apu...</span></li>
   </ul>
@@ -3840,7 +3844,7 @@ li.ui-menu-item {
   <label class="closebtn" onclick="toggleDiv('settings'); adjustComponents()">&times;</label>
   <div class="popupIn">
     <h2>Asetukset</h2>
-    <input type="checkbox" id="HCenter" value="HCenter"  />Pidä H keskellä<br />
+    <input type="checkbox" id="HCenter" value="HCenter"  />Pidä H keskellä <a class="help" href="#othersettings"></a><br />
     <!-- <input type="checkbox" id="showAccuracy" value="showAccuray"  />Näytä tarkkuusympyrä<br /> -->
     <input type="checkbox" id="readGPS" value="readGPS"  />Lue GPS:ää<br />
     <input type="checkbox" name="followMe" id="followMe" value="followMe"  />Piirrä oma jälki
@@ -3854,8 +3858,9 @@ li.ui-menu-item {
 
     <div class="ui-widget" id="followDiv">
       <div id="followArea">
-        <button type="button" onclick="$('#followArea').toggle(); $('#accountArea').toggle();" >Tilaa käyttäjätunnus (ID)...</button>
-        <div id="accountArea2"><p>Oman paikan lähettäminen ja muiden seuraaminen:</p>
+        <button type="button" onclick="$('#followArea').toggle(); $('#accountArea').toggle();" >Tilaa käyttäjätunnus (ID)...</button><a class="help" href="#userid"></a>
+        <hr>
+        <div id="accountArea2"><p><b>Oman paikan lähettäminen ja muiden seuraaminen:</b><a class="help" href="#followsettings"></a></p>
           <label for="editTag">Kartalla näkyvä tunnus: </label><input type="text" name="editTag" id="editTag" value="" size="5" /><br>
           <label for="editLog">logname: </label><input type="text" name="editLog" id="editLog" value="" size="12" /><br>
           <label for="editInterval">interval/ms: </label><input type="text" name="editInterval" id="editInterval" value="5000" size="8" /><br>
@@ -3868,7 +3873,7 @@ li.ui-menu-item {
         <input type="checkbox" name="drawLogLine" id="drawLogLine" value="drawLogLine"  />Piirrä viivaa seurattavista<br />
         <input type="checkbox" id="send" value="send"  />Lähetä omaa paikkaa<br />
         <hr>
-        <div id="compArea"><p>Mittareiden arvot <a target="help" class="help" href="#gauges">?</a></p>
+        <div id="compArea"><p><b>Mittareiden arvot</b> <a class="help" href="#gauges"></a></p>
           <input type="checkbox" name="useComps" id="useComps" value="useComps"  />Näytä mittarit<br />
           <div id="showCompsSettings">
             <input type="checkbox" id="useCompsWindow" value="useCompsWindow"  />Näytä ikkunassa<br />
@@ -3884,10 +3889,10 @@ li.ui-menu-item {
       <div id="accountArea">
         <br />
 
-        <label for="editEmail">Email: </label><input type="text" name="editEmail" id="editEmail" value="" size="25" /><br />
+        <label for="editEmail">Email: </label><input type="text" name="editEmail" id="editEmail" value="" size="25" /><a class="help" href="#userid"></a><br />
         <label for="editId">id: </label><input type="text" name="editId" id="editId" value="" size="15" /><br />
         <br />
-        <button id="getId">Hae uusi ID</button>
+        <button id="getId">Hae uusi ID</button><a class="help" href="#userid"></a>
         <br />
         <br />
         <span class="idMsg" id = "idMsg"></span>
@@ -3934,7 +3939,7 @@ li.ui-menu-item {
       <input type="checkbox" name="smallRaport" id="smallRaport" value="smallRapoprt" />Pieni raportti&nbsp;
       <a id="xctrackLink" target="_blank" rel="noopener noreferrer" href="Tallenna_tehtava_ensin"></a>&nbsp;
       <a id="xctrackQR"  href="javascript:void(0)" onclick="showQrInNewWindow()">QR</a>
-      <a target="help" class="help" href="#routeraport">?</a>
+      <a class="help" href="#routeraport"></a>
       <br>
       <textarea  name="editRaport" id="editRaport" class="raportTextArea"  rows="10"   >
       </textarea>
@@ -3984,7 +3989,7 @@ li.ui-menu-item {
     <input type="text" name="editPinLoc" id="editPinLoc" value="" size="35" onkeyup="checkAddPinText()" />
     <span class ="clearButton" id="buttonClearText" onclick="setPinText('')">x</span>
     <button type="button" id="buttonAddPin" onclick="addPin()">Etsi</button>
-    <a target="help" class="help" href="#find">?</a>
+    <a class="help" href="#find"></a>
     <span id="searchSpan" style="visibility: hidden">
       <select id="searchCombo" ></select>
       <span class="searchClass" id="searchMsg"></span>
@@ -4004,7 +4009,7 @@ li.ui-menu-item {
       <select id="combobox"></select> <span style="background: white;" id="distance">0 km</span>
     </div>
   </div>
-  <div class="areaCB">
+  <div class="area1CBcopy">
     <label for="area1cbCopy">✈️</label><br><input type="checkbox" title="Ilmatilat" id="area1cbCopy" name="area1cbCopy" value="area1cbCopy" />
   </div>
 </div>
