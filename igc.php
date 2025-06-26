@@ -19,6 +19,7 @@ function http_get($url) {
 	  curl_setopt($curl, CURLOPT_REFERER, "https://www.xcontest.org");
 	  curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true); // seuraa uudelleenohjauksia
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // palauta data, ei tulosta
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false); // testaa ilman SSL-tarkistusta
     //curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
     $json_response = curl_exec($curl);
     if ($json_response === false) {
