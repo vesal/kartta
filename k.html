@@ -2981,11 +2981,14 @@ function forcePathToRouteName(routename) {
   // "a/2" => "$email/a/2.txt" tai "!sm25/a/2.txt" jos log = "!sm25
   // "!a/2" => "!a/2.txt" aina
   // "/2" => "$email/2.txt" aina
+  // "$email/2" => "$email/2.txt" aina
   if ( !routename ) routename = "r";
   let path = "";
-  if (!routename.startsWith("!")) {
+  if (!routename.startsWith("!") && !routename.startsWith(options.email + "/")) {
     let ind = routename.lastIndexOf("/");
-    path = document.getElementById('editLog').value.trim() + "/";
+    if (ind !== 0) { // ei pakoteta omaan polkuun
+      path = document.getElementById('editLog').value.trim() + "/";
+    }
     if (!path.startsWith("!")) path = options.email + "/";
   }
   let ext = '.txt'
@@ -3197,8 +3200,8 @@ function handleURLRoute(froute) {
     if ( !urlTrack ) continue;
     let ext = "txt";
     const ind = urlTrack.lastIndexOf("/");
-    if ( ind >= 0 ) lastpath = urlTrack.substr(0, ind);
-    if ( urlTrack.substr(ind+1) === "*" ) continue;
+    if ( ind >= 0 ) lastpath = urlTrack.slice(0, ind);
+    if ( urlTrack.slice(ind+1) === "*" ) continue;
     let url = urlTrack;
     let name = getName(urlTrack);
     if (urlTrack.indexOf("txt") < 0) {
@@ -3777,7 +3780,7 @@ li.ui-menu-item {
   <label class="closebtn" onclick="toggleDiv('loadTrack')">&times;</label>
   <div class="popupIn">
 
-  <h2>Track-tiedoston hakeminen</h2>
+  <h2>Track-tiedoston hakeminen <a class="help" href="#loadtrack"></a></h2>
   <p>Track tiedosto voidaan hakea joko laitteelta tai netistä
     (esim <a href="https://www.xcontest.org/finland/lennot/paivan-tulokset/" target="_blank">XContest</a>:
     avaa lennon tiedot ja raahaa tai kopioi .igc tiedoston osoite)</p>
@@ -3790,7 +3793,7 @@ li.ui-menu-item {
   </div>
   <hr />
   <div>
-    <p>Tiedoston hakeminen netistä.  Kirjoita tai raahaa alle IGC-tiedoston URL-osoite:</p>
+    <p>Tiedoston hakeminen netistä.  Kirjoita tai raahaa alle IGC-tiedoston URL-osoite: <a class="help" href="#loadtrack"></a></p>
    	<textarea  name="editURLTrack" id="editURLTrack" cols="60" onkeyup="AutoGrowTextArea(this)"  ></textarea>
 	  <button type="button" onclick="handleURLTrack()" >Lataa track</button>
   </div>
@@ -3804,7 +3807,7 @@ li.ui-menu-item {
 <div class="popup" id="loadRoute" style=" ">
   <label class="closebtn" onclick="toggleDiv('loadRoute')">&times;</label>
   <div class="popupIn">
-  <h2>Reittitiedoston hakeminen</h2>
+  <h2>Reittitiedoston hakeminen <a class="help" href="#loadroute"></a></h2>
   <p>Reittitiedosto voidaan hakea joko laitteelta tai netistä.  Reittitiedoston tulee olla Riippuliito-ohjelman
   syntaksin mukainen.</p>
   <p>Värilista: <input name="editRouteColors" id="editRouteColors" size="50" value="blue,red,brown,orange,green,black"></p>
@@ -3816,7 +3819,7 @@ li.ui-menu-item {
   </div>
   <hr />
   <div>
-    <p>Tiedoston hakeminen netistä.  Kirjoita tai raahaa alle reitin .txt-tiedoston URL-osoite:</p>
+    <p>Tiedoston hakeminen netistä.  Kirjoita tai raahaa alle reitin .txt-tiedoston URL-osoite: <a class="help" href="#loadroute"></a></p>
    	<textarea  name="editURLRoute" id="editURLRoute" cols="60" onkeyup="AutoGrowTextArea(this)"  ></textarea>
    	<!-- <input type="text" name="editURLRoute" id="editURLRoute" value="" size="35"  /> -->
 	  <button type="button" onclick="handleURLRoute()" >Lataa reitti</button>
@@ -3915,7 +3918,7 @@ li.ui-menu-item {
 <div id="routeDiv" class="dragable">
     <label class="closebtn" style="top: -10px" onclick="closeDiv('routeDiv');">&times;</label>
     <div id="routeDivHanlde" class="move" >
-      &nbsp;Reitin muokkaus
+      &nbsp;Reitin muokkaus <a class="help" href="#routeplan"></a>
     </div>
     <div id="routeDivIn">
       <div id="editRouteButtons">

@@ -4,6 +4,9 @@ error_reporting(E_ALL | E_STRICT);
 ini_set("display_errors", "1");
 $json = '{"application" : "87ccf9c7-93a6-428a-8515-2bdddfded0a2", "language" : "fi" }';
 //print "$json\n";
+if (php_sapi_name() == "cli") {
+    parse_str($argv[1], $_GET);
+}
 $u=$_GET['u'];
 $ret = http_get($u);
 //$ret = http_get("https://www.mit.jyu.fi/demowww/cyclo/k.html");
