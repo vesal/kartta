@@ -505,8 +505,8 @@ function saveRoute($email,$routename,$file) {
   $dir = dirname($routename);
   $check = $dir;
 
-  if (strpos($dir, $emPrefix) === 0) {
-    $check = substr($dir, strlen($emPrefix));
+  if (strpos($dir, $em) === 0) {
+    $check = substr($dir, strlen($em));
   }
 
   if (preg_match('/[^!a-zA-Z0-9_\-\/]/', $check) || strpos($check, '.') !== false) {
