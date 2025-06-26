@@ -497,12 +497,19 @@ function saveRoute($email,$routename,$file) {
 // saves route tuo ! directory or to users directory
   $file = str_replace("\\", "", $file);
   $em = purifyEmail($email);
-  if (!startsWith($routename,"!") && !startsWith($routename,"$em/") ) {
+  $emPrefix = "$em/";
+  if (!startsWith($routename,"!") && !startsWith($routename,"$emPrefix") ) {
     error("No right to save: $routename $email");
   }
   if (strrpos($routename,".txt") === false ) error("Only .txt can be saved: $routename");
   $dir = dirname($routename);
-  if (preg_match('/[^!a-zA-Z0-9_\-\/]/', $dir) || strpos($dir, '.') !== false) {
+  $check = $dir;
+
+  if (strpos($dir, $emPrefix) === 0) {
+    $check = substr($dir, strlen($emPrefix));
+  }
+
+  if (preg_match('/[^!a-zA-Z0-9_\-\/]/', $check) || strpos($check, '.') !== false) {
       error("Invalid directory name: $dir");
   }
   if (!is_dir($dir)) {
