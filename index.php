@@ -491,17 +491,6 @@ function saveData($email,$logname,$data) {
   ok("");
 }
 
-// =============================================================================================
-function purifyEmail($email) {
-  $i = strpos($email, "+");
-  if (!$i) return $email;
-  $p = strpos($email, "@");
-  if ($p < $i)
-    return substr($email, 0, $i);
-  else
-    return substr($email, 0, $i) . substr($email, $p);
-}
-
 
 // =============================================================================================
 function saveRoute($email,$routename,$file) {
