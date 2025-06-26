@@ -495,8 +495,8 @@ function saveData($email,$logname,$data) {
 function saveRoute($email,$routename,$file) {
 // saves route tuo ! directory or to users directory
   $file = str_replace("\\", "", $file);
-  if (!startsWith($routename,"!") && !startsWith($routename,$email."/") ) {
-    error("No right to save: $routename");
+  if (!startsWith($routename,"!") && !startsWith($routename,"$email/") ) {
+    error("No right to save: $routename $email");
   }
   if (strrpos($routename,".txt") === false ) error("Only .txt can be saved: $routename");
   if ( !writefile("$routename","$file") ) error("Could be not write $routename");

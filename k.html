@@ -2977,6 +2977,7 @@ function forcePathToRouteName(routename) {
   let path = document.getElementById('editLog').value.trim() + "/";
   if ( ind >= 0 ) path = "";
   let ext = '.txt'
+  if (path === "/") path = options.email + "/";
   if ( routename.indexOf(ext) >= 0 ) ext = "";
   return path + routename + ext;
 }
@@ -2986,7 +2987,6 @@ function saveRoute() {
   const tx = t.value.trim();
   let name = document.getElementById('editRouteName').value.trim();
   name = forcePathToRouteName(name);
-  if (name.startsWith("/")) name = name.substr(1); // remove leading slash
   // noinspection JSUnusedLocalSymbols
   sendCyclo({saveRoute: name, file: tx}, function (data, extra) {
     setError(data);
