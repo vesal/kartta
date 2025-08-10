@@ -217,7 +217,8 @@ function getElevation($coords) {
       print 'Failed to fetch elevation data';
       exit;
   }
-  // print $result;
+  print $result;
+  /*
   // $json = file_get_contents($url);
 
   if ($result === false) {
@@ -233,6 +234,7 @@ function getElevation($coords) {
   } else {
       echo json_encode(['error' => 'No elevation found']);
   }
+  */
   exit;
 }
 
