@@ -199,7 +199,7 @@ function set_status_header($code) {
 function getElevation($coords) {
   // gets altitude from the alt coordinate
   // Valitse API ja datasetti
-  $url = 'https://api.opentopodata.org/v1/aster30m?locations=' . urlencode($coords);
+  $url = 'https://api.opentopodata.org/v1/mapzen?locations=' . urlencode($coords);
   // Tee pyyntö OpenTopoDataan
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $url);
