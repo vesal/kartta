@@ -68,6 +68,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
+    "ts.external.directory.path": "C:\\devel\\PyCharm\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -172,7 +173,7 @@
       <workItem from="1754828440037" duration="112000" />
       <workItem from="1754828569133" duration="7230000" />
       <workItem from="1754835919103" duration="350000" />
-      <workItem from="1754836285386" duration="9626000" />
+      <workItem from="1754836285386" duration="10457000" />
     </task>
     <servers />
   </component>
