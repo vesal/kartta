@@ -337,14 +337,14 @@ map.on('click', async (e) => {
   }
 
   // Hae korkeus OpenTopoDatasta
-  const url = `https://api.opentopodata.org/v1/test-dataset?locations=${lat},${lng}`;
+  const url = `https://www.mit.jyu.fi/demowww/cyclo/index.php?elev=${lat},${lng}`;
 
   try {
     const response = await fetch(url);
     const data = await response.json();
 
-    if (data.results && data.results.length > 0) {
-      const elevation = data.results[0].elevation;
+    if (data) {
+      const elevation = data;
       console.log("Korkeus:", elevation);
 
       // Päivitä pinin teksti näyttämään korkeus (pyöristetty)
