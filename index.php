@@ -200,12 +200,6 @@ function getElevation($coords) {
   // gets altitude from the alt coordinate
   // Valitse API ja datasetti
   $url = 'https://api.opentopodata.org/v1/test-dataset?locations=' . urlencode($coords);
-  print "$url\n";
-  print $coords . "\n";
-  exit;
-}
-
-/*
   // Tee pyyntö OpenTopoDataan
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $url);
@@ -215,17 +209,19 @@ function getElevation($coords) {
   $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
   curl_close($ch);
 
-  header('Content-Type: application/json');
+  // header('Content-Type: application/json');
   // http_response_code($httpcode);
+  /*
   if ($httpcode !== 200) {
       set_status_header(400);
       print json_encode(['error' => 'Failed to fetch elevation data']);
       exit;
   }
+  */
   print $result;
   exit;
 }
-*/
+
 
 // =============================================================================================
 function uparam($name) {
