@@ -201,6 +201,7 @@ function getElevation($coords) {
   // Valitse API ja datasetti
   $url = 'https://api.opentopodata.org/v1/test-dataset?locations=' . urlencode($coords);
   // Tee pyyntö OpenTopoDataan
+  /*
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $url);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -211,14 +212,29 @@ function getElevation($coords) {
 
   // header('Content-Type: application/json');
   // http_response_code($httpcode);
-  /*
+
   if ($httpcode !== 200) {
       set_status_header(400);
       print json_encode(['error' => 'Failed to fetch elevation data']);
       exit;
   }
-  */
   print $result;
+  */
+  $json = file_get_contents($url);
+
+  if ($json === false) {
+      echo json_encode(['error' => 'API request failed']);
+      exit;
+  }
+
+  $data = json_decode($json, true);
+
+  // Oletetaan että data on kunnollinen
+  if (isset($data['results'][0]['elevation'])) {
+      echo $data['results'][0]['elevation'];
+  } else {
+      echo json_encode(['error' => 'No elevation found']);
+  }
   exit;
 }
 
