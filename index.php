@@ -217,7 +217,7 @@ function getElevation($coords) {
       print 'Failed to fetch elevation data';
       exit;
   }
-  print $result;
+  // print $result;
   if (preg_match('/"elevation":\s*([\d\.]+)/', $result, $matches)) {
     echo $matches[1]; // Tämä on elevation-arvo
   } else {
