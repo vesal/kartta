@@ -312,23 +312,37 @@ function createPin(coord, label, color, text = null) {
 };
 
 
-// Sitten lisätään kartalle markkeri, joka seuraa käyttäjän sijaintia
+// Ensimmäinen sijainnin hakukutsu, tarkalla sijainnilla
 navigator.geolocation.getCurrentPosition(function(position) {
   const lat = position.coords.latitude;
   const lng = position.coords.longitude;
 
   myPin = createPin([lat, lng], 'I', 'green', "Olet tässä");
 
-  // Voit halutessasi siirtää kartan tähän kohtaan
+  // Siirretään kartta käyttäjän sijaintiin
   map.setView([lat, lng]);
 }, function(err) {
   console.error("Sijainnin haku epäonnistui:", err);
+}, {
+  enableHighAccuracy: true,
+  timeout: 10000,
+  maximumAge: 0
 });
 
-navigator.geolocation.watchPosition(async (pos) => {
+// Seurataan sijainnin muutoksia
+navigator.geolocation.watchPosition(function(pos) {
   const lat = pos.coords.latitude;
   const lng = pos.coords.longitude;
-  myPin.setLatLng([lat, lng]);
+
+  if (myPin) {
+    myPin.setLatLng([lat, lng]);
+  }
+}, function(err) {
+  console.error("Sijainnin päivitys epäonnistui:", err);
+}, {
+  enableHighAccuracy: true,
+  timeout: 10000,
+  maximumAge: 0
 });
 
 
