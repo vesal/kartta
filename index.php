@@ -145,7 +145,7 @@ $returl=udparam("returl");       // url to write to id-email
 
 date_default_timezone_set('UTC');
 
-// if ( $elev != null ) getElevation($elev);
+if ( $elev != null ) getElevation($elev);
 if ( $source != null ) printSource();
 if ( $getRoute != null && strpos($getRoute, '!') === 0 ) getRoute($email,$getRoute);
 if ( empty($email) ) error("Must use email");
@@ -194,12 +194,18 @@ function set_status_header($code) {
         header("HTTP/1.1 $code " . $status[$code]);
     }
 }
+*/
 
 function getElevation($coords) {
   // gets altitude from the alt coordinate
   // Valitse API ja datasetti
   $url = 'https://api.opentopodata.org/v1/test-dataset?locations=' . urlencode($coords);
+  print "$url\n";
+  print $coords . "\n";
+  exit;
+}
 
+/*
   // Tee pyyntö OpenTopoDataan
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $url);
