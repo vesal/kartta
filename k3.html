@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<!--suppress TypeScriptUMDGlobal, HttpUrlsUsage -->
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Leaflet Tilemap Esimerkki</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <style>
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      position: relative;
+    }
+    #mapModeSelect {
+      position: absolute;
+      top: 10px;
+      left: 30px;
+      z-index: 1000;
+      background: white;
+      padding: 5px;
+      border-radius: 3px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+<!--suppress HtmlFormInputWithoutLabel -->
+<select id="mapModeSelect"></select>
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<!-- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> -->
+<script src="js/leaflet.js"></script>
+<script>
+
+ // Simulation of C# string.Format, only {n} works.
+ if (!String.format) {
+  String.format = function(format) {
+    const args = Array.prototype.slice.call(arguments, 1);
+    return format.replace(/{(\d+)}/g, function(match, number) {
+      return typeof args[number] != 'undefined'
+        ? args[number]
+        : match
+      ;
+    });
+  };
+}
+
+class CustomTileLayer extends L.GridLayer {
+  constructor(options) {
+    super(options);
+  }
+
+  createTile(coords, done) {
+    const tile = document.createElement('img');
+    tile.alt = '';
+    tile.setAttribute('role', 'presentation');
+
+    // Käytetään sun omaa URL-funktiota
+    const tileInfo = {
+      zoom: coords.z,
+      x: coords.x,
+      y: coords.y
+    };
+    tile.src = mapMode.f(tileInfo);
+
+    // Kun kuva latautuu tai epäonnistuu, kerrotaan Leafletille
+    tile.onload = () => done(null, tile);
+    tile.onerror = () => done(new Error('Tile load error'), tile);
+
+    return tile;
+  }
+}
+
+const belectro = {
+  link: "https://tanger.belectro.fi/tiles/mmltopo/v9/256/{0}/{2}/{1}?ref=7f2d",
+  ok: false,
+  init: function () {
+    if (this.ok) return;
+    this.ok = true;
+    $.ajax({
+      url: "https://www.mit.jyu.fi/demowww/cyclo/bbark.php",
+      success: function (data) {
+        const bbarkObj = JSON.parse(data);
+        // noinspection JSUnresolvedReference
+        let url = bbarkObj.base_map_groups[0].maps[0].url;
+        url = url.replace("{W}", "256");
+        url = url.replace("{Z}", "{0}");
+        url = url.replace("{Y}", "{2}");
+        url = url.replace("{X}", "{1}");
+        belectro.link = url;
+      },
+      async: false
+    })
+  }
+};
+
+ // noinspection CheckImageSize
+const mapModes = {
+  "Bing Maps normal"   : { f:function(tile) {
+	                            return String.format("http://ecn.t1.tiles.virtualearth.net/tiles/r{0}?g=1135",TileXYToQuadKey(tile));
+							}, c:""},
+	"Bing Maps aerial"   : { f:function(tile) {
+	                            return String.format("https://ecn.t1.tiles.virtualearth.net/tiles/h{0}?g=1135",TileXYToQuadKey(tile));
+							}, c:""},
+	"Google street"      : { f:function(tile) { return String.format("https://mt1.google.com/vt/lyrs=m&z={0}&x={1}&y={2}",tile.zoom ,tile.x, tile.y ); },
+	                         c:'(c) <a href="http://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>'},
+	"Google satellite"   : { f:function(tile) { return String.format("https://mt1.google.com/vt/lyrs=y&z={0}&x={1}&y={2}",tile.zoom ,tile.x, tile.y ); },
+	                         c:'(c) <a href="http://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>'},
+//  "Google Street"      : { f:function(tile) { tile = nokiaConvert(tile); return String.format("https://maps.googleapis.com/maps/api/staticmap?center={1},{2}&zoom={0}&size=256x256&key=AIzaSyCpXjAoV19MUbpGd6e6YD9IketR2Gu-tqc",tile.zoom ,tile.x, tile.y); }, c:""},
+//  "Google satellite"   : { f:function(tile) { tile = nokiaConvert(tile); return String.format("https://maps.googleapis.com/maps/api/staticmap?center={1},{2}&zoom={0}&size=256x256&key=AIzaSyCpXjAoV19MUbpGd6e6YD9IketR2Gu-tqc&maptype=hybrid",tile.zoom ,tile.x, tile.y); }, c:""},
+//    "Nokia"              : { f:function(tile) { tile = nokiaConvert(tile); return String.format("http://m.nok.it/?app_id=_peU-uCkp-j8ovkzFGNU&app_code=gBoUkAMoxoqIWfxWA5DuMQ&h=256&w=256&ctr={1},{2}&z={0}&t=0&nord",tile.zoom ,tile.x, tile.y); }, c:""},
+//	"MapQuest"           : { f:function(tile) { return String.format("http://otile1.mqcdn.com/tiles/1.0.0/map/{0}/{1}/{2}.png",Clip(tile.zoom,0,19) ,tile.x, tile.y); },
+//	                         c:'(c) <a href="http://info.mapquest.com/terms-of-use/" target="_blank">MapQuest</a>'},
+	"OpenStreet"         : { f:function(tile) { return String.format("https://tile.openstreetmap.org/{0}/{1}/{2}.png",tile.zoom,tile.x,tile.y); },
+	                         c:'(c) <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'},
+	"OpenCycle"          : //{ f:function(tile) { return String.format("http://a.tile.opencyclemap.org/cycle/{0}/{1}/{2}.png",tile.zoom ,tile.x, tile.y ); },
+	                         { f:function(tile) { return String.format("https://tile.thunderforest.com/cycle/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
+	                         c:'(c) <a href="http://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	"Landscape"          : { f:function(tile) { return String.format("https://tile.thunderforest.com/landscape/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
+	                         c:'(c) <a href="http://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	"Transport"          : { f:function(tile) { return String.format("https://tile.thunderforest.com/transport/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
+	                         c:'(c) <a href="http://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	"Outdoors"           : { f:function(tile) { return String.format("https://tile.thunderforest.com/outdoors/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
+	                         c:'(c) <a href="http://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	/* Ei voi käyttää, koska ei ole enää saatavilla WGS84, vaan vain EPSG:3067
+  "Kapsi peruskartta"  : { f:function(tile) { return getKapsiTilePath(tile); },
+	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+	"Kapsi Tausta"       : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/taustakartta_3067/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
+	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+	"Kapsi Ilma"         : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/ortokuva_3067/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
+	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'
+
+                             },
+https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/default/WGS84_Pseudo-Mercator/18/72651/149809.png?api-key=
+https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/12/1116/2297.png?api-key=
+	 */
+  "MML maasto"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/maastokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
+	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+  "MML tausta"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
+	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+  "MML selko"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/selkokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
+	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+  "MML ilma"           : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
+	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+	"b-bark SuomiTopo"   : { f:function(tile) {
+                            return String.format(belectro.link, tile.zoom, tile.x, tile.y);
+						               },
+	                         c:'<span>Render:</span> <a href="https://www.b-bark.com" target="_blank"><img style="vertical-align:middle" src="css/b_bark_logo.png" width="20%" height="20%"  alt=""/></a><br />(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a><br />',
+                             i: belectro.init },
+  "World Topo Map":      {f: function(tile) {
+                            return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{0}/{2}/{1}", tile.zoom, tile.x, tile.y);
+                          },
+                          c: '(c) <a href="https://www.esri.com/" target="_blank">Esri</a>'
+                          },
+  "World Imagery"      : { f:function(tile) { return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{0}/{2}/{1}",tile.zoom ,tile.x, tile.y);},
+	                         c:'(c) <a href="http://www.esri.com/~/media/Files/Pdfs/legal/pdfs/e204_e300.pdf" target="_blank">ArgGIS</a>'},
+	"Ilmailu merged"      : { f:function(tile) {
+                              const airac = "1806";
+                              return String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/merged/256/latest/{0}/{1}/{2}.png', tile.zoom, tile.x, tile.y);
+                              },
+	                         c:'(c) <a href="https://openflightmaps.org/live/ef-finland/" target="_blank">openflightmaps.org</a>'},
+	"Ilmailu aero"      : { f:function(tile) {
+	                             const airac = "1806";
+	                             return String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/aero/256/latest/{0}/{1}/{2}.png',tile.zoom ,tile.x, tile.y);
+	                             },
+	                         c:'(c) <a href="https://openflightmaps.org/live/ef-finland/" target="_blank">openflightmaps.org</a>'},
+/*
+	"Ilmailu base"      : { f:function(tile) {
+	                             var airac = "1806";
+	                             var url = String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/base/256/latest/{0}/{1}/{2}.png',tile.zoom ,tile.x, tile.y);
+	                             return url},
+	                         c:'(c) <a href="https://openflightmaps.org/live/ef-finland/" target="_blank">openflightmaps.org</a>'},
+*/
+};
+
+  // Luodaan kartta ja asetetaan näkymä Helsingin kohdalle
+  const map = L.map('map', { zoomControl: false }).setView([60.1699, 24.9384], 13);
+  L.control.zoom({ position: 'topright' }).addTo(map);
+
+  // Luo layer-muuttuja, johon asetetaan nykyinen karttalaatta
+  let currentLayer;
+
+  // let mapMode = mapModes["OpenStreet"];
+  let mapMode = mapModes["b-bark SuomiTopo"];
+
+  // Lisätään kartta-laatat
+  /*
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+    maxZoom: 19
+  }).addTo(map);
+  */
+
+
+  // Aluksi luodaan ja lisätään ensimmäinen layer
+  function setMapMode(modeKey) {
+    mapMode = mapModes[modeKey];
+    if (currentLayer) {
+      map.removeLayer(currentLayer);
+    }
+    // Ota oma karttataso käyttöön
+    currentLayer = new CustomTileLayer({ attribution: mapMode.c });
+    currentLayer.addTo(map);
+
+    // Päivitä attribution-kenttä Leafletin oikeaan alakulmaan
+    map.attributionControl.setPrefix(false);
+    // map.attributionControl.setAttribution(mapMode.c);
+  }
+
+   // Täytetään select-valikko
+  const mapSelect = document.getElementById('mapModeSelect');
+  for (const key in mapModes) {
+    const option = document.createElement('option');
+    option.value = key;
+    option.textContent = key;
+    mapSelect.appendChild(option);
+  }
+
+  // Alustetaan valinta ja kartta
+  mapSelect.value = "OpenStreet";
+  setMapMode(mapSelect.value);
+
+   // Kuunnellaan valikon muutosta
+  mapSelect.addEventListener('change', (e) => {
+    setMapMode(e.target.value);
+  });
+
+
+/*
+  // Lisätään markkeri
+  L.marker([60.1699, 24.9384])
+    .addTo(map)
+    .bindPopup('<b>Tässä on Helsinki</b><br>Moikka!')
+    .openPopup();
+*/
+
+
+function customPin(label = 'I', color = 'green', baseColor = 'black') {
+  const svg = `
+    <svg width="32" height="48" viewBox="0 0 32 48" xmlns="http://www.w3.org/2000/svg">
+      <!-- Kolmion muotoinen jalka -->
+      <path d="M 3 16 L 16 48 L 29 16 Z" fill="${baseColor}" />
+      <!-- Eri värinen valinta-alue -->
+      <path id="pin-foot" d="M 4 15 L 16 47 L 28 15 Z" fill="red" style="visibility:hidden;" />
+      <!-- Iso musta ympyrä -->
+      <circle cx="16" cy="16" r="16" fill="${baseColor}" />
+      <!-- Sisempi värillinen ympyrä -->
+      <circle cx="16" cy="16" r="14" fill="${color}" />
+      <!-- Valkoinen teksti keskellä -->
+      <text x="16" y="16" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="white" dominant-baseline="middle">
+        ${label}
+      </text>
+    </svg>
+  `;
+
+  return L.divIcon({
+    className: '',
+    html: svg,
+    iconSize: [32, 48],
+    iconAnchor: [16, 48], // kärki osoittaa koordinaattiin
+    popupAnchor: [0, -48]
+  });
+}
+
+let lastSelected = null;
+let myPin = null;
+let hitPin = null;
+
+function selectPin(pin, selected) {
+  const element = pin.getElement();
+  const svg = element.querySelector('svg');
+  const foot = svg.querySelector('#pin-foot');
+  if (foot) {
+    foot.style.visibility = selected ? 'visible' : 'hidden';
+  }
+}
+
+function changeSelected(pin, selected=true) {
+  if (lastSelected === pin) { // Jos sama pin on jo valittu, poistetaan valinta
+    selectPin(pin, false);
+    lastSelected = null;
+    return;
+  }
+
+  if (lastSelected) {
+    selectPin(lastSelected, false);
+  }
+  lastSelected = pin;
+  if (pin)  {
+    selectPin(pin, selected);
+  }
+}
+
+function createPin(coord, label, color, text = null) {
+  const pin = L.marker(coord, {icon: customPin(label, color)});
+  pin.addTo(map);
+  if (text) {
+    pin.bindPopup(text);
+  }
+  pin.on('click', function() {
+    changeSelected(pin);
+  });
+  return pin;
+};
+
+
+// Sitten lisätään kartalle markkeri, joka seuraa käyttäjän sijaintia
+navigator.geolocation.getCurrentPosition(function(position) {
+  const lat = position.coords.latitude;
+  const lng = position.coords.longitude;
+
+  myPin = createPin([lat, lng], 'I', 'green', "Olet tässä");
+
+  // Voit halutessasi siirtää kartan tähän kohtaan
+  map.setView([lat, lng]);
+}, function(err) {
+  console.error("Sijainnin haku epäonnistui:", err);
+});
+
+
+map.on('click', async (e) => {
+  const { lat, lng } = e.latlng;
+  if (!hitPin) {
+    // Luo hitPin ensimmäisellä klikkauksella
+    hitPin = createPin([lat, lng], 'H', 'red');
+  } else {
+    // Siirrä olemassa olevaa hitPiniä uuteen paikkaan
+    hitPin.setLatLng([lat, lng]);
+  }
+
+  // Hae korkeus OpenTopoDatasta
+  const url = `https://api.opentopodata.org/v1/test-dataset?locations=${lat},${lng}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.results && data.results.length > 0) {
+      const elevation = data.results[0].elevation;
+      console.log("Korkeus:", elevation);
+
+      // Päivitä pinin teksti näyttämään korkeus (pyöristetty)
+      // hitPin.setIcon(customPin(`${Math.round(elevation)}m`, 'red', 'black'));
+    }
+  } catch (err) {
+    console.error("Korkeuden haku epäonnistui:", err);
+  }
+});
+
+
+</script>
+
+</body>
+</html>

@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="" />
+    <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/kartta.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/kartta.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.php" beforeDir="false" afterPath="$PROJECT_DIR$/index.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/k.html" beforeDir="false" afterPath="$PROJECT_DIR$/k.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -13,38 +20,58 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="Python Script" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;vesal&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/vesal/kartta.git&quot;,
+    &quot;accountId&quot;: &quot;8ac9df9f-c9fc-41cb-be0b-fb207e1787e5&quot;
+  }
+}</component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 4
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 4
+}</component>
   <component name="ProjectId" id="1f2Ifyc2NPs6Tv5p0elvvTk2EL6" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
     "JavaScript Debug.k.executor": "Debug",
     "JavaScript Debug.k.html.executor": "Debug",
+    "JavaScript Debug.k3.html.executor": "Debug",
     "Python.convertFlykKartta.executor": "Debug",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "E:/riippu/kartta",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "editing.templates",
+    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -53,7 +80,7 @@
       <recent name="E:\riippu\kartta\src" />
     </key>
   </component>
-  <component name="RunManager" selected="JavaScript Debug.k">
+  <component name="RunManager" selected="JavaScript Debug.k3.html">
     <configuration name="account.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/kartta/src/account.html">
       <method v="2" />
     </configuration>
@@ -61,6 +88,9 @@
       <method v="2" />
     </configuration>
     <configuration name="k" type="JavascriptDebugType" uri="https://localhost:8080/k.html">
+      <method v="2" />
+    </configuration>
+    <configuration name="k3.html" type="JavascriptDebugType" editBeforeRun="true" activateToolWindowBeforeRun="false" nameIsGenerated="true" uri="http://localhost:63342/kartta/k3.html" useFirstLineBreakpoints="true" useBuiltInWebServerPort="true">
       <method v="2" />
     </configuration>
     <configuration name="k.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:8080/kartta/k.html?lat=61.88961&amp;lon=25.94575&amp;zoom=15&amp;mapName=Google%20satellite&amp;route=!havu/81,!havu/82,!havu/83,!havu/8r34&amp;readGPS=false&amp;routeoptions=c:red,w:10">
@@ -96,6 +126,7 @@
     <list>
       <item itemvalue="JavaScript Debug.dr" />
       <item itemvalue="JavaScript Debug.k" />
+      <item itemvalue="JavaScript Debug.k3.html" />
       <item itemvalue="JavaScript Debug.k.html" />
       <item itemvalue="JavaScript Debug.s.html" />
       <item itemvalue="JavaScript Debug.account.html" />
@@ -140,7 +171,12 @@
       <workItem from="1597485963879" duration="12000" />
       <workItem from="1677061770185" duration="21545000" />
       <workItem from="1677946835873" duration="5754000" />
-      <workItem from="1750258780717" duration="134784000" />
+      <workItem from="1750258780717" duration="137623000" />
+      <workItem from="1754292478526" duration="10363000" />
+      <workItem from="1754828440037" duration="112000" />
+      <workItem from="1754828569133" duration="7230000" />
+      <workItem from="1754835919103" duration="350000" />
+      <workItem from="1754836285386" duration="3531000" />
     </task>
     <servers />
   </component>
@@ -150,10 +186,9 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/k.html</url>
-          <line>3119</line>
-          <properties lambdaOrdinal="-1" />
+          <line>3120</line>
           <option name="timeStamp" value="24" />
         </line-breakpoint>
       </breakpoints>
