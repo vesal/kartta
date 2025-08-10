@@ -126,7 +126,7 @@ $params = $_REQUEST;
 $request = "";  // implode("&",$params);
 
 // Collect params. Names starting by u is urlencoded and needs to be decoded by %40 => @ before usage
-$alt=param("alt");              // coord for alt we are interested in, like 62.2996956,25.7324266
+$elev=param("elev");            // coord for alt we are interested in, like 62.2996956,25.7324266
 $source=uparam("source");       // ask for source
 $email=atreplace(uparam("e"));  // email address e=vesal@jyu.fi
 $id=uparam("id");               // users id=123456790
@@ -145,7 +145,7 @@ $returl=udparam("returl");       // url to write to id-email
 
 date_default_timezone_set('UTC');
 
-if ( $alt != null ) getAlt($alt);
+if ( $elev != null ) getElevation($elev);
 if ( $source != null ) printSource();
 if ( $getRoute != null && strpos($getRoute, '!') === 0 ) getRoute($email,$getRoute);
 if ( empty($email) ) error("Must use email");
@@ -182,8 +182,19 @@ function param($name) {
    return $p;
 }
 
+function set_status_header($code) {
+    $status = [
+        200 => 'OK',
+        400 => 'Bad Request',
+        404 => 'Not Found',
+        500 => 'Internal Server Error'
+    ];
+    if (isset($status[$code])) {
+        header("HTTP/1.1 $code " . $status[$code]);
+    }
+}
 
-function getAlt($coords) {
+function getElevation($coords) {
   // gets altitude from the alt coordinate
   // Valitse API ja datasetti
   $url = 'https://api.opentopodata.org/v1/test-dataset?locations=' . urlencode($coords);
@@ -198,8 +209,13 @@ function getAlt($coords) {
   curl_close($ch);
 
   header('Content-Type: application/json');
-  http_response_code($httpcode);
-  echo $result;
+  // http_response_code($httpcode);
+  if ($httpcode !== 200) {
+      set_status_header(400);
+      print json_encode(['error' => 'Failed to fetch elevation data']);
+      exit;
+  }
+  print $result;
   exit;
 }
 
