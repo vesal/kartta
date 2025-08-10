@@ -9,6 +9,7 @@
     <orderEntry type="library" name="jquery-latest" level="application" />
     <orderEntry type="library" name="jquery.ui.touch-punch" level="application" />
     <orderEntry type="library" name="jquery-ui" level="application" />
+    <orderEntry type="library" name="leaflet" level="application" />
   </component>
   <component name="TestRunnerService">
     <option name="PROJECT_TEST_RUNNER" value="Unittests" />
