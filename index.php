@@ -145,7 +145,7 @@ $returl=udparam("returl");       // url to write to id-email
 
 date_default_timezone_set('UTC');
 
-if ( $elev != null ) getElevation($elev);
+// if ( $elev != null ) getElevation($elev);
 if ( $source != null ) printSource();
 if ( $getRoute != null && strpos($getRoute, '!') === 0 ) getRoute($email,$getRoute);
 if ( empty($email) ) error("Must use email");
@@ -182,6 +182,7 @@ function param($name) {
    return $p;
 }
 
+/*
 function set_status_header($code) {
     $status = [
         200 => 'OK',
@@ -218,7 +219,7 @@ function getElevation($coords) {
   print $result;
   exit;
 }
-
+*/
 
 // =============================================================================================
 function uparam($name) {
