@@ -325,7 +325,11 @@ navigator.geolocation.getCurrentPosition(function(position) {
   console.error("Sijainnin haku epäonnistui:", err);
 });
 
-
+navigator.geolocation.watchPosition(async (pos) => {
+  const lat = pos.coords.latitude;
+  const lng = pos.coords.longitude;
+  myPin.setLatLng([lat, lng]);
+});
 
 
 map.on('click', async (e) => {
