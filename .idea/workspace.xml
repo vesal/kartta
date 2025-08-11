@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="ANALYZE_INJECTED_CODE" value="false" />
+    <option name="SCOPE_TYPE" value="3" />
+  </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
@@ -52,6 +56,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "DefaultHtmlFileTemplate": "HTML File",
+    "JavaScript Debug.dr.executor": "Debug",
     "JavaScript Debug.k.executor": "Debug",
     "JavaScript Debug.k.html.executor": "Debug",
     "JavaScript Debug.k3.html.executor": "Debug",
@@ -67,6 +72,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "pProject Default",
     "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
     "ts.external.directory.path": "C:\\devel\\PyCharm\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
@@ -84,13 +90,13 @@
     <configuration name="dr" type="JavascriptDebugType" uri="http://localhost:63342/kartta/src/dr.html">
       <method v="2" />
     </configuration>
-    <configuration name="k" type="JavascriptDebugType" uri="https://localhost:8080/k.html">
+    <configuration name="k" type="JavascriptDebugType" uri="http://localhost:8080/k.html">
       <method v="2" />
     </configuration>
-    <configuration name="k3.html" type="JavascriptDebugType" editBeforeRun="true" activateToolWindowBeforeRun="false" nameIsGenerated="true" uri="http://localhost:63342/kartta/k3.html" useFirstLineBreakpoints="true" useBuiltInWebServerPort="true">
+    <configuration name="k3.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:8080/k3.html">
       <method v="2" />
     </configuration>
-    <configuration name="k.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:8080/kartta/k.html?lat=61.88961&amp;lon=25.94575&amp;zoom=15&amp;mapName=Google%20satellite&amp;route=!havu/81,!havu/82,!havu/83,!havu/8r34&amp;readGPS=false&amp;routeoptions=c:red,w:10">
+    <configuration name="k.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:8080/k.html?lat=61.88961&amp;lon=25.94575&amp;zoom=15&amp;mapName=Google%20satellite&amp;route=!havu/81,!havu/82,!havu/83,!havu/8r34&amp;readGPS=false&amp;routeoptions=c:red,w:10">
       <method v="2" />
     </configuration>
     <configuration name="s.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/kartta/src/s.html">
@@ -131,8 +137,9 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.convertFlykKartta" />
+        <item itemvalue="JavaScript Debug.k3.html" />
         <item itemvalue="JavaScript Debug.k.html" />
+        <item itemvalue="Python.convertFlykKartta" />
         <item itemvalue="JavaScript Debug.account.html" />
         <item itemvalue="JavaScript Debug.s.html" />
       </list>
@@ -173,7 +180,9 @@
       <workItem from="1754828440037" duration="112000" />
       <workItem from="1754828569133" duration="7230000" />
       <workItem from="1754835919103" duration="350000" />
-      <workItem from="1754836285386" duration="10457000" />
+      <workItem from="1754836285386" duration="11554000" />
+      <workItem from="1754904718618" duration="251000" />
+      <workItem from="1754904988042" duration="19877000" />
     </task>
     <servers />
   </component>
@@ -187,6 +196,12 @@
           <url>file://$PROJECT_DIR$/k.html</url>
           <line>3120</line>
           <option name="timeStamp" value="24" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/k.html</url>
+          <line>571</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="37" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<!--suppress TypeScriptUMDGlobal, HttpUrlsUsage -->
+<!--suppress ALL -->
 <html lang="fi">
 <head>
   <meta charset="UTF-8" />
-  <title>Leaflet Tilemap Esimerkki</title>
+  <title>Kartta 2</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
@@ -17,28 +18,233 @@
     }
     #map {
       position: relative;
+      cursor: default;
     }
     #mapModeSelect {
-      position: absolute;
-      top: 10px;
-      left: 30px;
+      /* position: absolute;
+      top: 0px;
+      left: 35px;
+
+       */
       z-index: 1000;
       background: white;
-      padding: 5px;
+      padding: 0px;
       border-radius: 3px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      /* box-shadow: 0 0 5px rgba(0,0,0,0.3); */
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 1.0em;
+    }
+    #distance {
+      background-color: white;
+      align-self: baseline;
+    }
+    .closebtn {
+        z-index: 1000;
+        position: absolute;
+        top: 0;
+        width: 20px;
+        right: 5px;
+        font-size: 36px;
+        /*margin-left: 50px; */
+    }
+
+    .layout-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .ui-layout-north {
+      /* height: 30px; */
+      background: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .ui-layout-center {
+      flex: 1;
+      position: relative;
+    }
+
+    .ui-widget {
+      display: flex;
+      /* align-items: center; */
+      gap: 5px; /* optional spacing */
+    }
+
+    .ui-full-width  {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      /* max-width: calc(100% - 40px); */
+    }
+
+    .hamburgerSpace {
+      margin-left: 35px;
+    }
+
+    .area1CBcopy {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      min-width: 40px;
     }
   </style>
 </head>
 <body>
-<!--suppress HtmlFormInputWithoutLabel -->
-<select id="mapModeSelect"></select>
-<div id="map"></div>
 
 <!-- Leaflet JS -->
 <!-- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> -->
 <script src="js/leaflet.js"></script>
 <script>
+const helpServerUrl = "https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta";
+function prefixHelpLinks() {
+    document.querySelectorAll('a.help').forEach(link => {
+        link.target = "help";
+        link.innerText = " ?";
+        const hash = link.getAttribute('href');
+        if (hash && hash.startsWith('#')) {
+            link.setAttribute('href',  helpServerUrl + hash);
+        }
+    });
+}
+
+
+ class MapWrapper {
+   // Luo layer-muuttuja, johon asetetaan nykyinen karttalaatta
+
+    constructor(containerId, mapmodes) {
+       this.currentLayer = null;
+
+      this.mapModes = mapmodes;
+      // this.mapMode = mapModes["OpenStreet"];
+      this.mapMode = this.mapModes["b-bark SuomiTopo"];
+      this.map = L.map('map', { zoomControl: false }).setView([60.1699, 24.9384], 13);
+      this.pins = [];
+      // L.control.zoom({ position: 'topright' }).addTo(map);
+    }
+
+   setView(coord, zoom=null) {
+     if (zoom === null) {
+       zoom = this.map.getZoom();
+     }
+     this.map.setView(coord, zoom);
+   }
+
+   addLayer(layer) {
+     this.map.addLayer(layer);
+   }
+
+   removeLayer(layer) {
+     this.map.removeLayer(layer);
+   }
+
+
+  static CustomTileLayer = class extends L.GridLayer {
+    constructor(options, outer) {
+      super(options);
+      this.outer = outer;
+    }
+
+    createTile(coords, done) {
+      const tile = document.createElement('img');
+      tile.alt = '';
+      tile.setAttribute('role', 'presentation');
+
+      // Käytetään sun omaa URL-funktiota
+      const tileInfo = {
+        zoom: coords.z,
+        x: coords.x,
+        y: coords.y
+      };
+      tile.src = this.outer.mapMode.f(tileInfo);
+
+      // Kun kuva latautuu tai epäonnistuu, kerrotaan Leafletille
+      tile.onload = () => done(null, tile);
+      tile.onerror = () => done(new Error('Tile load error'), tile);
+
+      return tile;
+    }
+  }; // CustomTileLayer ends
+
+  // Aluksi luodaan ja lisätään ensimmäinen layer
+  setMapMode(modeKey) {
+    this.mapMode = this.mapModes[modeKey];
+    if (this.currentLayer) {
+      this.removeLayer(this.currentLayer);
+    }
+    // Ota oma karttataso käyttöön
+    this.currentLayer = new MapWrapper.CustomTileLayer({ attribution: this.mapMode.c }, this);
+    this.addLayer(this.currentLayer);
+
+    // Päivitä attribution-kenttä Leafletin oikeaan alakulmaan
+    this.map.attributionControl.setPrefix(false);
+    // map.attributionControl.setAttribution(mapMode.c);
+  }
+
+  customPin(label = 'I', color = 'green', baseColor = 'black') {
+    let tsize = "16";
+    if (label.length > 3) { tsize = "12"; }
+    if (label.length >= 5) { tsize = "10"; }
+    const svg = `
+      <svg width="32" height="48" viewBox="0 0 32 48" xmlns="http://www.w3.org/2000/svg">
+        <!-- Kolmion muotoinen jalka -->
+        <path d="M 3 16 L 16 48 L 29 16 Z" fill="${baseColor}" />
+        <!-- Eri värinen valinta-alue -->
+        <path id="pin-foot" d="M 4 15 L 16 47 L 28 15 Z" fill="red" style="visibility:hidden;" />
+        <!-- Iso musta ympyrä -->
+        <circle cx="16" cy="16" r="16" fill="${baseColor}" />
+        <!-- Sisempi värillinen ympyrä -->
+        <circle cx="16" cy="16" r="14" fill="${color}" />
+        <!-- Valkoinen teksti keskellä -->
+        <text x="16" y="16" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="${tsize}" fill="white" dominant-baseline="middle">
+          ${label}
+        </text>
+      </svg>
+    `;
+
+    return L.divIcon({
+      className: '',
+      html: svg,
+      iconSize: [32, 48],
+      iconAnchor: [16, 48], // kärki osoittaa koordinaattiin
+      popupAnchor: [0, -48]
+    });
+  }  // customPin ends
+
+  selectPin(pin, selected) {
+    const element = pin.getElement();
+    const svg = element.querySelector('svg');
+    const foot = svg.querySelector('#pin-foot');
+    if (foot) {
+      foot.style.visibility = selected ? 'visible' : 'hidden';
+    }
+  }
+
+  createPin(coord, label, color, click, text = null) {
+    const pin = L.marker(coord, {icon: this.customPin(label, color)});
+    pin.addTo(this.map);
+    if (text) {
+      pin.bindPopup(text);
+    }
+    pin.on('click', function() {
+      click(pin);
+    });
+    return pin;
+  }
+
+  getPinLocation(pin) {
+    const latLng = pin.getLatLng();
+    return [latLng.lat, latLng.lng];
+  }
+
+  on(event, callback) {
+    this.map.on(event, callback);
+  }
+
+ } // MapWrapper ends
+
+
 
  // Simulation of C# string.Format, only {n} works.
  if (!String.format) {
@@ -53,31 +259,24 @@
   };
 }
 
-class CustomTileLayer extends L.GridLayer {
-  constructor(options) {
-    super(options);
+// Converts tile XY coordinates into a QuadKey at a specified level of detail.
+function TileXYToQuadKey(tile) {
+  let quadKey = "";
+  for (let i = tile.zoom; i > 0; i--)  {
+    let digit = '0';
+    const mask = 1 << (i - 1);
+    if ((tile.x & mask) !== 0) {
+            digit++;
+    }
+    if ((tile.y & mask) !== 0) {
+        digit++;
+        digit++;
+    }
+    quadKey += digit;
   }
-
-  createTile(coords, done) {
-    const tile = document.createElement('img');
-    tile.alt = '';
-    tile.setAttribute('role', 'presentation');
-
-    // Käytetään sun omaa URL-funktiota
-    const tileInfo = {
-      zoom: coords.z,
-      x: coords.x,
-      y: coords.y
-    };
-    tile.src = mapMode.f(tileInfo);
-
-    // Kun kuva latautuu tai epäonnistuu, kerrotaan Leafletille
-    tile.onload = () => done(null, tile);
-    tile.onerror = () => done(new Error('Tile load error'), tile);
-
-    return tile;
-  }
+  return quadKey;
 }
+
 
 const belectro = {
   link: "https://tanger.belectro.fi/tiles/mmltopo/v9/256/{0}/{2}/{1}?ref=7f2d",
@@ -181,41 +380,277 @@ https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/
 */
 };
 
-  // Luodaan kartta ja asetetaan näkymä Helsingin kohdalle
-  const map = L.map('map', { zoomControl: false }).setView([60.1699, 24.9384], 13);
-  L.control.zoom({ position: 'topright' }).addTo(map);
+function Ellipsoid(name, a, invf) {
+  /* constructor */
+  this.name=name
+  this.a=a
+  this.invf=invf
+}
 
-  // Luo layer-muuttuja, johon asetetaan nykyinen karttalaatta
-  let currentLayer;
-
-  // let mapMode = mapModes["OpenStreet"];
-  let mapMode = mapModes["b-bark SuomiTopo"];
-
-  // Lisätään kartta-laatat
-  /*
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
-    maxZoom: 19
-  }).addTo(map);
-  */
+const ells = [
+  new Ellipsoid("WGS84", 6378.137 / 1.852, 298.257223563),
+  new Ellipsoid("FAI sphere", 6371.0 / 1.852, 1000000000.)
+];
 
 
-  // Aluksi luodaan ja lisätään ensimmäinen layer
-  function setMapMode(modeKey) {
-    mapMode = mapModes[modeKey];
-    if (currentLayer) {
-      map.removeLayer(currentLayer);
-    }
-    // Ota oma karttataso käyttöön
-    currentLayer = new CustomTileLayer({ attribution: mapMode.c });
-    currentLayer.addTo(map);
+function getEllipsoid(selection){
+//  document.spheroid.major_radius.value=ells[selection.selectedIndex+1].a*1.852
+//  document.spheroid.inverse_f.value=ells[selection.selectedIndex+1].invf
+  return ells[selection.selectedIndex];
+}
 
-    // Päivitä attribution-kenttä Leafletin oikeaan alakulmaan
-    map.attributionControl.setPrefix(false);
-    // map.attributionControl.setAttribution(mapMode.c);
+function atan2(y,x) {
+  let out;
+  if (x <0)            { out= Math.atan(y/x)+Math.PI;}
+  if ((x >0) && (y>=0)){ out= Math.atan(y/x);}
+  if ((x >0) && (y<0)) { out= Math.atan(y/x)+2*Math.PI;}
+  if ((x===0) && (y>0)) { out= Math.PI/2;}
+  if ((x===0) && (y<0)) { out= 3*Math.PI/2;}
+  if ((x===0) && (y===0)) {
+  //alert("atan2(0,0) undefined")
+      out= 0.
   }
+  return out
+}
 
-   // Täytetään select-valikko
+function WGS84_distance(p1,p2) {
+  if (Array.isArray(p1) && p1.length === 2) {
+    p1 = { latitude: p1[0], longitude: p1[1] };
+  }
+  if (Array.isArray(p2) && p2.length === 2) {
+    p2 = { latitude: p2[0], longitude: p2[1] };
+  }
+  const selection = {selectedIndex: 0};
+  const m = Math.PI / 180;
+  return crsdist_ell(p1.latitude*m,p1.longitude*m,p2.latitude*m,p2.longitude*m,getEllipsoid(selection));
+}
+
+function crsdist_ell(glat1,glon1,glat2,glon2,ellipse){
+  // glat1 initial geodetic latitude in radians N positive
+  // glon1 initial geodetic longitude in radians E positive
+  // glat2 final geodetic latitude in radians N positive
+  // glon2 final geodetic longitude in radians E positive
+  const a = ellipse.a
+  const f = 1/ellipse.invf
+  //alert("a="+a+" f="+f)
+  let r, tu1, tu2, cu1, su1, cu2, s1, b1, f1;
+  let x, sx, cx, sy, cy, y, sa, c2a, cz, e, c, d;
+  const EPS = 0.00000000005;
+  let s;
+  let iter = 1;
+  const MAXITER = 100;
+  if ((glat1+glat2===0.) && (Math.abs(glon1-glon2)===Math.PI)){
+    alert("Course and distance between antipodal points is undefined")
+    glat1=glat1+0.00001 // allow algorithm to complete
+    }
+  if ( glat1===glat2 && (glon1===glon2 || Math.abs(Math.abs(glon1-glon2)-2*Math.PI) <  EPS) ) {
+    //alert("Points 1 and 2 are identical- course undefined")
+    return 0.0; // don't care???
+    // noinspection UnreachableCodeJS
+    let out = new MakeArray(0)
+    out.d = 0
+    out.crs12 = 0
+    out.crs21 = Math.PI
+    return out
+  }
+  r = 1 - f
+  tu1 = r * Math.tan (glat1)
+  tu2 = r * Math.tan (glat2)
+  cu1 = 1. / Math.sqrt (1. + tu1 * tu1)
+  su1 = cu1 * tu1
+  cu2 = 1. / Math.sqrt (1. + tu2 * tu2)
+  s1 = cu1 * cu2
+  b1 = s1 * tu2
+  f1 = b1 * tu1
+  x = glon2 - glon1
+  d = x + 1 // force one pass
+  while ((Math.abs(d - x) > EPS) && (iter < MAXITER))
+    {
+      iter=iter+1
+      sx = Math.sin (x)
+//       alert("sx="+sx)
+      cx = Math.cos (x)
+      tu1 = cu2 * sx
+      tu2 = b1 - su1 * cu2 * cx
+      sy = Math.sqrt(tu1 * tu1 + tu2 * tu2)
+      cy = s1 * cx + f1
+      y = atan2 (sy, cy)
+      sa = s1 * sx / sy
+      c2a = 1 - sa * sa
+      cz = f1 + f1
+      if (c2a > 0.)
+     cz = cy - cz / c2a
+      e = cz * cz * 2. - 1.
+      c = ((-3. * c2a + 4.) * f + 4.) * c2a * f / 16.
+      d = x
+      x = ((e * cy * c + cz) * sy * c + y) * sa
+      x = (1. - c) * x * f + glon2 - glon1
+    }
+  x = Math.sqrt ((1 / (r * r) - 1) * c2a + 1)
+  x +=1
+  x = (x - 2.) / x
+  c = 1. - x
+  c = (x * x / 4. + 1.) / c
+  d = (0.375 * x * x - 1.) * x
+  x = e * cy
+  s = ((((sy*sy*4.-3.)*(1.-e-e)*cz*d/6.-x)*d/4.+cz)*sy*d+y)*c*a*r
+
+  return s*1.852;
+  /*
+  let faz, baz;
+  faz = modcrs(atan2(tu1, tu2))
+  baz = modcrs(atan2(cu1 * sx, b1 * cx - su1 * cu2) + Math.PI)
+  out=new MakeArray(0)
+  out.d=s
+  out.crs12=faz
+  out.crs21=baz
+  if (Math.abs(iter-MAXITER)<EPS){
+    alert("Algorithm did not converge")
+  }
+  return out
+  */
+} // crsdist_ell ends
+
+// Globals:
+let lastSelected = null;
+let myPin = null;
+let hitPin = null;
+let mapWrapper = null;
+let pinNr = 1;
+let dst = null;
+let lastHitPoint = null;
+
+const options = {
+  email: "",
+  id: "",
+  logname: "",
+  interval: "5000",
+  usersTofollow: "",
+  send: false,
+  readGPS: true,
+  resend: false,
+  follow: false,
+  followMe: false,
+  showTime: true,
+  selectNewPin: true,
+  useDummyRect: false,
+  preventSleep: true,
+  smallRaport: false,
+  drawLogLine: false,
+  HCenter: true,
+  showAccuracy: true,
+  extra: false,
+  tpR: "0",
+  hasWakeLock: false,
+  useComps: false,
+  useCompsWindow: false,
+};
+
+function isCoordinate(s) {
+     if ( s === "" ) return false;
+     return "0123456789-".indexOf(s[0]) >= 0;
+}
+
+function search() {
+    if (!searchManager) {
+        //Create an instance of the search manager and perform the search.
+        // Microsoft.Maps.loadModule('Microsoft.Maps.Search', function () {
+        //     searchManager = new Microsoft.Maps.Search.SearchManager(map);
+        //    search();
+        // });
+    } else {
+      //Remove any previous results from the map.
+      clearSearchResults();
+      //Get the users query and geocode it.
+      const query = getPinText();
+      geocodeQuery(query);
+    }
+}
+
+function getCoordinateFromText(s) {
+  // Etsitään koordinaatit tekstistä
+  const latLongArray = s.split(/[\s,]+/);
+  if (latLongArray.length < 2) return null;
+  const lat = parseFloat(latLongArray[0]);
+  const lng = parseFloat(latLongArray[1]);
+  if (isNaN(lat) || isNaN(lng)) return null;
+  return [lat, lng];
+}
+
+function calcDistance() {
+  let d = 0;
+  if ( !hitPin ) return;
+  if ( !lastSelected ) {
+    if (!lastHitPoint) return;
+    d = WGS84_distance(lastHitPoint, mapWrapper.getPinLocation(hitPin));
+  } else {
+    d = WGS84_distance(mapWrapper.getPinLocation(lastSelected), mapWrapper.getPinLocation(hitPin));
+  }
+  if (!dst) dst = document.getElementById("distance");
+  // dst.css( "border" , "3px solid red" );
+  dst.innerText = "" + d.toFixed(3) + " km";
+}
+
+
+
+function selectActivePin(pin, calcDist) {
+  changeSelected(pin, true);
+  mapWrapper.selectPin(pin, true);
+  if ( calcDist ) calcDistance();
+}
+
+function addPinAt(pinLoc) {
+  let center = mapWrapper.getPinLocation(hitPin);
+  let name = "" + pinNr;
+  if ( pinLoc !== "" ) {
+    const latLongArray = (pinLoc).split(/[\s,]+/);
+    center = getCoordinateFromText(pinLoc);
+    name = latLongArray[2];
+    if ( name === undefined || name === "H" || name === "" ) name = ""+pinNr++;
+  }
+  else pinNr++;
+
+  return createPin(center, name, 'blue');
+}
+
+
+function addPin() {
+   const s = getPinText().trim();
+   if (s === "") return;
+   if ( !isCoordinate(s) ) return search();
+   const pin = addPinAt(s);
+   if (options.selectNewPin) {
+     selectActivePin(pin, true);
+     // const loc = new Microsoft.Maps.Location(pin.geometry.y, pin.geometry.x);
+     // map.setView({center:loc});
+   }
+}
+
+
+function checkAddPinText() {
+   let text = "Lisää pinni";
+   if ( !isCoordinate(getPinText()) ) text = "Etsi";
+   document.getElementById('buttonAddPin').innerText = text;
+}
+
+ function getPinText() {
+    return document.getElementById('editPinLoc').value.trim();
+}
+
+function setPinText(s) {
+    document.getElementById('editPinLoc').value = s.trim();
+    checkAddPinText();
+}
+
+function setHitPinLoc(loc) {
+  hitPin.setLatLng(loc);
+  calcDistance();
+}
+
+
+function initializeMapPage() {
+  mapWrapper = new MapWrapper('map', mapModes);
+  // Täytetään select-valikko
   const mapSelect = document.getElementById('mapModeSelect');
   for (const key in mapModes) {
     const option = document.createElement('option');
@@ -226,145 +661,70 @@ https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/
 
   // Alustetaan valinta ja kartta
   mapSelect.value = "OpenStreet";
-  setMapMode(mapSelect.value);
+  mapWrapper.setMapMode(mapSelect.value);
 
-   // Kuunnellaan valikon muutosta
+  // Kuunnellaan valikon muutosta
   mapSelect.addEventListener('change', (e) => {
-    setMapMode(e.target.value);
+    mapWrapper.setMapMode(e.target.value);
+  });
+
+  // Ensimmäinen sijainnin hakukutsu, tarkalla sijainnilla
+  navigator.geolocation.getCurrentPosition(function(position) {
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+
+    myPin = createPin([lat, lng], 'I', 'green', "Olet tässä");
+
+    // Siirretään kartta käyttäjän sijaintiin
+    mapWrapper.setView([lat, lng]);
+  }, function(err) {
+    console.error("Sijainnin haku epäonnistui:", err);
+  }, {
+    enableHighAccuracy: true,
+    timeout: 10000,
+    maximumAge: 0
+  });
+
+  // Seurataan sijainnin muutoksia
+  navigator.geolocation.watchPosition(function(pos) {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+
+    if (myPin) {
+      myPin.setLatLng([lat, lng]);
+    }
+  }, function(err) {
+    console.error("Sijainnin päivitys epäonnistui:", err);
+  }, {
+    enableHighAccuracy: true,
+    timeout: 10000,
+    maximumAge: 0
   });
 
 
-/*
-  // Lisätään markkeri
-  L.marker([60.1699, 24.9384])
-    .addTo(map)
-    .bindPopup('<b>Tässä on Helsinki</b><br>Moikka!')
-    .openPopup();
-*/
-
-
-function customPin(label = 'I', color = 'green', baseColor = 'black') {
-  const svg = `
-    <svg width="32" height="48" viewBox="0 0 32 48" xmlns="http://www.w3.org/2000/svg">
-      <!-- Kolmion muotoinen jalka -->
-      <path d="M 3 16 L 16 48 L 29 16 Z" fill="${baseColor}" />
-      <!-- Eri värinen valinta-alue -->
-      <path id="pin-foot" d="M 4 15 L 16 47 L 28 15 Z" fill="red" style="visibility:hidden;" />
-      <!-- Iso musta ympyrä -->
-      <circle cx="16" cy="16" r="16" fill="${baseColor}" />
-      <!-- Sisempi värillinen ympyrä -->
-      <circle cx="16" cy="16" r="14" fill="${color}" />
-      <!-- Valkoinen teksti keskellä -->
-      <text x="16" y="16" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="16" fill="white" dominant-baseline="middle">
-        ${label}
-      </text>
-    </svg>
-  `;
-
-  return L.divIcon({
-    className: '',
-    html: svg,
-    iconSize: [32, 48],
-    iconAnchor: [16, 48], // kärki osoittaa koordinaattiin
-    popupAnchor: [0, -48]
-  });
-}
-
-let lastSelected = null;
-let myPin = null;
-let hitPin = null;
-
-function selectPin(pin, selected) {
-  const element = pin.getElement();
-  const svg = element.querySelector('svg');
-  const foot = svg.querySelector('#pin-foot');
-  if (foot) {
-    foot.style.visibility = selected ? 'visible' : 'hidden';
-  }
-}
-
-function changeSelected(pin, selected=true) {
-  if (lastSelected === pin) { // Jos sama pin on jo valittu, poistetaan valinta
-    selectPin(pin, false);
-    lastSelected = null;
-    return;
-  }
-
-  if (lastSelected) {
-    selectPin(lastSelected, false);
-  }
-  lastSelected = pin;
-  if (pin)  {
-    selectPin(pin, selected);
-  }
-}
-
-function createPin(coord, label, color, text = null) {
-  const pin = L.marker(coord, {icon: customPin(label, color)});
-  pin.addTo(map);
-  if (text) {
-    pin.bindPopup(text);
-  }
-  pin.on('click', function() {
-    changeSelected(pin);
-  });
-  return pin;
-};
-
-
-// Ensimmäinen sijainnin hakukutsu, tarkalla sijainnilla
-navigator.geolocation.getCurrentPosition(function(position) {
-  const lat = position.coords.latitude;
-  const lng = position.coords.longitude;
-
-  myPin = createPin([lat, lng], 'I', 'green', "Olet tässä");
-
-  // Siirretään kartta käyttäjän sijaintiin
-  map.setView([lat, lng]);
-}, function(err) {
-  console.error("Sijainnin haku epäonnistui:", err);
-}, {
-  enableHighAccuracy: true,
-  timeout: 10000,
-  maximumAge: 0
-});
-
-// Seurataan sijainnin muutoksia
-navigator.geolocation.watchPosition(function(pos) {
-  const lat = pos.coords.latitude;
-  const lng = pos.coords.longitude;
-
-  if (myPin) {
-    myPin.setLatLng([lat, lng]);
-  }
-}, function(err) {
-  console.error("Sijainnin päivitys epäonnistui:", err);
-}, {
-  enableHighAccuracy: true,
-  timeout: 10000,
-  maximumAge: 0
-});
-
-
-map.on('click', async (e) => {
+mapWrapper.on('click', async (e) => {
+  if (e.originalEvent && e.originalEvent.target.id === 'mapModeSelect') return;
   const { lat, lng } = e.latlng;
+  const loc = [lat, lng];
   if (!hitPin) {
     // Luo hitPin ensimmäisellä klikkauksella
-    hitPin = createPin([lat, lng], 'H', 'red');
+    hitPin = createPin(loc, 'H', 'red');
   } else {
     // Siirrä olemassa olevaa hitPiniä uuteen paikkaan
-    hitPin.setLatLng([lat, lng]);
+    setHitPinLoc(loc);
   }
+  lastHitPoint = loc;
 
   // Hae korkeus OpenTopoDatasta
   const url = `https://www.mit.jyu.fi/demowww/cyclo/index.php?elev=${lat},${lng}`;
+  let elevation = ''
 
   try {
     const response = await fetch(url);
-    const data = await response.json();
+    const data = await response.text();
 
-    if (data) {
-      const elevation = data;
+    if (!isNaN(data)) {
+      elevation = Number(data).toFixed(0) + " m";
       console.log("Korkeus:", elevation);
 
       // Päivitä pinin teksti näyttämään korkeus (pyöristetty)
@@ -373,10 +733,81 @@ map.on('click', async (e) => {
   } catch (err) {
     console.error("Korkeuden haku epäonnistui:", err);
   }
-});
 
+  setPinText(`${lat.toFixed(5)} ${lng.toFixed(5)} H ${elevation}`);
+
+});  // mapWarpper.on end
+
+  prefixHelpLinks();
+
+}
+
+
+function changeSelected(pin, selected=true) {
+  if (lastSelected === pin) { // Jos sama pin on jo valittu, poistetaan valinta
+    mapWrapper.selectPin(pin, false);
+    lastSelected = null;
+    return;
+  }
+
+  if (lastSelected) {
+    mapWrapper.selectPin(lastSelected, false);
+  }
+  lastSelected = pin;
+  if (pin)  {
+    mapWrapper.selectPin(pin, selected);
+  }
+}
+
+function createPin(coord, label, color, text = null) {
+  return mapWrapper.createPin(coord, label, color, function(pin) {
+    changeSelected(pin);
+  }, text);
+}
+
+function closeParent(element) {
+  if (element.parentElement) {
+    element.parentElement.style.display = 'none';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', initializeMapPage)
 
 </script>
 
+<div class="layout-container">
+<!--suppress HtmlFormInputWithoutLabel -->
+<div id="findDiv" class="ui-layout-north">
+  <label class="closebtn" style="top: -10px" onclick=closeParent(this)>&times;</label>
+  <div id="pinDiv" style="margin-left: 35px">
+    <!-- <label class="hamburgerSpace"> </label> -->
+    <input type="text" name="editPinLoc" id="editPinLoc" value="" size="35" onkeyup="checkAddPinText()" />
+    <span class ="clearButton" id="buttonClearText" onclick="setPinText('')">x</span>
+    <button type="button" id="buttonAddPin" onclick="addPin()">Etsi</button>
+    <a class="help" href="#find"></a>
+    <span id="searchSpan" style="visibility: hidden">
+      <select id="searchCombo" ></select>
+      <span class="searchClass" id="searchMsg"></span>
+      <label class="closebtn2" style="margin-top: 10px;" onclick="clearSearchResults()">&times;</label>
+    </span>
+    <span class="errorClass" id="errorMsg"></span>
+  </div>
+</div>
+
+<div class="ui-layout-center">
+  <div id='map'></div>
+  <div class="logo"></div>
+  <div class="mapType">
+    <div class="ui-widget ui-full-width" style="z-index: 1001;">
+      <label class="hamburgerSpace">
+      <select id="mapModeSelect">
+      </select></label>&nbsp;<span  id="distance">0 km</span>
+      <div class="area1CBcopy">
+        <label for="area1cbCopy">✈️</label><input type="checkbox" title="Ilmatilat" id="area1cbCopy" name="area1cbCopy" value="area1cbCopy" />
+      </div>
+    </div>
+  </div>
+</div>
+</div>
 </body>
 </html>
