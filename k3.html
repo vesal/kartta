@@ -11,12 +11,93 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
   <style>
-    html, body, #map {
+    html, body {
       height: 100%;
       margin: 0;
       padding: 0;
     }
+
+    .popup {
+      padding: 5%;
+      position: absolute;
+      z-index: 400;
+      background-color: lightyellow;
+      visibility: hidden;
+      top: 30pt;
+      left: 5%;
+      /*width: calc(100% - 72px);
+      height: calc(100% - 120px);*/
+      right: 5%;
+      bottom: 10pt;
+      border-color: steelblue;
+      border-radius: 20px;
+      border-style: solid;
+      max-width: 800px;
+      /* overflow:auto; */
+    }
+
+    .popupIn {
+      padding: 5%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow:auto;
+      border-radius: 20px;
+    }
+
+    .ui-menu li {
+        margin: 0;
+        cursor: pointer;
+        list-style-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7);
+        position: relative;
+        padding: 3px 2em 3px 0em;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 1em;
+        cursor: pointer;
+    }
+
+    .ui-menu li:hover {
+      background-color: #007bff;
+      color: #fff;
+    }
+    .ui-menu li span {
+      color: inherit; /* Ensure span inherits the hover color */
+    }
+
+    .ui-menu {
+        background: #ffffff;
+        /* width: 230px; */
+        margin-left: 25px;
+        /* margin-top: 40px; */
+        margin-right: 20px;
+        height: auto !important;
+        display: block;
+        list-style-type: none;
+        margin-block-start: 1em;
+        margin-block-end: 1em;
+        padding-inline-start: 6px;
+    }
+
+    li a.help {
+        padding: unset !important;
+        display: inline !important;
+        /* float: right; */
+        position: absolute !important;
+        right: 10px;
+    }
+
+    a.help {
+        text-decoration: none !important;
+    }
+
+    li.ui-menu-item {
+        line-height: 1.5em;
+    }
+
     #map {
+      height: 100%;
       /* position: relative; */
       cursor: default;
       /* flex: 1 1 auto; */
@@ -43,6 +124,17 @@
       background-color: white;
       align-self: baseline;
     }
+
+    #editPinLoc {
+      width: 250px; /* desktop default */
+    }
+
+    @media (max-width: 600px) {
+      #editPinLoc {
+        width: 180px; /* smaller for mobile */
+      }
+    }
+
     .closebtn {
         z-index: 1000;
         position: absolute;
@@ -146,9 +238,13 @@ function prefixHelpLinks() {
       // L.control.zoom({ position: 'topright' }).addTo(map);
     }
 
+
    setView(coord, zoom=null) {
      if (zoom === null) {
        zoom = this.map.getZoom();
+     }
+     if (Array.isArray(coord)) {
+       coord = L.latLng(coord[0], coord[1]);
      }
      this.map.setView(coord, zoom);
    }
@@ -255,9 +351,25 @@ function prefixHelpLinks() {
     return pin;
   }
 
+  removePin(pin) {
+    this.map.removeLayer(pin);
+    const index = this.pins.indexOf(pin);
+    if (index > -1) {
+      this.pins.splice(index, 1);
+    }
+  }
+
   getPinLocation(pin) {
     const latLng = pin.getLatLng();
     return [latLng.lat, latLng.lng];
+  }
+
+  setPinDragging(pin, enable) {
+    if (enable) {
+      pin.dragging.enable();
+    } else {
+      pin.dragging.disable();
+    }
   }
 
   on(event, callback) {
@@ -541,6 +653,7 @@ let mapWrapper = null;
 let pinNr = 1;
 let dst = null;
 let lastHitPoint = null;
+let searchPins = [];
 
 const options = {
   email: "",
@@ -573,20 +686,48 @@ function isCoordinate(s) {
      return "0123456789-".indexOf(s[0]) >= 0;
 }
 
-function search() {
-    if (!searchManager) {
-        //Create an instance of the search manager and perform the search.
-        // Microsoft.Maps.loadModule('Microsoft.Maps.Search', function () {
-        //     searchManager = new Microsoft.Maps.Search.SearchManager(map);
-        //    search();
-        // });
-    } else {
-      //Remove any previous results from the map.
-      clearSearchResults();
-      //Get the users query and geocode it.
-      const query = getPinText();
-      geocodeQuery(query);
+function geocodeQuery(query) {
+
+  if (isCoordinate(query)) {
+    const loc = getCoordinateFromText(query);
+    const pin = addPinAt(loc)
+    searchPins.push(pin);
+    // map.entities.push([pin]);
+    // map.setView({center: loc});
+    return;
+  }
+  fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.length > 0) {
+        // console.log('Löytyi useita tuloksia:', data.length);
+        data.forEach((item, i) => {
+          // console.log(`${i + 1}: ${item.display_name} — lat: ${item.lat}, lon: ${item.lon}`);
+          const pin = createPin([item.lat,item.lon], `s${i+1}`, 'violet', item.display_name);
+          searchPins.push(pin)
+        });
+      } else {
+        console.log('Koordinaatteja ei löytynyt.');
+      }
+    })
+    .catch(err => console.error('Virhe:', err));
+}
+
+function clearSearchResults() {
+    if (searchPins.length > 0) {
+        searchPins.forEach(pin => {
+            mapWrapper.removePin(pin);
+        });
+        searchPins = [];
     }
+}
+
+function search() {
+    //Remove any previous results from the map.
+    clearSearchResults();
+    //Get the users query and geocode it.
+    const query = getPinText();
+    geocodeQuery(query);
 }
 
 function getCoordinateFromText(s) {
@@ -641,6 +782,7 @@ function addPin() {
    if (s === "") return;
    if ( !isCoordinate(s) ) return search();
    const pin = addPinAt(s);
+   mapWrapper.setPinDragging(pin, true);
    if (options.selectNewPin) {
      selectActivePin(pin, true);
      // const loc = new Microsoft.Maps.Location(pin.geometry.y, pin.geometry.x);
@@ -725,6 +867,7 @@ function initializeMapPage() {
 
 
 mapWrapper.on('click', async (e) => {
+  closeNav();
   if (e.originalEvent && e.originalEvent.target.id === 'mapModeSelect') return;
   const { lat, lng } = e.latlng;
   const loc = [lat, lng];
@@ -747,13 +890,13 @@ mapWrapper.on('click', async (e) => {
 
     if (!isNaN(data)) {
       elevation = Number(data).toFixed(0) + " m";
-      console.log("Korkeus:", elevation);
+      // console.log("Korkeus:", elevation);
 
       // Päivitä pinin teksti näyttämään korkeus (pyöristetty)
       // hitPin.setIcon(customPin(`${Math.round(elevation)}m`, 'red', 'black'));
     }
   } catch (err) {
-    console.error("Korkeuden haku epäonnistui:", err);
+    // console.error("Korkeuden haku epäonnistui:", err);
   }
 
   setPinText(`${lat.toFixed(5)} ${lng.toFixed(5)} H ${elevation}`);
@@ -762,7 +905,13 @@ mapWrapper.on('click', async (e) => {
 
   prefixHelpLinks();
 
-}
+  if ( options.id !== "" )
+	  toggleDiv("accountArea", false);
+	else
+	  toggleDiv("followArea", false);
+
+
+} // initializeMapPage ends
 
 
 function changeSelected(pin, selected=true) {
@@ -793,9 +942,131 @@ function closeParent(element) {
   }
 }
 
+let mySidenavElem = null;
+let menuElem = null;
+
+function isMenuOpen() {
+  if (menuElem === null) {
+    menuElem = document.getElementById("menu");
+    mySidenavElem = document.getElementById("mySidenav");
+  }
+  let s = menuElem.style;
+  return s.visibility === "visible";
+}
+
+function openNav() {
+  if ( isMenuOpen() ) { closeNav(); return; }
+  let s = menuElem.style;
+  // s.width = "300px";
+  // s.height = "350px";
+  s.visibility = "visible";
+  s = mySidenavElem.style;
+  s.visibility = "visible";
+}
+
+
+function closeNav() {
+  let s = mySidenavElem.style;
+  s.visibility = "hidden";
+  s = menuElem.style;
+  s.visibility = "hidden";
+}
+
+function toggleDiv(divId, force = null) {
+  const div = document.getElementById(divId);
+  let show = div.style.display != 'block';
+  if (force !== null) {
+    show = force;
+  }
+  if (show) {
+    div.style.display = 'block';
+    div.style.visibility = 'visible';
+  } else {
+    div.style.display = 'none';
+    div.style.visibility = 'hidden';
+  }
+}
+
+
+function findMyPlace() {
+  if (!myPin) return;
+  // Siirretään kartta käyttäjän sijaintiin
+  const center = mapWrapper.getPinLocation(myPin);
+  mapWrapper.setView(center);
+}
+
+function toggleFullscreen() {
+  const elem = document.documentElement; // Käytetään koko sivua
+  if (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+    // Poistetaan fullscreen-tila
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.mozCancelFullScreen) { // Firefox
+      document.mozCancelFullScreen();
+    } else if (document.webkitExitFullscreen) { // Chrome, Safari ja Opera
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) { // IE/Edge
+      document.msExitFullscreen();
+    }
+  } else {
+    openFullscreen(elem);
+  }
+}
+
+function openFullscreen(elem) {
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.mozRequestFullScreen) { // Firefox
+    elem.mozRequestFullScreen();
+  } else if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { // IE/Edge
+    elem.msRequestFullscreen();
+  }
+}
+
+
+function adjustComponents() {
+  /*  TODO: korjaa komponenttien muokkaus
+   saveComponents();
+   const compsdiv = document.getElementById("showComps");
+   compsdiv.style.backgroundColor = document.getElementById("editCompsBackground").value;
+   compsdiv.style.color = document.getElementById("editCompsColor").value;
+   createComps();
+   checkTimer("showTime", timecomponents.length === 0 || !options.useComps);
+   */
+}
+
+
+
 window.addEventListener('DOMContentLoaded', initializeMapPage)
 
 </script>
+<div id="mySidenavHamburger" style="top: 0; left: 0; width: 30px; height: 35px; position: absolute; z-index:3600;  background-color: lightgray;">
+  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;<br></span>
+  <span style="font-size:30px;cursor:pointer" onclick="findMyPlace()">&#9737;</span>
+</div>
+
+<div id="mySidenav" style="top: 45px; left: 0;  visibility: hidden; position: absolute; z-index:3500;  background-color: lightgray;" onclick="closeNav()">
+  <label class="closebtn" style="visibility: hidden" onclick="closeNav()">&times;</label>
+
+  <ul class="ui-menu" id="menu" style="visibility: hidden">
+  <li><span onclick="toggleDiv('settings');">Asetukset...</span> <a class="help" href="#settings"></a></li>
+  <li><span onclick="toggleDiv('findDiv'); closeNav();">Pinnien lisääminen...</span> <a class="help" href="#addpins"></a></li>
+  <li><span onclick="showRoutePane(); closeNav()">Ajo-ohjeet...</span> <a class="help" href="#directions"></a></li>
+  <li><span onclick="toggleDiv('loadTrack'); ">Lataa track-tiedosto...</span> <a class="help" href="#loadtrack"></a></li>
+  <li><span onclick="toggleDiv('trackDiv'); ">Näytä track-tiedot</span> <a class="help" href="#showtrackdetails"></a></li>
+  <li><span onclick="toggleDiv('loadRoute'); ">Lataa reittitiedosto...</span>  <a class="help" href="#loadroute"></a></li>
+  <li><span onclick="toggleDiv('routeDiv'); ">Reitin suunnittelu...</span> <a class="help" href="#routeplan"></a></li>
+  <li><span onclick="toggleDiv('routeRaport'); ">Reittiraportti...</span> <a class="help" href="#routeraport"></a></li>
+  <li><span onclick="toggleDiv('loadAreas'); ">Alueet...</span>  <a class="help" href="#areas"></a></li>
+  <li><span onclick="googleDirections();">Ajo-ohjeet Google Mapsillä</span> <a class="help" href="#googledirections"></a></li>
+  <li><span onclick="toggleFullscreen()">Fullscreen</span></li>
+  <li><span onclick="toggleDiv('about'); ">Pika-apu...</span></li>
+  </ul>
+  <!--Muista muuttaa korkeus openNav  (tai tee tähän tyyli automaattiseksi) -->
+</div>
+
 
 <div class="layout-container">
 <!--suppress HtmlFormInputWithoutLabel -->
@@ -803,7 +1074,7 @@ window.addEventListener('DOMContentLoaded', initializeMapPage)
   <label class="closebtn" style="top: -10px" onclick=closeParent(this)>&times;</label>
   <div id="pinDiv" style="margin-left: 35px">
     <!-- <label class="hamburgerSpace"> </label> -->
-    <input type="text" name="editPinLoc" id="editPinLoc" value="" size="23" onkeyup="checkAddPinText()" />
+    <input type="text" name="editPinLoc" id="editPinLoc" value="Tontuntie"  onkeyup="checkAddPinText()" />
     <span class ="clearButton" id="buttonClearText" onclick="setPinText('')">x</span>
     <button type="button" id="buttonAddPin" onclick="addPin()">Etsi</button>
     <a class="help" href="#find"></a>
@@ -830,6 +1101,69 @@ window.addEventListener('DOMContentLoaded', initializeMapPage)
     </div>
   </div>
 </div>
+</div>
+
+<div class="popup" id="settings" style="">
+  <label class="closebtn" onclick="toggleDiv('settings'); adjustComponents()">&times;</label>
+  <div class="popupIn">
+    <h2>Asetukset</h2>
+    <input type="checkbox" id="HCenter" value="HCenter"  />Pidä H keskellä <a class="help" href="#othersettings"></a><br />
+    <!-- <input type="checkbox" id="showAccuracy" value="showAccuray"  />Näytä tarkkuusympyrä<br /> -->
+    <input type="checkbox" id="readGPS" value="readGPS"  />Lue GPS:ää<br />
+    <input type="checkbox" name="followMe" id="followMe" value="followMe"  />Piirrä oma jälki
+    <input type="text" name="editFollowMeColor" id="editFollowMeColor" value="orange" size="8" />
+    <input type="text" name="editFollowMeWidth" id="editFollowMeWidth" value="3" size="1" /> pt<br />
+    <input type="checkbox" name="selectNewPin" id="selectNewPin" value="selectNewPin"  />Valitse uusi pin aktiiviseksi<br />
+    <!-- <input type="checkbox" name="useDummyRect" id="useDummyRect" value="useDummyRect"  />Käytä tyhjää hakualuetta (jos ei osaa hakea)<br /> -->
+    <span id="preventSleepSpan"><input type="checkbox" name="preventSleep" id="preventSleep" value="preventSleep"  />Estä näytön sammuminen</span>
+    <br /><br />
+
+
+    <div class="ui-widget" id="followDiv">
+      <div id="followArea">
+        <button type="button" onclick="toggleDiv('followArea', false); toggleDiv('accountArea', true);" >Tilaa käyttäjätunnus (ID)...</button><a class="help" href="#userid"></a>
+        <hr>
+        <div id="accountArea2"><p><b>Oman paikan lähettäminen ja muiden seuraaminen:</b><a class="help" href="#followsettings"></a></p>
+          <label for="editTag">Kartalla näkyvä tunnus: </label><input type="text" name="editTag" id="editTag" value="" size="5" /><br>
+          <label for="editLog">logname: </label><input type="text" name="editLog" id="editLog" value="" size="12" /><br>
+          <label for="editInterval">interval/ms: </label><input type="text" name="editInterval" id="editInterval" value="5000" size="8" /><br>
+          <label for="editUsersTofollow">Seurattavat käyttäjät: </label><input type="text" name="editUsersTofollow" id="editUsersTofollow" value="" size="15"   /><br />
+        </div>
+        <br />
+        <button type="button" onclick="getfollow(); closeDiv('settings');">Hae muiden paikka</button> (jos automaatti ei ole päällä)<br />
+        <br />
+        <input type="checkbox" name="follow" id="follow" value="follow"  />Seuraa muita automaattisesti<br />
+        <input type="checkbox" name="drawLogLine" id="drawLogLine" value="drawLogLine"  />Piirrä viivaa seurattavista<br />
+        <input type="checkbox" id="send" value="send"  />Lähetä omaa paikkaa<br />
+        <hr>
+        <div id="compArea"><p><b>Mittareiden arvot</b> <a class="help" href="#gauges"></a></p>
+          <input type="checkbox" name="useComps" id="useComps" value="useComps"  />Näytä mittarit<br />
+          <div id="showCompsSettings">
+            <input type="checkbox" id="useCompsWindow" value="useCompsWindow"  />Näytä ikkunassa<br />
+            <span><br>Taustan väri: </span> <input type="text" id="editCompsBackground" value="rgba(0,0,0,1.0)"  /><br />
+            <span><br>Fontin väri: </span> <input type="text" id="editCompsColor" value="white"  /><br />
+            <span style="font-size: 10px">Ruksi mittarit joita haluat käyttää</span>
+            <table id="tableCompsSettings">
+            </table>
+          </div>
+        </div>
+        <button class="close" onclick="toggleDiv('settings'); adjustComponents()">Sulje</button>
+      </div>
+      <div id="accountArea">
+        <br />
+
+        <label for="editEmail">Email: </label><input type="text" name="editEmail" id="editEmail" value="" size="25" /><a class="help" href="#userid"></a><br />
+        <label for="editId">id: </label><input type="text" name="editId" id="editId" value="" size="15" /><br />
+        <br />
+        <button id="getId">Hae uusi ID</button><a class="help" href="#userid"></a>
+        <br />
+        <br />
+        <span class="idMsg" id = "idMsg"></span>
+        <br />
+        <button type="button" onclick="toggleDiv('followArea', true); toggleDiv('accountArea', false);" >Palaa seuranta-asetuksiin...</button>
+      </div>
+    </div>
+  </div>
 </div>
 </body>
 </html>
