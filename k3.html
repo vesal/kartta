@@ -945,11 +945,15 @@ function closeParent(element) {
 let mySidenavElem = null;
 let menuElem = null;
 
-function isMenuOpen() {
+function checkMenuElements() {
   if (menuElem === null) {
     menuElem = document.getElementById("menu");
     mySidenavElem = document.getElementById("mySidenav");
   }
+}
+
+function isMenuOpen() {
+  checkMenuElements()
   let s = menuElem.style;
   return s.visibility === "visible";
 }
@@ -966,6 +970,7 @@ function openNav() {
 
 
 function closeNav() {
+  checkMenuElements()
   let s = mySidenavElem.style;
   s.visibility = "hidden";
   s = menuElem.style;
