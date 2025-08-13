@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!--suppress ALL -->
 <html lang="fi">
 <head>
   <meta charset="UTF-8" />
@@ -52,10 +51,9 @@
         cursor: pointer;
         list-style-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7);
         position: relative;
-        padding: 3px 2em 3px 0em;
+        padding: 3px 2em 3px 0;
         font-family: Arial, Helvetica, sans-serif;
         font-size: 1em;
-        cursor: pointer;
     }
 
     .ui-menu li:hover {
@@ -92,9 +90,6 @@
         text-decoration: none !important;
     }
 
-    li.ui-menu-item {
-        line-height: 1.5em;
-    }
 
     #map {
       height: 100%;
@@ -114,7 +109,7 @@
        */
       z-index: 1000;
       background: white;
-      padding: 0px;
+      padding: 0;
       border-radius: 3px;
       /* box-shadow: 0 0 5px rgba(0,0,0,0.3); */
       font-family: Arial, Helvetica, sans-serif;
@@ -177,12 +172,12 @@
 
     .mapType {
       position: absolute;
-      top: 0px;
-      left: 0px;
+      top: 0;
+      left: 0;
       z-index: 1100;
       background: rgba(255,255,255,0.9);
-      padding: 0px;
-      border-radius: 0px;
+      padding: 0;
+      border-radius: 0;
       width: 100%;
     }
     .ui-full-width  {
@@ -211,18 +206,53 @@
 <!-- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> -->
 <script src="js/leaflet.js"></script>
 <script>
+
+function sanitizeInput(input, type = "html") {
+  if (typeof input !== "string") return "";
+
+  switch (type) {
+    case "html": // Näytetään HTML:ssä tekstinä
+      return input
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    case "attr": // HTML-attribuuteissa
+      return input
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+    case "url": // URL-parametreissa
+      return encodeURIComponent(input);
+
+    case "alnum": // Vain kirjaimet ja numerot
+      return input.replace(/[^a-z0-9]/gi, '');
+
+    default:
+      return input;
+  }
+}
+
+
 const helpServerUrl = "https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta";
 function prefixHelpLinks() {
     document.querySelectorAll('a.help').forEach(link => {
         link.target = "help";
         link.innerText = " ?";
-        const hash = link.getAttribute('href');
+        const hash = link.getAttribute('data-href');
         if (hash && hash.startsWith('#')) {
             link.setAttribute('href',  helpServerUrl + hash);
         }
     });
 }
 
+// noinspection TypeScriptUMDGlobal
+const Lef = L;
 
  class MapWrapper {
    // Luo layer-muuttuja, johon asetetaan nykyinen karttalaatta
@@ -233,7 +263,7 @@ function prefixHelpLinks() {
       this.mapModes = mapmodes;
       // this.mapMode = mapModes["OpenStreet"];
       this.mapMode = this.mapModes["b-bark SuomiTopo"];
-      this.map = L.map('map', { zoomControl: false }).setView([60.1699, 24.9384], 13);
+      this.map = Lef.map('map', { zoomControl: false }).setView([60.1699, 24.9384], 13);
       this.pins = [];
       // L.control.zoom({ position: 'topright' }).addTo(map);
     }
@@ -244,7 +274,7 @@ function prefixHelpLinks() {
        zoom = this.map.getZoom();
      }
      if (Array.isArray(coord)) {
-       coord = L.latLng(coord[0], coord[1]);
+       coord = Lef.latLng(coord[0], coord[1]);
      }
      this.map.setView(coord, zoom);
    }
@@ -258,12 +288,13 @@ function prefixHelpLinks() {
    }
 
 
-  static CustomTileLayer = class extends L.GridLayer {
+  static CustomTileLayer = class extends Lef.GridLayer {
     constructor(options, outer) {
       super(options);
       this.outer = outer;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     createTile(coords, done) {
       const tile = document.createElement('img');
       tile.alt = '';
@@ -283,13 +314,18 @@ function prefixHelpLinks() {
 
       return tile;
     }
+
   }; // CustomTileLayer ends
+
 
   // Aluksi luodaan ja lisätään ensimmäinen layer
   setMapMode(modeKey) {
     this.mapMode = this.mapModes[modeKey];
     if (this.currentLayer) {
       this.removeLayer(this.currentLayer);
+    }
+    if (typeof this.mapMode.i !== 'undefined') {
+         this.mapMode.i();
     }
     // Ota oma karttataso käyttöön
     this.currentLayer = new MapWrapper.CustomTileLayer({ attribution: this.mapMode.c }, this);
@@ -321,7 +357,7 @@ function prefixHelpLinks() {
       </svg>
     `;
 
-    return L.divIcon({
+    return Lef.divIcon({
       className: '',
       html: svg,
       iconSize: [32, 48],
@@ -340,7 +376,7 @@ function prefixHelpLinks() {
   }
 
   createPin(coord, label, color, click, text = null) {
-    const pin = L.marker(coord, {icon: this.customPin(label, color)});
+    const pin = Lef.marker(coord, {icon: this.customPin(label, color)});
     pin.addTo(this.map);
     if (text) {
       pin.bindPopup(text);
@@ -359,7 +395,11 @@ function prefixHelpLinks() {
     }
   }
 
-  getPinLocation(pin) {
+  getPinLocation(pin=null) {
+    if (!pin || !pin.getLatLng) {
+      const center = this.map.getCenter();
+      return [center.lat, center.lng];
+    }
     const latLng = pin.getLatLng();
     return [latLng.lat, latLng.lng];
   }
@@ -374,6 +414,26 @@ function prefixHelpLinks() {
 
   on(event, callback) {
     this.map.on(event, callback);
+  }
+
+  setPinOn(pin, eventName, callback) {
+    pin.on(eventName, callback);
+  }
+
+  setLine(line, from, to, options = {}) {
+    const lineOptions = {
+      color: options.color || 'blue',
+      weight: options.weight || 2,
+      opacity: options.opacity || 0.6
+    };
+    if (!line) {
+      line = Lef.polyline([from, to], lineOptions);
+      this.map.addLayer(line);
+    } else {
+      line.setLatLngs([from, to]);
+      if (options) line.setStyle(lineOptions);
+    }
+    return line;
   }
 
  } // MapWrapper ends
@@ -415,54 +475,50 @@ function TileXYToQuadKey(tile) {
 const belectro = {
   link: "https://tanger.belectro.fi/tiles/mmltopo/v9/256/{0}/{2}/{1}?ref=7f2d",
   ok: false,
-  init: function () {
+  init: async function () {
     if (this.ok) return;
     this.ok = true;
-    $.ajax({
-      url: "https://www.mit.jyu.fi/demowww/cyclo/bbark.php",
-      success: function (data) {
-        const bbarkObj = JSON.parse(data);
-        // noinspection JSUnresolvedReference
-        let url = bbarkObj.base_map_groups[0].maps[0].url;
-        url = url.replace("{W}", "256");
-        url = url.replace("{Z}", "{0}");
-        url = url.replace("{Y}", "{2}");
-        url = url.replace("{X}", "{1}");
-        belectro.link = url;
-      },
-      async: false
-    })
+    const response = await fetch("https://www.mit.jyu.fi/demowww/cyclo/bbark.php");
+    const data = await response.text();
+    const bbarkObj = JSON.parse(data);
+    // noinspection JSUnresolvedReference
+    let url = bbarkObj.base_map_groups[0].maps[0].url;
+    url = url.replace("{W}", "256");
+    url = url.replace("{Z}", "{0}");
+    url = url.replace("{Y}", "{2}");
+    url = url.replace("{X}", "{1}");
+    belectro.link = url;
   }
 };
 
  // noinspection CheckImageSize
 const mapModes = {
   "Bing Maps normal"   : { f:function(tile) {
-	                            return String.format("http://ecn.t1.tiles.virtualearth.net/tiles/r{0}?g=1135",TileXYToQuadKey(tile));
+	                            return String.format("https://ecn.t1.tiles.virtualearth.net/tiles/r{0}?g=1135",TileXYToQuadKey(tile));
 							}, c:""},
 	"Bing Maps aerial"   : { f:function(tile) {
 	                            return String.format("https://ecn.t1.tiles.virtualearth.net/tiles/h{0}?g=1135",TileXYToQuadKey(tile));
 							}, c:""},
 	"Google street"      : { f:function(tile) { return String.format("https://mt1.google.com/vt/lyrs=m&z={0}&x={1}&y={2}",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="http://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>'},
+	                         c:'(c) <a href="https://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>'},
 	"Google satellite"   : { f:function(tile) { return String.format("https://mt1.google.com/vt/lyrs=y&z={0}&x={1}&y={2}",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="http://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>'},
+	                         c:'(c) <a href="https://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>'},
 //  "Google Street"      : { f:function(tile) { tile = nokiaConvert(tile); return String.format("https://maps.googleapis.com/maps/api/staticmap?center={1},{2}&zoom={0}&size=256x256&key=AIzaSyCpXjAoV19MUbpGd6e6YD9IketR2Gu-tqc",tile.zoom ,tile.x, tile.y); }, c:""},
 //  "Google satellite"   : { f:function(tile) { tile = nokiaConvert(tile); return String.format("https://maps.googleapis.com/maps/api/staticmap?center={1},{2}&zoom={0}&size=256x256&key=AIzaSyCpXjAoV19MUbpGd6e6YD9IketR2Gu-tqc&maptype=hybrid",tile.zoom ,tile.x, tile.y); }, c:""},
 //    "Nokia"              : { f:function(tile) { tile = nokiaConvert(tile); return String.format("http://m.nok.it/?app_id=_peU-uCkp-j8ovkzFGNU&app_code=gBoUkAMoxoqIWfxWA5DuMQ&h=256&w=256&ctr={1},{2}&z={0}&t=0&nord",tile.zoom ,tile.x, tile.y); }, c:""},
 //	"MapQuest"           : { f:function(tile) { return String.format("http://otile1.mqcdn.com/tiles/1.0.0/map/{0}/{1}/{2}.png",Clip(tile.zoom,0,19) ,tile.x, tile.y); },
 //	                         c:'(c) <a href="http://info.mapquest.com/terms-of-use/" target="_blank">MapQuest</a>'},
 	"OpenStreet"         : { f:function(tile) { return String.format("https://tile.openstreetmap.org/{0}/{1}/{2}.png",tile.zoom,tile.x,tile.y); },
-	                         c:'(c) <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'},
+	                         c:'(c) <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'},
 	"OpenCycle"          : //{ f:function(tile) { return String.format("http://a.tile.opencyclemap.org/cycle/{0}/{1}/{2}.png",tile.zoom ,tile.x, tile.y ); },
 	                         { f:function(tile) { return String.format("https://tile.thunderforest.com/cycle/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="http://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
 	"Landscape"          : { f:function(tile) { return String.format("https://tile.thunderforest.com/landscape/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="http://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
 	"Transport"          : { f:function(tile) { return String.format("https://tile.thunderforest.com/transport/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="http://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
 	"Outdoors"           : { f:function(tile) { return String.format("https://tile.thunderforest.com/outdoors/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="http://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
 	/* Ei voi käyttää, koska ei ole enää saatavilla WGS84, vaan vain EPSG:3067
   "Kapsi peruskartta"  : { f:function(tile) { return getKapsiTilePath(tile); },
 	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
@@ -476,17 +532,17 @@ https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/defa
 https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/12/1116/2297.png?api-key=
 	 */
   "MML maasto"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/maastokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
   "MML tausta"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
   "MML selko"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/selkokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
   "MML ilma"           : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
 	"b-bark SuomiTopo"   : { f:function(tile) {
                             return String.format(belectro.link, tile.zoom, tile.x, tile.y);
 						               },
-	                         c:'<span>Render:</span> <a href="https://www.b-bark.com" target="_blank"><img style="vertical-align:middle" src="css/b_bark_logo.png" width="20%" height="20%"  alt=""/></a><br />(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a><br />',
+	                         c:'<span>Render:</span> <a href="https://www.b-bark.com" target="_blank"><img style="vertical-align:middle" src="css/b_bark_logo.png" width="10%" height="10%"  alt=""/></a> (c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>',
                              i: belectro.init },
   "World Topo Map":      {f: function(tile) {
                             return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{0}/{2}/{1}", tile.zoom, tile.x, tile.y);
@@ -494,7 +550,7 @@ https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/
                           c: '(c) <a href="https://www.esri.com/" target="_blank">Esri</a>'
                           },
   "World Imagery"      : { f:function(tile) { return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{0}/{2}/{1}",tile.zoom ,tile.x, tile.y);},
-	                         c:'(c) <a href="http://www.esri.com/~/media/Files/Pdfs/legal/pdfs/e204_e300.pdf" target="_blank">ArgGIS</a>'},
+	                         c:'(c) <a href="https://www.esri.com/en-us/home" target="_blank">ArgGIS</a>'},
 	"Ilmailu merged"      : { f:function(tile) {
                               const airac = "1806";
                               return String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/merged/256/latest/{0}/{1}/{2}.png', tile.zoom, tile.x, tile.y);
@@ -580,12 +636,6 @@ function crsdist_ell(glat1,glon1,glat2,glon2,ellipse){
   if ( glat1===glat2 && (glon1===glon2 || Math.abs(Math.abs(glon1-glon2)-2*Math.PI) <  EPS) ) {
     //alert("Points 1 and 2 are identical- course undefined")
     return 0.0; // don't care???
-    // noinspection UnreachableCodeJS
-    let out = new MakeArray(0)
-    out.d = 0
-    out.crs12 = 0
-    out.crs21 = Math.PI
-    return out
   }
   r = 1 - f
   tu1 = r * Math.tan (glat1)
@@ -703,6 +753,7 @@ function geocodeQuery(query) {
         // console.log('Löytyi useita tuloksia:', data.length);
         data.forEach((item, i) => {
           // console.log(`${i + 1}: ${item.display_name} — lat: ${item.lat}, lon: ${item.lon}`);
+          // noinspection JSUnresolvedReference
           const pin = createPin([item.lat,item.lon], `s${i+1}`, 'violet', item.display_name);
           searchPins.push(pin)
         });
@@ -740,20 +791,30 @@ function getCoordinateFromText(s) {
   return [lat, lng];
 }
 
+let distanceLine = null;
+
 function calcDistance() {
   let d = 0;
   if ( !hitPin ) return;
+  let from = null;
+  const to = mapWrapper.getPinLocation(hitPin);
   if ( !lastSelected ) {
     if (!lastHitPoint) return;
-    d = WGS84_distance(lastHitPoint, mapWrapper.getPinLocation(hitPin));
+    from = lastHitPoint;
   } else {
     d = WGS84_distance(mapWrapper.getPinLocation(lastSelected), mapWrapper.getPinLocation(hitPin));
+    from = mapWrapper.getPinLocation(lastSelected);
   }
+  d = WGS84_distance(from, to);
   if (!dst) dst = document.getElementById("distance");
   // dst.css( "border" , "3px solid red" );
   dst.innerText = "" + d.toFixed(3) + " km";
+  distanceLine = mapWrapper.setLine(distanceLine, from, to, {
+    color: 'red',
+    weight: 1,
+    opacity: 0.8
+  });
 }
-
 
 
 function selectActivePin(pin, calcDist) {
@@ -778,9 +839,8 @@ function addPinAt(pinLoc) {
 
 
 function addPin() {
-   const s = getPinText().trim();
-   if (s === "") return;
-   if ( !isCoordinate(s) ) return search();
+   const s = getPinText();
+   if ( s !== "" && !isCoordinate(s) ) return search();
    const pin = addPinAt(s);
    mapWrapper.setPinDragging(pin, true);
    if (options.selectNewPin) {
@@ -793,12 +853,14 @@ function addPin() {
 
 function checkAddPinText() {
    let text = "Lisää pinni";
-   if ( !isCoordinate(getPinText()) ) text = "Etsi";
+   const s = getPinText()
+   if ( s !== "" && !isCoordinate(s) ) text = "Etsi";
    document.getElementById('buttonAddPin').innerText = text;
 }
 
  function getPinText() {
-    return document.getElementById('editPinLoc').value.trim();
+    let s = sanitizeInput(document.getElementById('editPinLoc').value.trim());
+    return s;
 }
 
 function setPinText(s) {
@@ -865,6 +927,29 @@ function initializeMapPage() {
     maximumAge: 0
   });
 
+async function getElevation(loc) {
+// Hae korkeus OpenTopoDatasta
+  const url = `https://www.mit.jyu.fi/demowww/cyclo/index.php?elev=${loc[0]},${loc[1]}`;
+  let elevation = ''
+
+  try {
+    const response = await fetch(url);
+    const data = await response.text();
+    const ndata = Number(data);
+
+    if (!isNaN(ndata)) {
+      elevation = ndata.toFixed(0) + " m";
+      // console.log("Korkeus:", elevation);
+
+      // Päivitä pinin teksti näyttämään korkeus (pyöristetty)
+      // hitPin.setIcon(customPin(`${Math.round(elevation)}m`, 'red', 'black'));
+    }
+  } catch (err) {
+    // console.error("Korkeuden haku epäonnistui:", err);
+  }
+  return elevation;
+}
+
 
 mapWrapper.on('click', async (e) => {
   closeNav();
@@ -874,30 +959,18 @@ mapWrapper.on('click', async (e) => {
   if (!hitPin) {
     // Luo hitPin ensimmäisellä klikkauksella
     hitPin = createPin(loc, 'H', 'red');
+    mapWrapper.setPinDragging(hitPin, true);
+    mapWrapper.setPinOn(hitPin, 'dragend', function() {
+      // Kun hitPin on siirretty, päivitetään sen sijainti
+      calcDistance();
+    });
   } else {
     // Siirrä olemassa olevaa hitPiniä uuteen paikkaan
     setHitPinLoc(loc);
   }
   lastHitPoint = loc;
 
-  // Hae korkeus OpenTopoDatasta
-  const url = `https://www.mit.jyu.fi/demowww/cyclo/index.php?elev=${lat},${lng}`;
-  let elevation = ''
-
-  try {
-    const response = await fetch(url);
-    const data = await response.text();
-
-    if (!isNaN(data)) {
-      elevation = Number(data).toFixed(0) + " m";
-      // console.log("Korkeus:", elevation);
-
-      // Päivitä pinin teksti näyttämään korkeus (pyöristetty)
-      // hitPin.setIcon(customPin(`${Math.round(elevation)}m`, 'red', 'black'));
-    }
-  } catch (err) {
-    // console.error("Korkeuden haku epäonnistui:", err);
-  }
+  const elevation = await getElevation(loc);
 
   setPinText(`${lat.toFixed(5)} ${lng.toFixed(5)} H ${elevation}`);
 
@@ -979,7 +1052,7 @@ function closeNav() {
 
 function toggleDiv(divId, force = null) {
   const div = document.getElementById(divId);
-  let show = div.style.display != 'block';
+  let show = div.style.display !== 'block';
   if (force !== null) {
     show = force;
   }
@@ -1002,16 +1075,24 @@ function findMyPlace() {
 
 function toggleFullscreen() {
   const elem = document.documentElement; // Käytetään koko sivua
+
+  // noinspection JSUnresolvedReference
   if (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
     // Poistetaan fullscreen-tila
     if (document.exitFullscreen) {
       document.exitFullscreen();
-    } else if (document.mozCancelFullScreen) { // Firefox
-      document.mozCancelFullScreen();
-    } else if (document.webkitExitFullscreen) { // Chrome, Safari ja Opera
-      document.webkitExitFullscreen();
-    } else if (document.msExitFullscreen) { // IE/Edge
-      document.msExitFullscreen();
+    } else { // noinspection JSUnresolvedReference
+      if (document.mozCancelFullScreen) { // Firefox
+            document.mozCancelFullScreen();
+      } else { // noinspection JSUnresolvedReference
+        if (document.webkitExitFullscreen) { // Chrome, Safari ja Opera
+                    document.webkitExitFullscreen();
+              } else { // noinspection JSUnresolvedReference
+          if (document.msExitFullscreen) { // IE/Edge
+                              document.msExitFullscreen();
+                        }
+        }
+      }
     }
   } else {
     openFullscreen(elem);
@@ -1021,12 +1102,18 @@ function toggleFullscreen() {
 function openFullscreen(elem) {
   if (elem.requestFullscreen) {
     elem.requestFullscreen();
-  } else if (elem.mozRequestFullScreen) { // Firefox
-    elem.mozRequestFullScreen();
-  } else if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
-    elem.webkitRequestFullscreen();
-  } else if (elem.msRequestFullscreen) { // IE/Edge
-    elem.msRequestFullscreen();
+  } else { // noinspection JSUnresolvedReference
+    if (elem.mozRequestFullScreen) { // Firefox
+        elem.mozRequestFullScreen();
+      } else { // noinspection JSUnresolvedReference
+      if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
+              elem.webkitRequestFullscreen();
+            } else { // noinspection JSUnresolvedReference
+        if (elem.msRequestFullscreen) { // IE/Edge
+                      elem.msRequestFullscreen();
+                    }
+      }
+    }
   }
 }
 
@@ -1056,16 +1143,16 @@ window.addEventListener('DOMContentLoaded', initializeMapPage)
   <label class="closebtn" style="visibility: hidden" onclick="closeNav()">&times;</label>
 
   <ul class="ui-menu" id="menu" style="visibility: hidden">
-  <li><span onclick="toggleDiv('settings');">Asetukset...</span> <a class="help" href="#settings"></a></li>
-  <li><span onclick="toggleDiv('findDiv'); closeNav();">Pinnien lisääminen...</span> <a class="help" href="#addpins"></a></li>
-  <li><span onclick="showRoutePane(); closeNav()">Ajo-ohjeet...</span> <a class="help" href="#directions"></a></li>
-  <li><span onclick="toggleDiv('loadTrack'); ">Lataa track-tiedosto...</span> <a class="help" href="#loadtrack"></a></li>
-  <li><span onclick="toggleDiv('trackDiv'); ">Näytä track-tiedot</span> <a class="help" href="#showtrackdetails"></a></li>
-  <li><span onclick="toggleDiv('loadRoute'); ">Lataa reittitiedosto...</span>  <a class="help" href="#loadroute"></a></li>
-  <li><span onclick="toggleDiv('routeDiv'); ">Reitin suunnittelu...</span> <a class="help" href="#routeplan"></a></li>
-  <li><span onclick="toggleDiv('routeRaport'); ">Reittiraportti...</span> <a class="help" href="#routeraport"></a></li>
-  <li><span onclick="toggleDiv('loadAreas'); ">Alueet...</span>  <a class="help" href="#areas"></a></li>
-  <li><span onclick="googleDirections();">Ajo-ohjeet Google Mapsillä</span> <a class="help" href="#googledirections"></a></li>
+  <li><span onclick="toggleDiv('settings');">Asetukset...</span> <a class="help" data-href="#settings"></a></li>
+  <li><span onclick="toggleDiv('findDiv'); closeNav();">Pinnien lisääminen...</span> <a class="help" data-href="#addpins"></a></li>
+  <li><span onclick="showRoutePane(); closeNav()">Ajo-ohjeet...</span> <a class="help" data-href="#directions"></a></li>
+  <li><span onclick="toggleDiv('loadTrack'); ">Lataa track-tiedosto...</span> <a class="help" data-href="#loadtrack"></a></li>
+  <li><span onclick="toggleDiv('trackDiv'); ">Näytä track-tiedot</span> <a class="help" data-href="#showtrackdetails"></a></li>
+  <li><span onclick="toggleDiv('loadRoute'); ">Lataa reittitiedosto...</span>  <a class="help" data-href="#loadroute"></a></li>
+  <li><span onclick="toggleDiv('routeDiv'); ">Reitin suunnittelu...</span> <a class="help" data-href="#routeplan"></a></li>
+  <li><span onclick="toggleDiv('routeRaport'); ">Reittiraportti...</span> <a class="help" data-href="#routeraport"></a></li>
+  <li><span onclick="toggleDiv('loadAreas'); ">Alueet...</span>  <a class="help" data-href="#areas"></a></li>
+  <li><span onclick="googleDirections();">Ajo-ohjeet Google Mapsillä</span> <a class="help" data-href="#googledirections"></a></li>
   <li><span onclick="toggleFullscreen()">Fullscreen</span></li>
   <li><span onclick="toggleDiv('about'); ">Pika-apu...</span></li>
   </ul>
@@ -1079,12 +1166,15 @@ window.addEventListener('DOMContentLoaded', initializeMapPage)
   <label class="closebtn" style="top: -10px" onclick=closeParent(this)>&times;</label>
   <div id="pinDiv" style="margin-left: 35px">
     <!-- <label class="hamburgerSpace"> </label> -->
-    <input type="text" name="editPinLoc" id="editPinLoc" value="Tontuntie"  onkeyup="checkAddPinText()" />
+    <label><!--suppress JSDeprecatedSymbols -->
+      <input type="text" name="editPinLoc" id="editPinLoc" value="Tontuntie"
+           onkeyup="checkAddPinText()"
+           onkeydown="if(event.key === 'Enter') { addPin(); event.preventDefault(); }" /></label>
     <span class ="clearButton" id="buttonClearText" onclick="setPinText('')">x</span>
     <button type="button" id="buttonAddPin" onclick="addPin()">Etsi</button>
-    <a class="help" href="#find"></a>
+    <a class="help" data-href="#find"></a>
     <span id="searchSpan" style="visibility: hidden">
-      <select id="searchCombo" ></select>
+      <label><select id="searchCombo" ></select></label>
       <span class="searchClass" id="searchMsg"></span>
       <label class="closebtn2" style="margin-top: 10px;" onclick="clearSearchResults()">&times;</label>
     </span>
@@ -1112,23 +1202,23 @@ window.addEventListener('DOMContentLoaded', initializeMapPage)
   <label class="closebtn" onclick="toggleDiv('settings'); adjustComponents()">&times;</label>
   <div class="popupIn">
     <h2>Asetukset</h2>
-    <input type="checkbox" id="HCenter" value="HCenter"  />Pidä H keskellä <a class="help" href="#othersettings"></a><br />
+    <label><input type="checkbox" id="HCenter" value="HCenter"  />Pidä H keskellä <a class="help" data-href="#othersettings"></a></label><br />
     <!-- <input type="checkbox" id="showAccuracy" value="showAccuray"  />Näytä tarkkuusympyrä<br /> -->
-    <input type="checkbox" id="readGPS" value="readGPS"  />Lue GPS:ää<br />
-    <input type="checkbox" name="followMe" id="followMe" value="followMe"  />Piirrä oma jälki
-    <input type="text" name="editFollowMeColor" id="editFollowMeColor" value="orange" size="8" />
-    <input type="text" name="editFollowMeWidth" id="editFollowMeWidth" value="3" size="1" /> pt<br />
-    <input type="checkbox" name="selectNewPin" id="selectNewPin" value="selectNewPin"  />Valitse uusi pin aktiiviseksi<br />
+    <label><input type="checkbox" id="readGPS" value="readGPS"  />Lue GPS:ää</label><br />
+    <label><input type="checkbox" name="followMe" id="followMe" value="followMe"  />Piirrä oma jälki</label>
+    <label><input type="text" name="editFollowMeColor" id="editFollowMeColor" value="orange" size="8" /></label>
+    <label><input type="text" name="editFollowMeWidth" id="editFollowMeWidth" value="3" size="1" /> pt</label><br />
+    <label><input type="checkbox" name="selectNewPin" id="selectNewPin" value="selectNewPin"  />Valitse uusi pin aktiiviseksi</label><br />
     <!-- <input type="checkbox" name="useDummyRect" id="useDummyRect" value="useDummyRect"  />Käytä tyhjää hakualuetta (jos ei osaa hakea)<br /> -->
-    <span id="preventSleepSpan"><input type="checkbox" name="preventSleep" id="preventSleep" value="preventSleep"  />Estä näytön sammuminen</span>
+    <span id="preventSleepSpan"><label><input type="checkbox" name="preventSleep" id="preventSleep" value="preventSleep"  />Estä näytön sammuminen</label></span>
     <br /><br />
 
 
     <div class="ui-widget" id="followDiv">
       <div id="followArea">
-        <button type="button" onclick="toggleDiv('followArea', false); toggleDiv('accountArea', true);" >Tilaa käyttäjätunnus (ID)...</button><a class="help" href="#userid"></a>
+        <button type="button" onclick="toggleDiv('followArea', false); toggleDiv('accountArea', true);" >Tilaa käyttäjätunnus (ID)...</button><a class="help" data-href="#userid"></a>
         <hr>
-        <div id="accountArea2"><p><b>Oman paikan lähettäminen ja muiden seuraaminen:</b><a class="help" href="#followsettings"></a></p>
+        <div id="accountArea2"><p><b>Oman paikan lähettäminen ja muiden seuraaminen:</b><a class="help" data-href="#followsettings"></a></p>
           <label for="editTag">Kartalla näkyvä tunnus: </label><input type="text" name="editTag" id="editTag" value="" size="5" /><br>
           <label for="editLog">logname: </label><input type="text" name="editLog" id="editLog" value="" size="12" /><br>
           <label for="editInterval">interval/ms: </label><input type="text" name="editInterval" id="editInterval" value="5000" size="8" /><br>
@@ -1137,16 +1227,16 @@ window.addEventListener('DOMContentLoaded', initializeMapPage)
         <br />
         <button type="button" onclick="getfollow(); closeDiv('settings');">Hae muiden paikka</button> (jos automaatti ei ole päällä)<br />
         <br />
-        <input type="checkbox" name="follow" id="follow" value="follow"  />Seuraa muita automaattisesti<br />
-        <input type="checkbox" name="drawLogLine" id="drawLogLine" value="drawLogLine"  />Piirrä viivaa seurattavista<br />
-        <input type="checkbox" id="send" value="send"  />Lähetä omaa paikkaa<br />
+        <label><input type="checkbox" name="follow" id="follow" value="follow"  />Seuraa muita automaattisesti</label><br />
+        <label><input type="checkbox" name="drawLogLine" id="drawLogLine" value="drawLogLine"  />Piirrä viivaa seurattavista</label><br />
+        <label><input type="checkbox" id="send" value="send"  />Lähetä omaa paikkaa</label><br />
         <hr>
-        <div id="compArea"><p><b>Mittareiden arvot</b> <a class="help" href="#gauges"></a></p>
-          <input type="checkbox" name="useComps" id="useComps" value="useComps"  />Näytä mittarit<br />
+        <div id="compArea"><p><b>Mittareiden arvot</b> <a class="help" data-href="#gauges"></a></p>
+          <label><input type="checkbox" name="useComps" id="useComps" value="useComps"  />Näytä mittarit</label><br />
           <div id="showCompsSettings">
-            <input type="checkbox" id="useCompsWindow" value="useCompsWindow"  />Näytä ikkunassa<br />
-            <span><br>Taustan väri: </span> <input type="text" id="editCompsBackground" value="rgba(0,0,0,1.0)"  /><br />
-            <span><br>Fontin väri: </span> <input type="text" id="editCompsColor" value="white"  /><br />
+            <label><input type="checkbox" id="useCompsWindow" value="useCompsWindow"  />Näytä ikkunassa</label><br />
+            <span><br>Taustan väri: </span> <label><input type="text" id="editCompsBackground" value="rgba(0,0,0,1.0)"  /></label><br />
+            <span><br>Fontin väri: </span> <label><input type="text" id="editCompsColor" value="white"  /></label><br />
             <span style="font-size: 10px">Ruksi mittarit joita haluat käyttää</span>
             <table id="tableCompsSettings">
             </table>
@@ -1157,10 +1247,10 @@ window.addEventListener('DOMContentLoaded', initializeMapPage)
       <div id="accountArea">
         <br />
 
-        <label for="editEmail">Email: </label><input type="text" name="editEmail" id="editEmail" value="" size="25" /><a class="help" href="#userid"></a><br />
+        <label for="editEmail">Email: </label><input type="text" name="editEmail" id="editEmail" value="" size="25" /><a class="help" data-href="#userid"></a><br />
         <label for="editId">id: </label><input type="text" name="editId" id="editId" value="" size="15" /><br />
         <br />
-        <button id="getId">Hae uusi ID</button><a class="help" href="#userid"></a>
+        <button id="getId">Hae uusi ID</button><a class="help" data-href="#userid"></a>
         <br />
         <br />
         <span class="idMsg" id = "idMsg"></span>
