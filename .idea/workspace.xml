@@ -182,7 +182,7 @@
       <workItem from="1754835919103" duration="350000" />
       <workItem from="1754836285386" duration="11554000" />
       <workItem from="1754904718618" duration="251000" />
-      <workItem from="1754904988042" duration="42506000" />
+      <workItem from="1754904988042" duration="55384000" />
     </task>
     <servers />
   </component>
@@ -202,12 +202,6 @@
           <line>571</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="37" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/k3.html</url>
-          <line>883</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="50" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
