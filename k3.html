@@ -4,10 +4,11 @@
   <meta charset="UTF-8" />
   <title>Kartta 2</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <link rel="manifest" href="manifest.json">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
+  <link rel="stylesheet" href="js/leaflet.css"/>
 
   <style>
     html, body {
@@ -206,6 +207,13 @@
       z-index: 3000;
     }
   </style>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/idb-keyval/3.0.1/idb-keyval-iife.min.js"></script>!-->
+<script src="KeyValStore.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('offline-worker.js');
+}
+</script>
 </head>
 <body>
 
@@ -217,6 +225,11 @@
 <script src="js/leaflet.js"></script>
 <script src="js/leaflet.textpath.js"></script>
 <script>
+
+// Globass for databases
+const tileStore = new KeyValStore('kartta-db', 'tiles');
+// const settingsStore = new KeyValStore('kartta-db', 'settings');
+
 
 function sanitizeInput(input, type = "html") {
   if (typeof input !== "string") return "";
@@ -294,6 +307,15 @@ function prefixHelpLinks() {
      this.map.setView(coord, zoom);
    }
 
+   getCenter() {
+     const center = this.map.getCenter();
+     return [center.lat, center.lng];
+   }
+
+   getZoom() {
+      return this.map.getZoom();
+   }
+
    addLayer(layer) {
      this.map.addLayer(layer);
    }
@@ -311,7 +333,7 @@ function prefixHelpLinks() {
     }
 
     // noinspection JSUnusedGlobalSymbols
-    createTile(coords, done) {
+    createTile2(coords, done) {
       const tile = document.createElement('img');
       tile.alt = '';
       tile.setAttribute('role', 'presentation');
@@ -331,12 +353,56 @@ function prefixHelpLinks() {
       return tile;
     }
 
+  createTile(coords, done) {
+    const tile = document.createElement('img');
+    tile.alt = '';
+    tile.setAttribute('role', 'presentation');
+    const tileInfo = { zoom: coords.z, x: coords.x, y: coords.y };
+    const url = this.outer.mapMode.f(tileInfo);
+    tile.crossOrigin = "Anonymous";
+    tile.src = url;
+    tile.onload = () => done(null, tile);
+    tile.onerror = () => done(new Error('Tile load error'), tile);
+
+    if (!options.useCache) {
+      // Do not use cache, always fetch from network
+      return tile;
+    }
+
+    const cacheKey = `${this.outer.mapModeKey}_${coords.z}_${coords.x}_${coords.y}`;
+
+    // Try to get from IndexedDB
+    tileStore.get(cacheKey).then(cached => {
+      if (cached) {
+        tile.src = typeof cached === "string" ? cached : "";
+        return tile;
+      }
+      // Not cached: fetch from network
+      tile.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = tile.width;
+          canvas.height = tile.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(tile, 0, 0);
+          const dataURL = canvas.toDataURL('image/png');
+          tileStore.set(cacheKey, dataURL);
+        } catch (e) {
+          // Ignore storage errors
+        }
+        done(null, tile);
+      };
+    });
+    return tile;
+  }
+
   }; // CustomTileLayer ends
 
 
   // Aluksi luodaan ja lisätään ensimmäinen layer
   setMapMode(modeKey) {
     this.mapMode = this.mapModes[modeKey];
+    this.mapModeKey = modeKey;
     if (this.currentLayer) {
       this.removeLayer(this.currentLayer);
     }
@@ -421,6 +487,22 @@ function prefixHelpLinks() {
     }
     const latLng = pin.getLatLng();
     return [latLng.lat, latLng.lng];
+  }
+
+  getPinLabel(pin) {
+    const element = pin.getElement();
+    if (!element) {
+      return '';
+    }
+    const svg = element.querySelector('svg');
+    if (!svg) {
+      return '';
+    }
+    const textElement = svg.querySelector('text');
+    if (!textElement) {
+      return '';
+    }
+    return textElement.textContent.trim();
   }
 
   setPinDragging(pin, enable) {
@@ -605,7 +687,8 @@ https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/
                           },
   "World Imagery"      : { f:function(tile) { return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{0}/{2}/{1}",tile.zoom ,tile.x, tile.y);},
 	                         c:'(c) <a href="https://www.esri.com/en-us/home" target="_blank">ArgGIS</a>'},
-	"Ilmailu merged"      : { f:function(tile) {
+	/*
+  "Ilmailu merged"      : { f:function(tile) {
                               const airac = "1806";
                               return String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/merged/256/latest/{0}/{1}/{2}.png', tile.zoom, tile.x, tile.y);
                               },
@@ -615,6 +698,7 @@ https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/
 	                             return String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/aero/256/latest/{0}/{1}/{2}.png',tile.zoom ,tile.x, tile.y);
 	                             },
 	                         c:'(c) <a href="https://openflightmaps.org/live/ef-finland/" target="_blank">openflightmaps.org</a>'},
+*/
 /*
 	"Ilmailu base"      : { f:function(tile) {
 	                             var airac = "1806";
@@ -624,11 +708,12 @@ https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/
 */
 };
 
-function Ellipsoid(name, a, invf) {
-  /* constructor */
-  this.name=name
-  this.a=a
-  this.invf=invf
+class Ellipsoid {
+  constructor(name, a, invf) {
+    this.name = name;
+    this.a = a;
+    this.invf = invf;
+  }
 }
 
 const ells = [
@@ -800,7 +885,169 @@ const options = {
   hasWakeLock: false,
   useComps: false,
   useCompsWindow: false,
+  useCache: true,
 };
+
+const areaDatas = [
+  {name: "Ilmatilat", url: "https://flyk.com/api/airspaces.geojson", cb: "area1cb"},
+  {name: "Suplementit", url: "https://flyk.com/api/supplements.geojson", cb: "area2cb"},
+  {name: "Varaukset", url: "https://flyk.com/api/reservations.geojson", cb: "area3cb"},
+];
+
+const params = getUrlVars();
+
+function getUrlVars()
+ {
+   let vars = [], hash;
+   const hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+   for (let i = 0; i < hashes.length; i++) {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+ }
+
+const timers = {
+ follow : { t:null,f:getfollow,interval:1000 },
+ showPosition : { t:null, f:showCurrentPosition,interval:1000},
+ send : { t:null,f:sendPosition,interval:5000 },
+ resend : { t:null,f:sendPosition,interval:200000 },
+ showTime: { t:null,f:setTimeCompsValues,interval:1000 },
+};
+
+function checkTimer(timer, clear) {
+  // if ( timer=="send" && !options.sendPos) return;
+  const tim = timers[timer];
+  if ( options[timer] && !clear)
+     tim.t = setInterval(function(){ tim.f();	}, tim.interval);
+  else
+     clearInterval(tim.t);
+}
+
+function setTimeCompsValues() {
+    const now = new Date();
+    for (let comp of timecomponents) {
+        let v = comp.f(comp, now);
+        if (v === null) continue;
+        comp.span.innerText = v;
+        comp.value = v;
+    }
+}
+
+function displayLoc(e) {
+	if (e.targetType === 'pushpin') displayLocPin(e.target);
+}
+
+function displayLocPin(pin) {
+  if ( !pin ) return;
+  const pinLoc = mapWrapper.getPinLocation(pin);
+  const alt = pinLoc.altitude;
+  let alts = "";
+  if ( !(alt === undefined) ) alts = " " + (alt/3.280839895).toFixed(0) + " m";
+  setPinText(pinLoc[0].toFixed(5) + " " + pinLoc[1].toFixed(5) + " " + mapWrapper.getPinLabel(pin) + alts);
+  calcDistance(-1, -1);
+}
+
+
+function mapMove() {
+  mouseDown = true;
+  const pos = mapWrapper.getCenter();
+  localStorage.lon = pos.longitude;
+  localStorage.lat = pos.latitude;
+  localStorage.zoom = mapWrapper.getZoom();
+  if ( options.HCenter ) {
+     setHitPinLoc(mapWrapper.getCenter(),-1, -1);
+     displayLocPin(hitPin);
+  }
+}
+
+function showCurrentPosition() {
+
+}
+
+function postCyclo(data, callback) {
+  fetch("https://www.mit.jyu.fi/demowww/cyclo/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: Object.keys(data)
+      .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
+      .join("&")
+  })
+  .then(response => response.text())
+  .then(callback);
+}
+
+function getfollow()  {
+  if ( !options.id || !options.email ) return;
+
+  clearError();
+  postCyclo({id: options.id, e: getEmailTag(), f : options.usersTofollow}, setPins(data));
+}
+
+function postPosition(position) {
+    if ( sending ) return;
+    if ( !options.id || !options.email ) return;
+    sending = true;
+   clearError();
+   // var position ="62.4596956,25.7324266,0,433,41478.4036846991,2.390,254.9,3.0,3.0";
+  const pos = fixed(position.coords.latitude, 7) + "," +
+    fixed(position.coords.longitude, 7) + "," +
+    "0" + "," +
+    fixed(((position.coords.altitude) * 3.280839895), 0) + "," +
+    fixed((position.timestamp / 1000 / 3600 / 24) + 25569.00, 10) + "," +
+    fixed(position.coords.speed, 1) + "," +
+    fixed(position.coords.heading, 1) + "," +
+    fixed(position.coords.accuracy, 1) + "," +
+    fixed(position.coords.altitudeAccuracy, 1);
+  const posmsg = fixed(position.coords.latitude, 4) + "," +
+    fixed(position.coords.longitude, 4);
+
+  // let tag = "";
+  // if ( options.tag ) tag = "+" + options.tag;
+
+   if ( lastSend === posmsg ) {
+      setError("");
+      // timers["send"].interval = options.interval;
+      // checkTimer("send",false);
+      // checkTimer("resend",true);
+      sending = false;
+      return;
+   }
+
+   sendCyclo({id: options.id, e: getEmailTag(), d : pos, log:getLogname()},
+    function( data ) {
+      setError(data);
+      // timers["send"].interval = options.interval;
+      // checkTimer("send",false);
+      // checkTimer("resend",true);
+      sending = false;
+      lastSend = posmsg;
+	  }
+	);
+  const c = document.getElementById('coord');
+  c.innerHTML = " " + posmsg;
+}
+
+
+let sending = false;
+let lastGPSCoord;
+
+function sendPosition() {
+   // checkTimer("send",true);
+   // checkTimer("resend",true);
+   clearError();
+   // getLocation();
+   if ( options.send ) {
+       if ( lastGPSCoord )
+          postPosition(lastGPSCoord);
+       else
+          navigator.geolocation.getCurrentPosition(postPosition, errorCallBack, geo_options);
+   }
+ }
+
 
 function isCoordinate(s) {
      if ( s === "" ) return false;
@@ -884,7 +1131,7 @@ function getCoordinateFromText(s) {
   return [lat, lng];
 }
 
-let distanceLines = null;
+let distanceLines = [];
 
 function calcDistance(idx1 = -1000, idx2 = -1000) {
   let d = 0;
@@ -967,9 +1214,9 @@ function checkAddPinText() {
    document.getElementById('buttonAddPin').innerText = text;
 }
 
- function getPinText() {
-    let s = sanitizeInput(document.getElementById('editPinLoc').value.trim());
-    return s;
+function getPinText() {
+  let s = sanitizeInput(document.getElementById('editPinLoc').value.trim());
+  return s;
 }
 
 function setPinText(s) {
@@ -977,13 +1224,17 @@ function setPinText(s) {
     checkAddPinText();
 }
 
-function setHitPinLoc(loc) {
+function setHitPinLoc(loc, idx1 = -1000, idx2 = -1000) {
+  if (!hitPin) return;
   hitPin.setLatLng(loc);
-  calcDistance();
+  calcDistance(idx1, idx2);
 }
 
 
 function initializeMapPage() {
+
+  checkSavedValues();
+
   mapWrapper = new MapWrapper('map', mapModes);
   // Täytetään select-valikko
   const mapSelect = document.getElementById('mapModeSelect');
@@ -1090,6 +1341,8 @@ function initializeMapPage() {
 
   });  // mapWarpper.on end
 
+  mapWrapper.on('move', mapMove);
+
   prefixHelpLinks();
 
   if ( options.id !== "" )
@@ -1105,6 +1358,10 @@ function initializeMapPage() {
       changeSelected(pin, true);
     }
   });
+
+//if ('serviceWorker' in navigator) {
+//  navigator.serviceWorker.register('sw.js');
+//}
 
 } // initializeMapPage ends
 
@@ -1255,6 +1512,255 @@ function adjustComponents() {
 
 window.addEventListener('DOMContentLoaded', initializeMapPage)
 
+function setOption(name,value) {
+  options[name] = value;
+  localStorage.setItem(name,value);
+}
+
+
+function setOptionInt(name,value,def) {
+  const val = parseInt(value) || def;
+  options[name] = val;
+  localStorage.setItem(name, ""+val);
+}
+
+
+function getOptionValue(name) {
+  return localStorage[name];
+}
+
+
+function getOption(name,editName) {
+  const edit = document.getElementById(editName);
+  if (!edit) return;
+  options[name] = params[name] || localStorage.getItem(name) || "";
+	if (options[name] !== "")
+	  edit.value = options[name]; //document.getElementById(edit).value = options[name];
+	// noinspection JSUnusedLocalSymbols
+  edit.addEventListener("change", function(event) {
+    setOption(name, this.value);
+  });
+  setOption(name,edit.value);
+}
+
+
+function getOptionInt(name,editName, def) {
+  const edit = document.getElementById(editName);
+  if (!edit) return;
+  const val = parseInt(localStorage.getItem(name)) || def;
+  options[name] = params[name] || val || def;
+  if (options[name] !== "")
+    edit.vallue = options[name];
+  // noinspection JSUnusedLocalSymbols
+  edit.addEventListener("change", function(event) {
+    setOptionInt(name,this.value, def);
+  });
+  setOptionInt(name,edit.value,def);
+}
+
+
+function getBoolean(s) {
+   if (typeof(s) === typeof true) return s;
+   if ( s === '1') return true;
+   s = s.toUpperCase();
+   if ( s === "TRUE") return true;
+   return s === "YES";
+
+}
+
+
+function setCBOption(name,value) {
+  if ( value === undefined ) return;
+  value = getBoolean(value);
+  options[name] = value;
+  localStorage.setItem(name,value);
+}
+
+
+function getCBOption(name,f) {
+  const cb = document.getElementById(name);
+  if (!cb)
+    return;
+  let value = params[name];
+  if ( value === undefined ) value = getBoolean(localStorage.getItem(name) || options[name] || false);
+  else value = getBoolean(value);
+  options[name]= value;
+  if (options[name]) {
+     cb.checked = true;
+     options[name] = true; // ??? ei kai tarviisi
+  } else options[name] = false;
+
+  // noinspection JSUnusedLocalSymbols
+  cb.addEventListener("click", function(event) {
+    setCBOption(name, this.checked);
+    if (typeof f !== "undefined") f(this.checked);
+  });
+  setCBOption(name,cb.checked);
+}
+
+function changeRaportView() {
+  // TODO: korjaa raportin näkymä
+  /*
+  const sb = document.getElementById("editRaport").style;
+  const ss = document.getElementById("editSmallRaport").style;
+  if ( options.smallRaport ) {
+  //      closeDiv("editRaport");
+  //      openDiv("editSmallRaport");
+    sb.height = "0px";
+    sb.visibility = "hidden";
+    ss.height = "auto";
+    ss.visibility = "inherit";
+  } else {
+    //      openDiv("editRaport");
+    //      closeDiv("editSmallRaport");
+    ss.height = "0px";
+    ss.visibility = "hidden";
+    sb.height = "auto";
+    sb.visibility = "inherit";
+  }
+  */
+}
+
+
+  // Ks: https://github.com/richtr/NoSleep.js/blob/master/src/index.js
+// The wake lock sentinel.
+if ('wakeLock' in navigator) { options.hasWakeLock = true; }
+let wakeLock = null;
+
+// Function that attempts to request a screen wake lock.
+// async // IE11 does not like async, but we manage without it using then and teh fact that this is never called in ie
+function requestWakeLock()  {
+  // alert('Start Wake Lock 2');
+  endWakeLock();
+  if (document.visibilityState === "hidden") return;
+  try {
+    // noinspection JSUnresolvedVariable
+    // wakeLock = await navigator.wakeLock.request('screen'); // does not work on ie
+    // wakeLock.addEventListener('release', function() {/* alert('Screen Wake Lock was released'); */ });
+    // alert('Screen Wake Lock is active');
+    navigator.wakeLock.request('screen').then(function(wl) {
+      wakeLock = wl;
+      wakeLock.addEventListener('release', function() {
+        // alert('Screen Wake Lock was released'); */
+        });
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      // alert('Screen Wake Lock is active');
+    });
+  } catch (err) {
+    alert(err.name + err.message);
+  }
+}
+
+if ('wakeLock' in navigator) {
+  options.hasWakeLock = true;
+}
+
+function handleVisibilityChange() {
+  if (wakeLock !== null && document.visibilityState === 'visible') {
+    requestWakeLock();
+  }
+}
+
+
+function startWakeLock() {
+  // alert('Start Wake Lock 1');
+	requestWakeLock();
+}
+
+
+
+function endWakeLock() {
+   if ( !wakeLock ) return;
+   wakeLock.release();
+   document.removeEventListener('visibilitychange', handleVisibilityChange);
+   wakeLock = null;
+   // alert('Wake Lock released');
+}
+
+
+function checkSleep() {
+   if ( options.preventSleep && options.hasWakeLock ) { startWakeLock(); }
+   if ( !options.preventSleep ) { endWakeLock(); }
+}
+
+
+function checkSavedValues() {
+  if ( !options.hasWakeLock ) {
+    const s = document.getElementById("preventSleepSpan").style;
+    s.visibility = "hidden";
+  }
+
+  getOption("followMeColor","editFollowMeColor");
+  getOptionInt("followMeWidth","editFollowMeWidth", 3);
+
+  getOption("email","editEmail");
+  getOption("id","editId");
+  getOption("usersTofollow","editUsersTofollow");
+  getOption("to","editTo");
+  getOption("from","editFrom");
+  getOption("tpR","editTPR");
+
+  getOption("tag","editTag");
+  getOption("logname","editLog");
+  getOption("interval","editInterval");
+  getOption("trackColors","editTrackColors");
+  getOption("routeColors","editRouteColors");
+
+  getCBOption("follow",function(checked) { checkTimer("follow", !checked); } );
+  getCBOption("followMe",function() { /*checkTimer("followMe");*/ } );
+  getCBOption("selectNewPin",function() { /*checkTimer("followMe");*/ } );
+  // getCBOption("useDummyRect",function() { /*checkTimer("followMe");*/ } );
+  getCBOption("preventSleep",function() { checkSleep(); } );
+  getCBOption("smallRaport",function() { changeRaportView(); } );
+  // getCBOption("showAccuracy");
+  getCBOption("HCenter");
+  getCBOption("send"); // ,sendPosition);
+  getCBOption("drawLogLine");
+  // getCBOption("readGPS",function() { checkTimer("readGPS"); });
+  getCBOption("readGPS",function() { checkGeoLocation(); });
+  getCBOption("useComps",function() { checkShowComponents(); });
+  getCBOption("useCompsWindow");
+
+  const cb1 = document.getElementById('area1cb');
+  const cb2 = document.getElementById('area1cbCopy');
+
+
+
+  for (let area of areaDatas) {
+    getCBOption(area.cb, function() { checkArea(area);});
+    getCBOption(area.cb+ "Own", function() { checkAreaColor(area);});
+    getOption(area.cb + "Opt", area.cb + "Opt")
+  }
+
+  // Sync the two checkboxes
+  cb1.addEventListener('change', syncCheckboxes);
+  cb2.addEventListener('change', syncCheckboxes);
+  function syncCheckboxes(e) {
+      cb1.checked = cb2.checked = e.target.checked;
+      if (e.target === cb2) {
+        // Trigger cb1's change event so all logic runs
+        cb1.dispatchEvent(new Event('click', { bubbles: true }));
+      }
+  }
+  cb2.checked = cb1.checked;
+
+  checkTimer("follow", !options.follow);
+  // checkTimer("readGPS");
+  changeRaportView();
+
+  checkSleep(); // check if use wake lock or not
+
+  /*
+  options.follow=getCookie("follow"); if (options.follow=="true") { document.getElementById('follow').checked = true; options.follow = true; } else options.follow = false;
+  options.showAccuracy=getCookie("showAccuracy"); if (options.showAccuracy=="true") { document.getElementById('showAccuracy').checked = true; options.showAccuracy = true; } else options.showAccuracy = false;
+  options.HCenter=getCookie("HCenter"); if (options.HCenter=="true") { document.getElementById('HCenter').checked = true; options.HCenter = true; } else options.HCenter = false;
+  options.showAccuracy=getCookie("showAccuracy"); if (options.showAccuracy=="true") { document.getElementById('showAccuracy').checked = true; options.showAccuracy = true; } else options.showAccuracy = false;
+  checkTimer("follow");
+  */
+}
+
+
+
 </script>
 <div id="mySidenavHamburger" style="top: 0; left: 0; width: 30px; height: 35px; position: absolute; z-index:3600;  background-color: lightgray;">
   <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;<br></span>
@@ -1402,6 +1908,37 @@ window.addEventListener('DOMContentLoaded', initializeMapPage)
   </div>
 </div>
 
+<div class="popup" id="loadAreas" style=" ">
+  <label class="closebtn" onclick="toggleDiv('loadAreas')">&times;</label>
+  <div class="popupIn">
+    <h2>Alueet</h2>
+    <p>Valitse mitä alueita haluat käyttää</p>
+    <div id="loadAreasIn">
+      <table>
+        <tr><th>Alue</th><th>Oma väritys</th><th>Optiot</th></tr>
+        <tr><td><label><input type="checkbox" name="area1cb" id="area1cb" value="area1" />Alue 1</label></td>
+            <td><label><input type="checkbox" name="area1cbOwn" id="area1cbOwn" value="area1" /></label></td>
+            <td><label><input type="text" name="area1cbOpt" id="area1cbOpt" value="c:gray/60,w:8,f:" /></label></td>
+        </tr>
+        <tr><td><label><input type="checkbox" name="area2cb" id="area2cb" value="area2" />Alue 1</label></td>
+            <td><label><input type="checkbox" name="area2cbOwn" id="area2cbOwn" value="area2" /></label></td>
+            <td><label><input type="text" name="area2cbOpt" id="area2cbOpt" value="c:red/60,w:8,f:red/30" /></label></td>
+        </tr>
+        <tr><td><label><input type="checkbox" name="area3cb" id="area3cb" value="area3" />Alue 1</label></td>
+            <td><label><input type="checkbox" name="area3cbOwn" id="area3cbOwn" value="area3" /></label></td>
+            <td><label><input type="text" name="area3cbOpt" id="area3cbOpt" value="c:red/80,w:8,f:red/30" /></label></td>
+        </tr>
+      </table>
+      <br>
+      <p>Tarkista kuitenkin alueiden korkeudet ja voimassaoloajat <a id="flykLink" href="https://flyk.com/map?lang=fi&pilot#p=7.11/60.837/27.172" target="flyk">FLYK-kartasta</a>!</p>
+      <!--
+      <p>Muut alueet: (kirjoita URL-osoiteet, joista saadaan ladattua alueiden JSONit)</p>
+      <textarea  name="editRaport" id="editLoadAreas" class="loadAreasTextArea"  rows="10">
+      </textarea>
+      -->
+   </div>
+  </div>
+</div>
 
 
 </body>
