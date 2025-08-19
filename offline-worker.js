@@ -1,11 +1,11 @@
 const CACHE_NAME = "k3-cache-v2";
 const FILES_TO_CACHE = [
-  "/k3.html",
-  "/js/leaflet.js",
-  "/js/leaflet.textpath.js",
-  "js/leaflet.css",
-  "/manifest.json",
-  "/offline-worker.js",
+  "./k3.html",
+  "./js/leaflet.js",
+  "./js/leaflet.textpath.js",
+  "./js/leaflet.css",
+  "./manifest.json",
+  "./offline-worker.js",
 ];
 
 self.addEventListener("install", (event) => {
