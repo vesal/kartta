@@ -206,6 +206,20 @@
       right: 0;
       z-index: 3000;
     }
+    button.icon-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      width: auto;
+      height: auto;
+      box-shadow: none;
+      outline: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
   </style>
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/idb-keyval/3.0.1/idb-keyval-iife.min.js"></script>!-->
 <script src="KeyValStore.js"></script>
@@ -262,8 +276,9 @@ function sanitizeInput(input, type = "html") {
   }
 }
 
-
+const cycloServerUrl = "https://www.mit.jyu.fi/demowww/cyclo";
 const helpServerUrl = "https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta";
+
 function prefixHelpLinks() {
     document.querySelectorAll('a.help').forEach(link => {
         link.target = "help";
@@ -418,10 +433,16 @@ function prefixHelpLinks() {
     // map.attributionControl.setAttribution(mapMode.c);
   }
 
-  customPin(label = 'I', color = 'green', baseColor = 'black') {
+  calcPinFontSize(label) {
     let tsize = "16";
     if (label.length > 3) { tsize = "12"; }
     if (label.length >= 5) { tsize = "10"; }
+    return tsize;
+  }
+
+  customPin(label = 'I', color = 'green', baseColor = 'black') {
+    label = label.trim()
+    const tsize = this.calcPinFontSize(label);
     const svg = `
       <svg width="32" height="48" viewBox="0 0 32 48" xmlns="http://www.w3.org/2000/svg">
         <!-- Kolmion muotoinen jalka -->
@@ -480,6 +501,15 @@ function prefixHelpLinks() {
     }
   }
 
+
+  setPinLocation(pin, coord) {
+    if (!pin || !pin.setLatLng) {
+      return;
+    }
+    pin.setLatLng(coord);
+  }
+
+
   getPinLocation(pin=null) {
     if (!pin || !pin.getLatLng) {
       const center = this.map.getCenter();
@@ -487,6 +517,25 @@ function prefixHelpLinks() {
     }
     const latLng = pin.getLatLng();
     return [latLng.lat, latLng.lng];
+  }
+
+  setPinLabel(pin, label) {
+    const element = pin.getElement();
+    if (!element) {
+      return;
+    }
+    const svg = element.querySelector('svg');
+    if (!svg) {
+      return;
+    }
+    const textElement = svg.querySelector('text');
+    if (!textElement) {
+      return;
+    }
+    const s = label.trim();
+    textElement.textContent = s;
+    const fontSize = this.calcPinFontSize(s);
+    textElement.setAttribute('font-size', fontSize);
   }
 
   getPinLabel(pin) {
@@ -517,7 +566,11 @@ function prefixHelpLinks() {
     this.map.on(event, callback);
   }
 
-  setPinOn(pin, eventName, callback) {
+  setPinOn(pin, eventName, callback, remove = false) {
+    if (remove) {
+      pin.off(eventName, callback);
+      return;
+    }
     pin.on(eventName, callback);
   }
 
@@ -614,7 +667,7 @@ const belectro = {
   init: async function () {
     if (this.ok) return;
     this.ok = true;
-    const response = await fetch("https://www.mit.jyu.fi/demowww/cyclo/bbark.php");
+    const response = await fetch(cycloServerUrl + "/bbark.php");
     const data = await response.text();
     const bbarkObj = JSON.parse(data);
     // noinspection JSUnresolvedReference
@@ -852,12 +905,12 @@ function crsdist_ell(glat1,glon1,glat2,glon2,ellipse){
 } // crsdist_ell ends
 
 // Globals:
-let lastSelected = null;
+// let lastSelected = null;
 let myPin = null;
 let hitPin = null;
 let mapWrapper = null;
 let pinNr = 1;
-let dst = null;
+let dstTextElem = null;
 let lastHitPoint = null;
 let searchPins = [];
 
@@ -967,7 +1020,7 @@ function showCurrentPosition() {
 }
 
 function postCyclo(data, callback) {
-  fetch("https://www.mit.jyu.fi/demowww/cyclo/", {
+  fetch(cycloServerUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded"
@@ -1102,6 +1155,49 @@ function geocodeQuery(query) {
     .catch(err => console.error('Virhe:', err));
 }
 
+let _lastSelected = null;
+
+Object.defineProperty(window, 'lastSelected', {
+  get() {
+    return _lastSelected;
+  },
+  set(pin) {
+    setLastSelected(pin);
+  }
+});
+
+function setLastSelected(pin) {
+  _lastSelected = pin;
+  // Tee tässä mitä haluat, esim. loggaa tai muuta logiikkaa
+  const pinButtonsDiv = document.getElementById('pinButtons');
+  if (pin && pin !== myPin && pin !== hitPin) {
+    pinButtonsDiv.style.display = 'inline-block';
+  } else {
+    pinButtonsDiv.style.display = 'none';
+  }
+}
+
+function removePin(pin = lastSelected) {
+  if (pin === myPin || pin === hitPin)  return;
+  if (pin === lastSelected) lastSelected = null;
+  mapWrapper.removePin(pin);
+}
+
+function changePinData(pin = lastSelected, s = null) {
+    if (pin === myPin || pin === hitPin) return;
+    if (s == null) s = getPinText();
+    const last = lastSelected;
+    if (isCoordinate(s)) {
+      removePin(pin);
+      const npin = addPinAt(s);
+      if (last === pin) {
+        changeSelected(npin, true);
+      }
+    } else {
+       mapWrapper.setPinLabel(pin, s);
+    }
+}
+
 function clearSearchResults() {
     if (searchPins.length > 0) {
         searchPins.forEach(pin => {
@@ -1167,16 +1263,19 @@ function calcDistance(idx1 = -1000, idx2 = -1000) {
   for (let i = 0; i < distanceLines.length; i++) {
     if (distanceLines[i].d) sum += distanceLines[i].d;
   }
-  if (!dst) dst = document.getElementById("distance");
-  if (sum !== d) dst.innerText = s + ` = ${sum.toFixed(3)} km`;
-  else dst.innerText = s;
+  if (!dstTextElem) dstTextElem = document.getElementById("distance");
+  if (sum !== d) dstTextElem.innerText = s + ` = ${sum.toFixed(3)} km`;
+  else dstTextElem.innerText = s;
 }
 
 
 function selectActivePin(pin, calcDist) {
   changeSelected(pin, true);
   mapWrapper.selectPin(pin, true);
-  if ( calcDist ) calcDistance();
+  if ( calcDist ) {
+    mapWrapper.setPinOn(pin, 'drag', calcDistance);
+    calcDistance();
+  }
 }
 
 function addPinAt(pinLoc) {
@@ -1226,7 +1325,7 @@ function setPinText(s) {
 
 function setHitPinLoc(loc, idx1 = -1000, idx2 = -1000) {
   if (!hitPin) return;
-  hitPin.setLatLng(loc);
+  mapWrapper.setPinLocation(hitPin, loc);
   calcDistance(idx1, idx2);
 }
 
@@ -1275,10 +1374,7 @@ function initializeMapPage() {
   navigator.geolocation.watchPosition(function(pos) {
     const lat = pos.coords.latitude;
     const lng = pos.coords.longitude;
-
-    if (myPin) {
-      myPin.setLatLng([lat, lng]);
-    }
+    mapWrapper.setPinLocation([lat, lng]);
   }, function(err) {
     console.error("Sijainnin päivitys epäonnistui:", err);
   }, {
@@ -1289,7 +1385,7 @@ function initializeMapPage() {
 
   async function getElevation(loc) {
   // Hae korkeus OpenTopoDatasta
-    const url = `https://www.mit.jyu.fi/demowww/cyclo/index.php?elev=${loc[0]},${loc[1]}`;
+    const url = cycloServerUrl + `/index.php?elev=${loc[0]},${loc[1]}`;
     let elevation = ''
 
     try {
@@ -1318,7 +1414,13 @@ function initializeMapPage() {
     const loc = [lat, lng];
     if (!hitPin) {
       // Luo hitPin ensimmäisellä klikkauksella
-      hitPin = createPin(loc, 'H', 'red');
+      hitPin = mapWrapper.createPin(loc, 'H', 'red', function() {
+        lastHitPoint = mapWrapper.getPinLocation(hitPin);
+        calcDistance();
+        // setPinText(`${lastHitPoint[0].toFixed(5)} ${lastHitPoint[1].toFixed(5)} Hi`);
+        // calcDistance();
+        // lastHitPoint = mapWrapper.getPinLocation(hitPin);
+      });
       mapWrapper.setPinDragging(hitPin, true);
       mapWrapper.setPinOn(hitPin, 'dragend', function() {
         // Kun hitPin on siirretty, päivitetään sen sijainti
@@ -1327,10 +1429,21 @@ function initializeMapPage() {
       });
       mapWrapper.setPinOn(hitPin, 'drag', function() {
         // Kun hitPin on siirretty, päivitetään sen sijainti
+        const loc = mapWrapper.getPinLocation(hitPin);
+        setPinText(`${loc[0].toFixed(5)} ${loc[1].toFixed(5)} H`);
+        calcDistance(-1, -1);
+      });
+      mapWrapper.setPinOn(hitPin, 'drag', function() {
+        // Kun hitPin on siirretty, päivitetään sen sijainti
+        const loc = mapWrapper.getPinLocation(hitPin);
+        setPinText(`${loc[0].toFixed(5)} ${loc[1].toFixed(5)} H`);
         calcDistance(-1, -1);
       });
     } else {
       // Siirrä olemassa olevaa hitPiniä uuteen paikkaan
+      if (distanceLines.length > 0) {
+        lastHitPoint = distanceLines[distanceLines.length - 1].to;
+      }
       setHitPinLoc(loc);
     }
     lastHitPoint = loc;
@@ -1369,16 +1482,22 @@ function initializeMapPage() {
 function changeSelected(pin, selected=true) {
   if (lastSelected === pin) { // Jos sama pin on jo valittu, poistetaan valinta
     mapWrapper.selectPin(pin, false);
-    lastSelected = null;
+    mapWrapper.setPinOn(lastSelected, 'drag', calcDistance, true);
+    window.lastSelected = null;
     return;
   }
 
   if (lastSelected) {
     mapWrapper.selectPin(lastSelected, false);
+    mapWrapper.setPinOn(lastSelected, 'drag', calcDistance, true);
   }
   lastSelected = pin;
   if (pin)  {
     mapWrapper.selectPin(pin, selected);
+  }
+  if (selected) {
+    mapWrapper.setPinOn(pin, 'drag', calcDistance);
+    displayLocPin(pin);
   }
 }
 
@@ -1684,6 +1803,11 @@ function checkSleep() {
 }
 
 
+function removeDistance() {
+    mapWrapper.removeLines(distanceLines);
+    lastHitPoint = mapWrapper.getPinLocation(hitPin);
+}
+
 function checkSavedValues() {
   if ( !options.hasWakeLock ) {
     const s = document.getElementById("preventSleepSpan").style;
@@ -1800,6 +1924,24 @@ function checkSavedValues() {
            onkeydown="if(event.key === 'Enter') { addPin(); event.preventDefault(); }" /></label>
     <span class ="clearButton" id="buttonClearText" onclick="setPinText('')">x</span>
     <button type="button" id="buttonAddPin" onclick="addPin()">Etsi</button>
+    <span id="pinButtons" style="display: none;">
+      <button title="Vaihda pinnin tiedot" class="icon-btn" onclick="changePinData()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2">
+          <path d="M3 17.25V21h3.75l11.06-11.06-3.75-3.75L3 17.25z"/>
+          <path d="M20.71 7.04a1 1 0 0 0 0-1.42l-2.34-2.34a1 1 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
+        </svg>
+      </button>
+      <button title="Poista pinni" class="icon-btn"  onclick="removePin()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="6" width="18" height="15" rx="2"/>
+          <line x1="9" y1="10" x2="9" y2="19"/>
+          <line x1="15" y1="10" x2="15" y2="19"/>
+          <line x1="4" y1="6" x2="20" y2="6"/>
+          <line x1="10" y1="3" x2="14" y2="3"/>
+          <line x1="12" y1="3" x2="12" y2="6"/>
+        </svg>
+      </button>
+    </span>
     <a class="help" data-href="#find"></a>
     <div style="display: inline-block; margin-left: 10px; white-space: nowrap;">
       <span id="searchSpan" style="visibility: hidden; display: none;">
@@ -1818,7 +1960,7 @@ function checkSavedValues() {
   <div class="mapType">
       <div class="ui-widget" style="z-index: 1001;">
         <label class="hamburgerSpace"><select id="mapModeSelect"></select></label>&nbsp;
-        <span  id="distance" onclick="mapWrapper.removeLines(distanceLines)">0 km</span>
+        <span  id="distance" onclick="removeDistance()">0 km</span>
       </div>
     </div>
     <div class="area1CBcopy">
