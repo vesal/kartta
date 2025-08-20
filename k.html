@@ -406,11 +406,21 @@ function GetMap() {
 
 let routeOptions = {w:3};
 
+function getValueFromParamsOrStrore(name, def) {
+  const candidates = [params[name], localStorage[name]];
+  for (const val of candidates) {
+    if (val !== undefined && val !== null && val !== "undefined" && val !== "") {
+      return Number(val);
+    }
+  }
+  return def;
+}
+
 function ContinueGetMap() {
   // Initialize the map
-  const pzoom = parseInt(params["zoom"]) || parseInt(localStorage.zoom) || 8;
-  const lon = params["lon"] || localStorage.lon || 25.75;
-  const lat = params["lat"] || localStorage.lat || 62.25;
+  const pzoom = parseInt(getValueFromParamsOrStrore("zoom", 8));
+  const lon = getValueFromParamsOrStrore("lon", 25.75); // params["lon"] || localStorage.lon || 25.75;
+  const lat = getValueFromParamsOrStrore("lat", 62.25); // params["lat"] || localStorage.lat || 62.25;
   const load = params["load"] || localStorage.load || "";
   const route = params["route"] || localStorage.route || "";
   routeOptions = makeJSON(params["routeoptions"] || localStorage.routeOptions || "", 0, routeOptions);
