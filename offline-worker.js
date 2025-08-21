@@ -33,8 +33,21 @@ self.addEventListener("fetch", (event) => {
   const fileName = url.pathname.split("/").pop();
 
   if (FILE_NAMES.includes(fileName)) {
+    const cacheUrl = new URL(event.request.url);
+    cacheUrl.search = "";
+    const cacheRequest = new Request(cacheUrl, {
+      method: event.request.method,
+      headers: event.request.headers,
+      mode: event.request.mode,
+      credentials: event.request.credentials,
+      redirect: event.request.redirect,
+      referrer: event.request.referrer,
+      referrerPolicy: event.request.referrerPolicy,
+      integrity: event.request.integrity,
+      cache: event.request.cache,
+    });
     event.respondWith(
-      caches.match(event.request).then((response) => {
+      caches.match(cacheRequest).then((response) => {
         if (response) {
           if (DEBUG) console.log("Haettu cachesta:", event.request.url);
           return response;
