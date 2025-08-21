@@ -1,7 +1,8 @@
 {
   "name": "Kartta App",
-  "short_name": "Kartta",
-  "start_url": "/k3.html",
+  "short_name": "Kartta3",
+  "start_url": "./k3.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff"
 }
