@@ -1589,7 +1589,23 @@ function checkSavedValues() {
   */
 }
 
-
+async function clearServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    // Unregister all service workers for this origin
+    const regs = await navigator.serviceWorker.getRegistrations();
+    for (let reg of regs) {
+      await reg.unregister();
+    }
+    // Optionally, clear caches
+    if ('caches' in window) {
+      const names = await caches.keys();
+      for (let name of names) {
+        await caches.delete(name);
+      }
+    }
+    alert('Virkistä sivu jos tulisi uusi versio');
+  }
+}
 
 </script>
 <div id="mySidenavHamburger" style="top: 0; left: 0; width: 30px; height: 35px; position: absolute; z-index:3600;  background-color: lightgray;">
@@ -1689,7 +1705,8 @@ function checkSavedValues() {
     <label><input type="checkbox" name="selectNewPin" id="selectNewPin" value="selectNewPin"  />Valitse uusi pin aktiiviseksi</label><br>
     <!-- <input type="checkbox" name="useDummyRect" id="useDummyRect" value="useDummyRect"  />Käytä tyhjää hakualuetta (jos ei osaa hakea)<br> -->
     <span id="preventSleepSpan"><label><input type="checkbox" name="preventSleep" id="preventSleep" value="preventSleep"  />Estä näytön sammuminen</label></span><br>
-    <span id="spanUseCache"><label><input type="checkbox" name="useCache" id="useCache" value="useCache"  />Käytä paikallista muistia <a class="help" data-href="#usecache"></a></label></span><br>
+    <span id="spanUseCache"><label><input type="checkbox" name="useCache" id="useCache" value="useCache"  />Käytä paikallista muistia <a class="help" data-href="#usecache"></a></label></span>
+    <button id="clear-worker" onclick="clearServiceWorker()">Tarkista uusi versio</button><br>
     <label><input type="checkbox" id="drawDistanceLine" value="drawDistanceLine"  />Piirrä mittaviivaa</label>
     <label><input type="checkbox" id="calcDistanceSum" value="calcDistanceSum"  />Laske summaa <a class="help" data-href="#addpins"></a></label><br>
     <br><br>
