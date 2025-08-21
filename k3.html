@@ -1603,7 +1603,7 @@ async function clearServiceWorker() {
         await caches.delete(name);
       }
     }
-    alert('Virkistä sivu jos tulisi uusi versio');
+    location.reload(); // Reload the page to ensure everything is reset
   }
 }
 
