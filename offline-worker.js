@@ -38,7 +38,6 @@ self.addEventListener("fetch", (event) => {
     const cacheRequest = new Request(cacheUrl, {
       method: event.request.method,
       headers: event.request.headers,
-      mode: event.request.mode,
       credentials: event.request.credentials,
       redirect: event.request.redirect,
       referrer: event.request.referrer,
