@@ -140,7 +140,7 @@
 
     @media (max-width: 600px) {
       #editPinLoc {
-        width: 180px; /* smaller for mobile */
+        width: 170px; /* smaller for mobile */
       }
     }
 
@@ -238,6 +238,7 @@ if ('serviceWorker' in navigator) {
 
 <script src="js/leaflet.js"></script>
 <script src="js/leaflet.textpath.js"></script>
+<script src="MapWrapperLeafLet.js"></script>
 <script>
 
 // Globass for databases
@@ -291,341 +292,6 @@ function prefixHelpLinks() {
 }
 
 
- class MapWrapper {
-  /**
-   * @typedef {Object} Polyline
-   * @property {function(string, Object=): any} setText
-   */
-   // Luo layer-muuttuja, johon asetetaan nykyinen karttalaatta
-
-
-    constructor(containerId, mapmodes) {
-      // noinspection TypeScriptUMDGlobal
-      this.L = L;
-      this.currentLayer = null;
-      this.mapModes = mapmodes;
-      // this.mapMode = mapModes["OpenStreet"];
-      this.mapMode = this.mapModes["b-bark SuomiTopo"];
-      this.map = this.L.map('map', { zoomControl: false }).setView([60.1699, 24.9384], 13);
-      this.pins = [];
-      // L.control.zoom({ position: 'topright' }).addTo(map);
-    }
-
-
-   setView(coord, zoom=null) {
-     if (zoom === null) {
-       zoom = this.map.getZoom();
-     }
-     if (Array.isArray(coord)) {
-       coord = this.L.latLng(coord[0], coord[1]);
-     }
-     this.map.setView(coord, zoom);
-   }
-
-   getCenter() {
-     const center = this.map.getCenter();
-     return [center.lat, center.lng];
-   }
-
-   getZoom() {
-      return this.map.getZoom();
-   }
-
-   addLayer(layer) {
-     this.map.addLayer(layer);
-   }
-
-   removeLayer(layer) {
-     this.map.removeLayer(layer);
-   }
-
-
-  // noinspection TypeScriptUMDGlobal
-  static CustomTileLayer = class extends L.GridLayer {
-    constructor(options, outer) {
-      super(options);
-      this.outer = outer;
-    }
-
-    // noinspection JSUnusedGlobalSymbols
-    createTile2(coords, done) {
-      const tile = document.createElement('img');
-      tile.alt = '';
-      tile.setAttribute('role', 'presentation');
-
-      // Käytetään sun omaa URL-funktiota
-      const tileInfo = {
-        zoom: coords.z,
-        x: coords.x,
-        y: coords.y
-      };
-      tile.src = this.outer.mapMode.f(tileInfo);
-
-      // Kun kuva latautuu tai epäonnistuu, kerrotaan Leafletille
-      tile.onload = () => done(null, tile);
-      tile.onerror = () => done(new Error('Tile load error'), tile);
-
-      return tile;
-    }
-
-  createTile(coords, done) {
-    const tile = document.createElement('img');
-    tile.alt = '';
-    tile.setAttribute('role', 'presentation');
-    const tileInfo = { zoom: coords.z, x: coords.x, y: coords.y };
-    const url = this.outer.mapMode.f(tileInfo);
-    tile.crossOrigin = "Anonymous";
-    tile.src = url;
-    tile.onload = () => done(null, tile);
-    tile.onerror = () => done(new Error('Tile load error'), tile);
-
-    if (!options.useCache) {
-      // Do not use cache, always fetch from network
-      return tile;
-    }
-
-    const cacheKey = `${this.outer.mapModeKey}_${coords.z}_${coords.x}_${coords.y}`;
-
-    // Try to get from IndexedDB
-    tileStore.get(cacheKey).then(cached => {
-      if (cached) {
-        tile.src = typeof cached === "string" ? cached : "";
-        return tile;
-      }
-      // Not cached: fetch from network
-      tile.onload = () => {
-        try {
-          const canvas = document.createElement('canvas');
-          canvas.width = tile.width;
-          canvas.height = tile.height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(tile, 0, 0);
-          const dataURL = canvas.toDataURL('image/png');
-          tileStore.set(cacheKey, dataURL);
-        } catch (e) {
-          // Ignore storage errors
-        }
-        done(null, tile);
-      };
-    });
-    return tile;
-  }
-
-  }; // CustomTileLayer ends
-
-
-  // Aluksi luodaan ja lisätään ensimmäinen layer
-  setMapMode(modeKey) {
-    this.mapMode = this.mapModes[modeKey];
-    this.mapModeKey = modeKey;
-    if (this.currentLayer) {
-      this.removeLayer(this.currentLayer);
-    }
-    if (typeof this.mapMode.i !== 'undefined') {
-         this.mapMode.i();
-    }
-    // Ota oma karttataso käyttöön
-    this.currentLayer = new MapWrapper.CustomTileLayer({ attribution: this.mapMode.c }, this);
-    this.addLayer(this.currentLayer);
-
-    // Päivitä attribution-kenttä Leafletin oikeaan alakulmaan
-    this.map.attributionControl.setPrefix(false);
-    // map.attributionControl.setAttribution(mapMode.c);
-  }
-
-  calcPinFontSize(label) {
-    let tsize = "16";
-    if (label.length > 3) { tsize = "12"; }
-    if (label.length >= 5) { tsize = "10"; }
-    return tsize;
-  }
-
-  customPin(label = 'I', color = 'green', baseColor = 'black') {
-    label = label.trim()
-    const tsize = this.calcPinFontSize(label);
-    const svg = `
-      <svg width="32" height="48" viewBox="0 0 32 48" xmlns="http://www.w3.org/2000/svg">
-        <!-- Kolmion muotoinen jalka -->
-        <path d="M 3 16 L 16 48 L 29 16 Z" fill="${baseColor}" />
-        <!-- Eri värinen valinta-alue -->
-        <path id="pin-foot" d="M 4 15 L 16 47 L 28 15 Z" fill="red" style="visibility:hidden;" />
-        <!-- Iso musta ympyrä -->
-        <circle cx="16" cy="16" r="16" fill="${baseColor}" />
-        <!-- Sisempi värillinen ympyrä -->
-        <circle cx="16" cy="16" r="14" fill="${color}" />
-        <!-- Valkoinen teksti keskellä -->
-        <text x="16" y="16" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="${tsize}" fill="white" dominant-baseline="middle">
-          ${label}
-        </text>
-      </svg>
-    `;
-
-    return this.L.divIcon({
-      className: '',
-      html: svg,
-      iconSize: [32, 48],
-      iconAnchor: [16, 48], // kärki osoittaa koordinaattiin
-      popupAnchor: [0, -48]
-    });
-  }  // customPin ends
-
-  selectPin(pin, selected) {
-    const element = pin.getElement();
-    if (!element) {
-      return;
-    }
-    const svg = element.querySelector('svg');
-    const foot = svg.querySelector('#pin-foot');
-    if (foot) {
-      foot.style.visibility = selected ? 'visible' : 'hidden';
-    }
-  }
-
-  createPin(coord, label, color, click, text = null) {
-    const pin = this.L.marker(coord, {icon: this.customPin(label, color)});
-    pin.addTo(this.map);
-    if (text) {
-      pin.bindPopup(text);
-    }
-    pin.on('click', function() {
-      click(pin);
-    });
-    return pin;
-  }
-
-  removePin(pin) {
-    this.map.removeLayer(pin);
-    const index = this.pins.indexOf(pin);
-    if (index > -1) {
-      this.pins.splice(index, 1);
-    }
-  }
-
-
-  setPinLocation(pin, coord) {
-    if (!pin || !pin.setLatLng) {
-      return;
-    }
-    pin.setLatLng(coord);
-  }
-
-
-  getPinLocation(pin=null) {
-    if (!pin || !pin.getLatLng) {
-      const center = this.map.getCenter();
-      return [center.lat, center.lng];
-    }
-    const latLng = pin.getLatLng();
-    return [latLng.lat, latLng.lng];
-  }
-
-  setPinLabel(pin, label) {
-    const element = pin.getElement();
-    if (!element) {
-      return;
-    }
-    const svg = element.querySelector('svg');
-    if (!svg) {
-      return;
-    }
-    const textElement = svg.querySelector('text');
-    if (!textElement) {
-      return;
-    }
-    const s = label.trim();
-    textElement.textContent = s;
-    const fontSize = this.calcPinFontSize(s);
-    textElement.setAttribute('font-size', fontSize);
-  }
-
-  getPinLabel(pin) {
-    const element = pin.getElement();
-    if (!element) {
-      return '';
-    }
-    const svg = element.querySelector('svg');
-    if (!svg) {
-      return '';
-    }
-    const textElement = svg.querySelector('text');
-    if (!textElement) {
-      return '';
-    }
-    return textElement.textContent.trim();
-  }
-
-  setPinDragging(pin, enable) {
-    if (enable) {
-      pin.dragging.enable();
-    } else {
-      pin.dragging.disable();
-    }
-  }
-
-  on(event, callback) {
-    this.map.on(event, callback);
-  }
-
-  setPinOn(pin, eventName, callback, remove = false) {
-    if (remove) {
-      pin.off(eventName, callback);
-      return;
-    }
-    pin.on(eventName, callback);
-  }
-
-  addLines(lines, from, to, options = {}, text = null) {
-    if (!lines) {
-      lines = [];
-    }
-    const lineOptions = {
-      color: options.color || 'blue',
-      weight: options.weight || 2,
-      opacity: options.opacity || 0.6
-    };
-    let line;
-    // if (!line) {
-      line = this.L.polyline([from, to], lineOptions);
-      line.from = from;
-      line.to = to;
-      this.map.addLayer(line);
-    // } else {
-    //  line.setLatLngs([from, to]);
-    //  if (options) line.setStyle(lineOptions);
-    // }
-    line.setText("", {});
-    if (text) {
-      let flip = 'normal';
-      let offset = -3;
-      if (to[1] < from[1]) {
-         flip = 'flip';
-         offset = 12;
-      }
-      const opts = {repeat: false, center: true, offset: offset}
-      if (flip === 'flip') opts.orientation = 'flip';
-      line.setText(text, opts);
-    }
-    lines.push(line);
-    return lines;
-  }
-
-  removeLines(lines, idx1 = 0, idx2 = 10000) {
-    if (!lines || lines.length === 0) return;
-    if (idx1 >= lines.length) return;
-    if (idx1 < 0) idx1 = lines.length + idx1;
-    if (idx2 < 0) idx2 = lines.length + idx2;
-    if (idx1 >= lines.length) return;
-    if (idx2 < 0) return;
-    if (idx1 < 0) idx1 = 0;
-    if (idx2 >= lines.length) idx2 = lines.length - 1;
-    for (let i = idx1; i <= idx2; i++) {
-      this.map.removeLayer(lines[i]);
-    }
-    lines.splice(idx1, idx2 - idx1 + 1); // poista vastaavat taulukosta
-  }
-
-
- } // MapWrapper ends
 
 
 
@@ -912,6 +578,7 @@ let mapWrapper = null;
 let pinNr = 1;
 let dstTextElem = null;
 let lastHitPoint = null;
+let hitPinXY = [100,100];
 let searchPins = [];
 
 const options = {
@@ -931,7 +598,8 @@ const options = {
   preventSleep: true,
   smallRaport: false,
   drawLogLine: false,
-  HCenter: true,
+  HStationary: true,
+  HCenter: false,
   showAccuracy: true,
   extra: false,
   tpR: "0",
@@ -939,6 +607,8 @@ const options = {
   useComps: false,
   useCompsWindow: false,
   useCache: true,
+  drawDistanceLine: true,
+  calcDistanceSum: true,
 };
 
 const areaDatas = [
@@ -998,7 +668,7 @@ function displayLocPin(pin) {
   const alt = pinLoc.altitude;
   let alts = "";
   if ( !(alt === undefined) ) alts = " " + (alt/3.280839895).toFixed(0) + " m";
-  setPinText(pinLoc[0].toFixed(5) + " " + pinLoc[1].toFixed(5) + " " + mapWrapper.getPinLabel(pin) + alts);
+  setPinInputText(pinLoc[0].toFixed(5) + " " + pinLoc[1].toFixed(5) + " " + mapWrapper.getPinLabel(pin) + alts);
   calcDistance(-1, -1);
 }
 
@@ -1011,6 +681,10 @@ function mapMove() {
   localStorage.zoom = mapWrapper.getZoom();
   if ( options.HCenter ) {
      setHitPinLoc(mapWrapper.getCenter(),-1, -1);
+     displayLocPin(hitPin);
+  } else if (options.HStationary) {
+     const loc = mapWrapper.getXYCoord(hitPinXY);
+     setHitPinLoc(loc, -1, -1);
      displayLocPin(hitPin);
   }
 }
@@ -1183,21 +857,6 @@ function removePin(pin = lastSelected) {
   mapWrapper.removePin(pin);
 }
 
-function changePinData(pin = lastSelected, s = null) {
-    if (pin === myPin || pin === hitPin) return;
-    if (s == null) s = getPinText();
-    const last = lastSelected;
-    if (isCoordinate(s)) {
-      removePin(pin);
-      const npin = addPinAt(s);
-      if (last === pin) {
-        changeSelected(npin, true);
-      }
-    } else {
-       mapWrapper.setPinLabel(pin, s);
-    }
-}
-
 function clearSearchResults() {
     if (searchPins.length > 0) {
         searchPins.forEach(pin => {
@@ -1213,7 +872,7 @@ function search() {
     //Remove any previous results from the map.
     clearSearchResults();
     //Get the users query and geocode it.
-    const query = getPinText();
+    const query = getPinInputText();
     geocodeQuery(query);
 }
 
@@ -1240,12 +899,14 @@ function calcDistance(idx1 = -1000, idx2 = -1000) {
     }
   }
   const to = mapWrapper.getPinLocation(hitPin);
-  if ( !lastSelected ) {
+  if ( lastSelected ) {
+    from = mapWrapper.getPinLocation(lastSelected);
+    mapWrapper.removeLines(distanceLines);
+  } else {
     if (!lastHitPoint) return;
     from = lastHitPoint;
-  } else {
-    d = WGS84_distance(mapWrapper.getPinLocation(lastSelected), mapWrapper.getPinLocation(hitPin));
-    from = mapWrapper.getPinLocation(lastSelected);
+  }
+  if (!options.calcDistanceSum) {
     mapWrapper.removeLines(distanceLines);
   }
   d = WGS84_distance(from, to);
@@ -1256,7 +917,7 @@ function calcDistance(idx1 = -1000, idx2 = -1000) {
     color: 'red',
     weight: 1,
     opacity: 0.8
-  }, s);
+  }, s, options.drawDistanceLine);
   const line = distanceLines[distanceLines.length - 1];
   line.d = d;
   line.deg = deg;
@@ -1278,47 +939,79 @@ function selectActivePin(pin, calcDist) {
   }
 }
 
-function addPinAt(pinLoc) {
-  let center = mapWrapper.getPinLocation(hitPin);
-  let name = "" + pinNr;
-  if ( pinLoc !== "" ) {
-    const latLongArray = (pinLoc).split(/[\s,]+/);
-    center = getCoordinateFromText(pinLoc);
-    name = latLongArray[2];
-    if ( name === undefined || name === "H" || name === "" ) name = ""+pinNr++;
-  }
-  else pinNr++;
-
-  return createPin(center, name, 'blue');
+function getPinValues(pinLoc, defLoc=null, defLabel=null) {
+  if (!pinLoc) return [defLoc, defLabel];
+  let name = defLabel;
+  const latLongArray = pinLoc.split(/[\s,]+/);
+  let loc = getCoordinateFromText(pinLoc);
+  if (!loc) loc = defLoc;
+  if (latLongArray.length >= 3) name = latLongArray[2];
+  if ( name === undefined || name === "H" || name === "" )
+      name = defLabel;
+  return [loc, name];
 }
 
 
+function addPinAt(pinLoc, label = null) {
+  /*
+  let loc = mapWrapper.getPinLocation(hitPin);
+  let name = "" + pinNr;
+  if (pinLoc) {
+    const latLongArray = (pinLoc).split(/[\s,]+/);
+    loc = getCoordinateFromText(pinLoc);
+    if (latLongArray.length >= 3) name = latLongArray[2];
+    if ( name === undefined || name === "H" || name === "" )
+      if (label) name = label; else name = ""+pinNr++;
+  }
+  else pinNr++;
+  */
+  let [loc, name] = getPinValues(pinLoc, mapWrapper.getPinLocation(hitPin), label);
+  if (!loc) return null;
+  if (!name) name = "" + pinNr++;
+
+  return createPin(loc, name, 'blue');
+}
+
+
+function changePinData(pin = lastSelected, s = null) {
+    if (pin === myPin || pin === hitPin) return;
+    if (s == null) s = getPinInputText();
+    if (isCoordinate(s)) {
+      const [loc, label] = getPinValues(s, null, null);
+      if (loc) mapWrapper.setPinLocation(pin, loc);
+      if (label) mapWrapper.setPinLabel(pin, label);
+    } else {
+       mapWrapper.setPinLabel(pin, s);
+    }
+}
+
+
+
 function addPin() {
-   const s = getPinText();
+   const s = getPinInputText();
    if ( s !== "" && !isCoordinate(s) ) return search();
    const pin = addPinAt(s);
    mapWrapper.setPinDragging(pin, true);
    if (options.selectNewPin) {
      selectActivePin(pin, true);
-     // const loc = new Microsoft.Maps.Location(pin.geometry.y, pin.geometry.x);
-     // map.setView({center:loc});
    }
 }
 
 
 function checkAddPinText() {
    let text = "Lisää pinni";
-   const s = getPinText()
+   if (window.innerWidth < 400) text = "Lisää";
+   const s = getPinInputText()
    if ( s !== "" && !isCoordinate(s) ) text = "Etsi";
    document.getElementById('buttonAddPin').innerText = text;
 }
 
-function getPinText() {
+function getPinInputText() {
   let s = sanitizeInput(document.getElementById('editPinLoc').value.trim());
   return s;
 }
 
-function setPinText(s) {
+function setPinInputText(s) {
     document.getElementById('editPinLoc').value = s.trim();
     checkAddPinText();
 }
@@ -1334,7 +1027,7 @@ function initializeMapPage() {
 
   checkSavedValues();
 
-  mapWrapper = new MapWrapper('map', mapModes);
+  mapWrapper = new MapWrapper('map', mapModes, options.useCache);
   // Täytetään select-valikko
   const mapSelect = document.getElementById('mapModeSelect');
   for (const key in mapModes) {
@@ -1426,31 +1119,40 @@ function initializeMapPage() {
         // Kun hitPin on siirretty, päivitetään sen sijainti
         calcDistance(-1, -1);
         lastHitPoint = mapWrapper.getPinLocation(hitPin);
+        if (options.HCenter && options.HStationary) {
+          // preventMapMove = true;
+          mapWrapper.setView(lastHitPoint);
+        }
+        hitPinXY = mapWrapper.getCoordXY(lastHitPoint);
       });
       mapWrapper.setPinOn(hitPin, 'drag', function() {
         // Kun hitPin on siirretty, päivitetään sen sijainti
         const loc = mapWrapper.getPinLocation(hitPin);
-        setPinText(`${loc[0].toFixed(5)} ${loc[1].toFixed(5)} H`);
+        setPinInputText(`${loc[0].toFixed(5)} ${loc[1].toFixed(5)} H`);
         calcDistance(-1, -1);
       });
       mapWrapper.setPinOn(hitPin, 'drag', function() {
         // Kun hitPin on siirretty, päivitetään sen sijainti
         const loc = mapWrapper.getPinLocation(hitPin);
-        setPinText(`${loc[0].toFixed(5)} ${loc[1].toFixed(5)} H`);
+        setPinInputText(`${loc[0].toFixed(5)} ${loc[1].toFixed(5)} H`);
         calcDistance(-1, -1);
       });
-    } else {
-      // Siirrä olemassa olevaa hitPiniä uuteen paikkaan
-      if (distanceLines.length > 0) {
-        lastHitPoint = distanceLines[distanceLines.length - 1].to;
-      }
-      setHitPinLoc(loc);
+    } else
+    // Siirrä olemassa olevaa hitPiniä uuteen paikkaan
+    if (distanceLines.length > 0) {
+      lastHitPoint = distanceLines[distanceLines.length - 1].to;
     }
+    mapWrapper.setPinLocation(hitPin, loc);
+    setHitPinLoc(loc);
+    hitPinXY = mapWrapper.getCoordXY(mapWrapper.getPinLocation(hitPin));
     lastHitPoint = loc;
 
     const elevation = await getElevation(loc);
 
-    setPinText(`${lat.toFixed(5)} ${lng.toFixed(5)} H ${elevation}`);
+    setPinInputText(`${lat.toFixed(5)} ${lng.toFixed(5)} H ${elevation}`);
+    if (options.HCenter && options.HStationary) {
+      mapWrapper.setView(loc);
+    }
 
   });  // mapWarpper.on end
 
@@ -1837,6 +1539,8 @@ function checkSavedValues() {
   getCBOption("preventSleep",function() { checkSleep(); } );
   getCBOption("smallRaport",function() { changeRaportView(); } );
   // getCBOption("showAccuracy");
+  getCBOption("useCache",function() { if (mapWrapper) mapWrapper.setUseCache(options.useCache); });
+  getCBOption("HStationary");
   getCBOption("HCenter");
   getCBOption("send"); // ,sendPosition);
   getCBOption("drawLogLine");
@@ -1844,6 +1548,8 @@ function checkSavedValues() {
   getCBOption("readGPS",function() { checkGeoLocation(); });
   getCBOption("useComps",function() { checkShowComponents(); });
   getCBOption("useCompsWindow");
+  getCBOption("drawDistanceLine");
+  getCBOption("calcDistanceSum");
 
   const cb1 = document.getElementById('area1cb');
   const cb2 = document.getElementById('area1cbCopy');
@@ -1922,7 +1628,7 @@ function checkSavedValues() {
       <input type="text" name="editPinLoc" id="editPinLoc" value="Tontuntie"
            onkeyup="checkAddPinText()"
            onkeydown="if(event.key === 'Enter') { addPin(); event.preventDefault(); }" /></label>
-    <span class ="clearButton" id="buttonClearText" onclick="setPinText('')">x</span>
+    <span class ="clearButton" id="buttonClearText" onclick="setPinInputText('')">x</span>
     <button type="button" id="buttonAddPin" onclick="addPin()">Etsi</button>
     <span id="pinButtons" style="display: none;">
       <button title="Vaihda pinnin tiedot" class="icon-btn" onclick="changePinData()">
@@ -1973,16 +1679,20 @@ function checkSavedValues() {
   <label class="closebtn" onclick="toggleDiv('settings'); adjustComponents()">&times;</label>
   <div class="popupIn">
     <h2>Asetukset</h2>
-    <label><input type="checkbox" id="HCenter" value="HCenter"  />Pidä H keskellä <a class="help" data-href="#othersettings"></a></label><br />
-    <!-- <input type="checkbox" id="showAccuracy" value="showAccuray"  />Näytä tarkkuusympyrä<br /> -->
-    <label><input type="checkbox" id="readGPS" value="readGPS"  />Lue GPS:ää</label><br />
+    <label><input type="checkbox" id="HStationary" value="HStationary"  />Pidä H paikallaan</label>
+    <label><input type="checkbox" id="HCenter" value="HCenter"  />Pidä H keskellä <a class="help" data-href="#othersettings"></a></label><br>
+    <!-- <input type="checkbox" id="showAccuracy" value="showAccuray"  />Näytä tarkkuusympyrä<br> -->
+    <label><input type="checkbox" id="readGPS" value="readGPS"  />Lue GPS:ää</label><br>
     <label><input type="checkbox" name="followMe" id="followMe" value="followMe"  />Piirrä oma jälki</label>
     <label><input type="text" name="editFollowMeColor" id="editFollowMeColor" value="orange" size="8" /></label>
-    <label><input type="text" name="editFollowMeWidth" id="editFollowMeWidth" value="3" size="1" /> pt</label><br />
-    <label><input type="checkbox" name="selectNewPin" id="selectNewPin" value="selectNewPin"  />Valitse uusi pin aktiiviseksi</label><br />
-    <!-- <input type="checkbox" name="useDummyRect" id="useDummyRect" value="useDummyRect"  />Käytä tyhjää hakualuetta (jos ei osaa hakea)<br /> -->
-    <span id="preventSleepSpan"><label><input type="checkbox" name="preventSleep" id="preventSleep" value="preventSleep"  />Estä näytön sammuminen</label></span>
-    <br /><br />
+    <label><input type="text" name="editFollowMeWidth" id="editFollowMeWidth" value="3" size="1" /> pt</label><br>
+    <label><input type="checkbox" name="selectNewPin" id="selectNewPin" value="selectNewPin"  />Valitse uusi pin aktiiviseksi</label><br>
+    <!-- <input type="checkbox" name="useDummyRect" id="useDummyRect" value="useDummyRect"  />Käytä tyhjää hakualuetta (jos ei osaa hakea)<br> -->
+    <span id="preventSleepSpan"><label><input type="checkbox" name="preventSleep" id="preventSleep" value="preventSleep"  />Estä näytön sammuminen</label></span><br>
+    <span id="spanUseCache"><label><input type="checkbox" name="useCache" id="useCache" value="useCache"  />Käytä paikallista muistia <a class="help" data-href="#usecache"></a></label></span><br>
+    <label><input type="checkbox" id="drawDistanceLine" value="drawDistanceLine"  />Piirrä mittaviivaa</label>
+    <label><input type="checkbox" id="calcDistanceSum" value="calcDistanceSum"  />Laske summaa <a class="help" data-href="#addpins"></a></label><br>
+    <br><br>
 
 
     <div class="ui-widget" id="followDiv">
@@ -1993,21 +1703,21 @@ function checkSavedValues() {
           <label for="editTag">Kartalla näkyvä tunnus: </label><input type="text" name="editTag" id="editTag" value="" size="5" /><br>
           <label for="editLog">logname: </label><input type="text" name="editLog" id="editLog" value="" size="12" /><br>
           <label for="editInterval">interval/ms: </label><input type="text" name="editInterval" id="editInterval" value="5000" size="8" /><br>
-          <label for="editUsersTofollow">Seurattavat käyttäjät: </label><input type="text" name="editUsersTofollow" id="editUsersTofollow" value="" size="15"   /><br />
+          <label for="editUsersTofollow">Seurattavat käyttäjät: </label><input type="text" name="editUsersTofollow" id="editUsersTofollow" value="" size="15" /><br>
         </div>
-        <br />
-        <button type="button" onclick="getfollow(); closeDiv('settings');">Hae muiden paikka</button> (jos automaatti ei ole päällä)<br />
-        <br />
-        <label><input type="checkbox" name="follow" id="follow" value="follow"  />Seuraa muita automaattisesti</label><br />
-        <label><input type="checkbox" name="drawLogLine" id="drawLogLine" value="drawLogLine"  />Piirrä viivaa seurattavista</label><br />
-        <label><input type="checkbox" id="send" value="send"  />Lähetä omaa paikkaa</label><br />
+        <br>
+        <button type="button" onclick="getfollow(); closeDiv('settings');">Hae muiden paikka</button> (jos automaatti ei ole päällä)<br>
+        <br>
+        <label><input type="checkbox" name="follow" id="follow" value="follow"  />Seuraa muita automaattisesti</label><br>
+        <label><input type="checkbox" name="drawLogLine" id="drawLogLine" value="drawLogLine"  />Piirrä viivaa seurattavista</label><br>
+        <label><input type="checkbox" id="send" value="send"  />Lähetä omaa paikkaa</label><br>
         <hr>
         <div id="compArea"><p><b>Mittareiden arvot</b> <a class="help" data-href="#gauges"></a></p>
-          <label><input type="checkbox" name="useComps" id="useComps" value="useComps"  />Näytä mittarit</label><br />
+          <label><input type="checkbox" name="useComps" id="useComps" value="useComps"  />Näytä mittarit</label><br>
           <div id="showCompsSettings">
-            <label><input type="checkbox" id="useCompsWindow" value="useCompsWindow"  />Näytä ikkunassa</label><br />
-            <span><br>Taustan väri: </span> <label><input type="text" id="editCompsBackground" value="rgba(0,0,0,1.0)"  /></label><br />
-            <span><br>Fontin väri: </span> <label><input type="text" id="editCompsColor" value="white"  /></label><br />
+            <label><input type="checkbox" id="useCompsWindow" value="useCompsWindow"  />Näytä ikkunassa</label><br>
+            <span><br>Taustan väri: </span> <label><input type="text" id="editCompsBackground" value="rgba(0,0,0,1.0)"  /></label><br>
+            <span><br>Fontin väri: </span> <label><input type="text" id="editCompsColor" value="white"  /></label><br>
             <span style="font-size: 10px">Ruksi mittarit joita haluat käyttää</span>
             <table id="tableCompsSettings">
             </table>
@@ -2016,16 +1726,16 @@ function checkSavedValues() {
         <button class="close" onclick="toggleDiv('settings'); adjustComponents()">Sulje</button>
       </div>
       <div id="accountArea">
-        <br />
+        <br>
 
-        <label for="editEmail">Email: </label><input type="text" name="editEmail" id="editEmail" value="" size="25" /><a class="help" data-href="#userid"></a><br />
-        <label for="editId">id: </label><input type="text" name="editId" id="editId" value="" size="15" /><br />
-        <br />
+        <label for="editEmail">Email: </label><input type="text" name="editEmail" id="editEmail" value="" size="25" /><a class="help" data-href="#userid"></a><br>
+        <label for="editId">id: </label><input type="text" name="editId" id="editId" value="" size="15" /><br>
+        <br>
         <button id="getId">Hae uusi ID</button><a class="help" data-href="#userid"></a>
-        <br />
-        <br />
+        <br>
+        <br>
         <span class="idMsg" id = "idMsg"></span>
-        <br />
+        <br>
         <button type="button" onclick="toggleDiv('followArea', true); toggleDiv('accountArea', false);" >Palaa seuranta-asetuksiin...</button>
       </div>
     </div>
