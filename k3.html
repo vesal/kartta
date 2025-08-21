@@ -222,7 +222,7 @@
     }
   </style>
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/idb-keyval/3.0.1/idb-keyval-iife.min.js"></script>!-->
-<script src="KeyValStore.js"></script>
+<script src="KeyValStore.js" defer></script>
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('offline-worker.js');
@@ -236,13 +236,13 @@ if ('serviceWorker' in navigator) {
 <!-- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> -->
 <!-- <script src="https://unpkg.com/leaflet-textpath/leaflet.textpath.js"></script>-->
 
-<script src="js/leaflet.js"></script>
-<script src="js/leaflet.textpath.js"></script>
-<script src="MapWrapperLeafLet.js"></script>
+<script src="js/leaflet.js" defer></script>
+<script src="js/leaflet.textpath.js" defer></script>
+<script src="MapWrapperLeafLet.js" defer></script>
 <script>
 
 // Globass for databases
-const tileStore = new KeyValStore('kartta-db', 'tiles');
+// const tileStore = new KeyValStore('kartta-db', 'tiles');
 // const settingsStore = new KeyValStore('kartta-db', 'settings');
 
 
