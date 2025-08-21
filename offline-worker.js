@@ -1,10 +1,10 @@
-const CACHE_NAME = "k3-cache-v6";
+const CACHE_NAME = "k3-cache-v7";
 const FILES_TO_CACHE = [
   "./k3.html",
   "./js/leaflet.js",
   "./js/leaflet.textpath.js",
   "./js/leaflet.css",
-  "./KeyValueStore.js",
+  "./KeyValStore.js",
   "./MapWrapperLeafLet.js",
   "./manifest.json",
   "./offline-worker.js",
