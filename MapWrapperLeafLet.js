@@ -1,4 +1,4 @@
- class MapWrapper {
+class MapWrapper {
   /**
    * @typedef {Object} Polyline
    * @property {function(string, Object=): any} setText
@@ -8,6 +8,7 @@
 
     constructor(containerId, mapmodes, useCache = true) {
       // noinspection TypeScriptUMDGlobal
+      this.tileStore = new KeyValStore('kartta-db', 'tiles');
       this.useCache = useCache;
       // noinspection TypeScriptUMDGlobal
       this.L = L;
@@ -99,7 +100,7 @@
     const cacheKey = `${this.outer.mapModeKey}_${coords.z}_${coords.x}_${coords.y}`;
 
     // Try to get from IndexedDB
-    tileStore.get(cacheKey).then(cached => {
+    this.outer.tileStore.get(cacheKey).then(cached => {
       if (cached) {
         tile.src = typeof cached === "string" ? cached : "";
         done(null, tile); // Notify Leaflet that the tile is ready
@@ -116,7 +117,7 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(tile, 0, 0);
           const dataURL = canvas.toDataURL('image/png');
-          tileStore.set(cacheKey, dataURL);
+          this.outer.tileStore.set(cacheKey, dataURL);
           // console.log(`Tile cached: ${cacheKey}`);
         } catch (e) {
           // Ignore storage errors
