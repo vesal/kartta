@@ -87,12 +87,12 @@
     const tileInfo = { zoom: coords.z, x: coords.x, y: coords.y };
     const url = this.outer.mapMode.f(tileInfo);
     tile.crossOrigin = "Anonymous";
-    tile.src = url;
     tile.onload = () => done(null, tile);
     tile.onerror = () => done(new Error('Tile load error'), tile);
 
     if (!this.outer.useCache) {
       // Do not use cache, always fetch from network
+      tile.src = url;
       return tile;
     }
 
@@ -102,9 +102,12 @@
     tileStore.get(cacheKey).then(cached => {
       if (cached) {
         tile.src = typeof cached === "string" ? cached : "";
+        done(null, tile); // Notify Leaflet that the tile is ready
+        // console.log(`From tile cache: ${cacheKey}`);
         return tile;
       }
       // Not cached: fetch from network
+      tile.src = url;
       tile.onload = () => {
         try {
           const canvas = document.createElement('canvas');
@@ -114,6 +117,7 @@
           ctx.drawImage(tile, 0, 0);
           const dataURL = canvas.toDataURL('image/png');
           tileStore.set(cacheKey, dataURL);
+          // console.log(`Tile cached: ${cacheKey}`);
         } catch (e) {
           // Ignore storage errors
         }

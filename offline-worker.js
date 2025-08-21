@@ -1,36 +1,49 @@
-const CACHE_NAME = "k3-cache-v7";
+const CACHE_NAME = "k3-cache-v16";
+const DEBUG = false;
 const FILES_TO_CACHE = [
-  "./k3.html",
-  "./js/leaflet.js",
-  "./js/leaflet.textpath.js",
-  "./js/leaflet.css",
-  "./KeyValStore.js",
-  "./MapWrapperLeafLet.js",
-  "./manifest.json",
-  "./offline-worker.js",
+  "k3.html",
+  "js/leaflet.js",
+  "js/leaflet.textpath.js",
+  "js/leaflet.css",
+  "KeyValStore.js",
+  "MapWrapperLeafLet.js",
+  "manifest.json",
+  "offline-worker.js",
 ];
 
+let FILE_NAMES = [];
+
 self.addEventListener("install", (event) => {
+  FILE_NAMES = FILES_TO_CACHE.map(f => f.split("/").pop());
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(FILES_TO_CACHE);
+      return cache.addAll(FILES_TO_CACHE).then(() => {
+        return self.skipWaiting();
+      });
     })
   );
 });
 
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
+  const fileName = url.pathname.split("/").pop();
 
-  if (FILES_TO_CACHE.includes(url.pathname) || FILES_TO_CACHE.includes(event.request.url)) {
+  if (FILE_NAMES.includes(fileName)) {
     event.respondWith(
       caches.match(event.request).then((response) => {
         if (response) {
-          // console.log("Haettu cachesta:", event.request.url);
+          if (DEBUG) console.log("Haettu cachesta:", event.request.url);
           return response;
         }
-        // console.log("Haetaan verkosta:", event.request.url);
+        if (DEBUG) console.log("Haetaan verkosta:", event.request.url);
         return fetch(event.request);
       })
     );
+    return;
   }
+  if (DEBUG) console.log("Haetaan cachen ohi:", event.request.url);
 });
