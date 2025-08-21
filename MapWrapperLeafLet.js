@@ -1,0 +1,355 @@
+ class MapWrapper {
+  /**
+   * @typedef {Object} Polyline
+   * @property {function(string, Object=): any} setText
+   */
+   // Luo layer-muuttuja, johon asetetaan nykyinen karttalaatta
+
+
+    constructor(containerId, mapmodes, useCache = true) {
+      // noinspection TypeScriptUMDGlobal
+      this.useCache = useCache;
+      // noinspection TypeScriptUMDGlobal
+      this.L = L;
+      this.currentLayer = null;
+      this.mapModes = mapmodes;
+      // this.mapMode = mapModes["OpenStreet"];
+      this.mapMode = this.mapModes["b-bark SuomiTopo"];
+      this.map = this.L.map('map', { zoomControl: false }).setView([60.1699, 24.9384], 13);
+      this.pins = [];
+      // L.control.zoom({ position: 'topright' }).addTo(map);
+    }
+
+   setUseCache(useCache) {
+     this.useCache = useCache;
+   }
+
+   setView(coord, zoom=null) {
+     if (zoom === null) {
+       zoom = this.map.getZoom();
+     }
+     if (Array.isArray(coord)) {
+       coord = this.L.latLng(coord[0], coord[1]);
+     }
+     this.map.setView(coord, zoom);
+   }
+
+   getCenter() {
+     const center = this.map.getCenter();
+     return [center.lat, center.lng];
+   }
+
+   getZoom() {
+      return this.map.getZoom();
+   }
+
+   addLayer(layer) {
+     this.map.addLayer(layer);
+   }
+
+   removeLayer(layer) {
+     this.map.removeLayer(layer);
+   }
+
+
+  // noinspection TypeScriptUMDGlobal
+  static CustomTileLayer = class extends L.GridLayer {
+    constructor(options, outer) {
+      super(options);
+      this.outer = outer;
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    createTile2(coords, done) {
+      const tile = document.createElement('img');
+      tile.alt = '';
+      tile.setAttribute('role', 'presentation');
+
+      // Käytetään sun omaa URL-funktiota
+      const tileInfo = {
+        zoom: coords.z,
+        x: coords.x,
+        y: coords.y
+      };
+      tile.src = this.outer.mapMode.f(tileInfo);
+
+      // Kun kuva latautuu tai epäonnistuu, kerrotaan Leafletille
+      tile.onload = () => done(null, tile);
+      tile.onerror = () => done(new Error('Tile load error'), tile);
+
+      return tile;
+    }
+
+  createTile(coords, done) {
+    const tile = document.createElement('img');
+    tile.alt = '';
+    tile.setAttribute('role', 'presentation');
+    const tileInfo = { zoom: coords.z, x: coords.x, y: coords.y };
+    const url = this.outer.mapMode.f(tileInfo);
+    tile.crossOrigin = "Anonymous";
+    tile.src = url;
+    tile.onload = () => done(null, tile);
+    tile.onerror = () => done(new Error('Tile load error'), tile);
+
+    if (!this.outer.useCache) {
+      // Do not use cache, always fetch from network
+      return tile;
+    }
+
+    const cacheKey = `${this.outer.mapModeKey}_${coords.z}_${coords.x}_${coords.y}`;
+
+    // Try to get from IndexedDB
+    tileStore.get(cacheKey).then(cached => {
+      if (cached) {
+        tile.src = typeof cached === "string" ? cached : "";
+        return tile;
+      }
+      // Not cached: fetch from network
+      tile.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = tile.width;
+          canvas.height = tile.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(tile, 0, 0);
+          const dataURL = canvas.toDataURL('image/png');
+          tileStore.set(cacheKey, dataURL);
+        } catch (e) {
+          // Ignore storage errors
+        }
+        done(null, tile);
+      };
+    });
+    return tile;
+  }
+
+  }; // CustomTileLayer ends
+
+
+  // Aluksi luodaan ja lisätään ensimmäinen layer
+  setMapMode(modeKey) {
+    this.mapMode = this.mapModes[modeKey];
+    this.mapModeKey = modeKey;
+    if (this.currentLayer) {
+      this.removeLayer(this.currentLayer);
+    }
+    if (typeof this.mapMode.i !== 'undefined') {
+         this.mapMode.i();
+    }
+    // Ota oma karttataso käyttöön
+    this.currentLayer = new MapWrapper.CustomTileLayer({ attribution: this.mapMode.c }, this);
+    this.addLayer(this.currentLayer);
+
+    // Päivitä attribution-kenttä Leafletin oikeaan alakulmaan
+    this.map.attributionControl.setPrefix(false);
+    // map.attributionControl.setAttribution(mapMode.c);
+  }
+
+  calcPinFontSize(label) {
+    let tsize = "16";
+    if (label.length > 3) { tsize = "12"; }
+    if (label.length >= 5) { tsize = "10"; }
+    return tsize;
+  }
+
+  customPin(label = 'I', color = 'green', baseColor = 'black') {
+    label = label.trim()
+    const tsize = this.calcPinFontSize(label);
+    const svg = `
+      <svg width="32" height="48" viewBox="0 0 32 48" xmlns="http://www.w3.org/2000/svg">
+        <!-- Kolmion muotoinen jalka -->
+        <path d="M 3 16 L 16 48 L 29 16 Z" fill="${baseColor}" />
+        <!-- Eri värinen valinta-alue -->
+        <path id="pin-foot" d="M 4 15 L 16 47 L 28 15 Z" fill="red" style="visibility:hidden;" />
+        <!-- Iso musta ympyrä -->
+        <circle cx="16" cy="16" r="16" fill="${baseColor}" />
+        <!-- Sisempi värillinen ympyrä -->
+        <circle cx="16" cy="16" r="14" fill="${color}" />
+        <!-- Valkoinen teksti keskellä -->
+        <text x="16" y="16" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="${tsize}" fill="white" dominant-baseline="middle">
+          ${label}
+        </text>
+      </svg>
+    `;
+
+    return this.L.divIcon({
+      className: '',
+      html: svg,
+      iconSize: [32, 48],
+      iconAnchor: [16, 48], // kärki osoittaa koordinaattiin
+      popupAnchor: [0, -48]
+    });
+  }  // customPin ends
+
+  selectPin(pin, selected) {
+    const element = pin.getElement();
+    if (!element) {
+      return;
+    }
+    const svg = element.querySelector('svg');
+    const foot = svg.querySelector('#pin-foot');
+    if (foot) {
+      foot.style.visibility = selected ? 'visible' : 'hidden';
+    }
+  }
+
+  createPin(coord, label, color, click, text = null) {
+    const pin = this.L.marker(coord, {icon: this.customPin(label, color)});
+    pin.addTo(this.map);
+    if (text) {
+      pin.bindPopup(text);
+    }
+    pin.on('click', function() {
+      click(pin);
+    });
+    return pin;
+  }
+
+  removePin(pin) {
+    this.map.removeLayer(pin);
+    const index = this.pins.indexOf(pin);
+    if (index > -1) {
+      this.pins.splice(index, 1);
+    }
+  }
+
+
+  setPinLocation(pin, coord) {
+    if (!pin || !pin.setLatLng) {
+      return;
+    }
+    pin.setLatLng(coord);
+  }
+
+
+  getPinLocation(pin=null) {
+    if (!pin || !pin.getLatLng) {
+      const center = this.map.getCenter();
+      return [center.lat, center.lng];
+    }
+    const latLng = pin.getLatLng();
+    return [latLng.lat, latLng.lng];
+  }
+
+  setPinLabel(pin, label) {
+    const element = pin.getElement();
+    if (!element) {
+      return;
+    }
+    const svg = element.querySelector('svg');
+    if (!svg) {
+      return;
+    }
+    const textElement = svg.querySelector('text');
+    if (!textElement) {
+      return;
+    }
+    const s = label.trim();
+    textElement.textContent = s;
+    const fontSize = this.calcPinFontSize(s);
+    textElement.setAttribute('font-size', fontSize);
+  }
+
+  getPinLabel(pin) {
+    const element = pin.getElement();
+    if (!element) {
+      return '';
+    }
+    const svg = element.querySelector('svg');
+    if (!svg) {
+      return '';
+    }
+    const textElement = svg.querySelector('text');
+    if (!textElement) {
+      return '';
+    }
+    return textElement.textContent.trim();
+  }
+
+  setPinDragging(pin, enable) {
+    if (enable) {
+      pin.dragging.enable();
+    } else {
+      pin.dragging.disable();
+    }
+  }
+
+  on(event, callback) {
+    this.map.on(event, callback);
+  }
+
+  setPinOn(pin, eventName, callback, remove = false) {
+    if (remove) {
+      pin.off(eventName, callback);
+      return;
+    }
+    pin.on(eventName, callback);
+  }
+
+  addLines(lines, from, to, options = {}, text = null, draw = true) {
+    if (!lines) {
+      lines = [];
+    }
+    const lineOptions = {
+      color: options.color || 'blue',
+      weight: options.weight || 2,
+      opacity: options.opacity || 0.6
+    };
+    let line;
+    // if (!line) {
+      line = this.L.polyline([from, to], lineOptions);
+      line.from = from;
+      line.to = to;
+      if (draw) this.map.addLayer(line);
+    // } else {
+    //  line.setLatLngs([from, to]);
+    //  if (options) line.setStyle(lineOptions);
+    // }
+    line.setText("", {});
+    if (text) {
+      let flip = 'normal';
+      let offset = -3;
+      if (to[1] < from[1]) {
+         flip = 'flip';
+         offset = 12;
+      }
+      const opts = {repeat: false, center: true, offset: offset}
+      if (flip === 'flip') opts.orientation = 'flip';
+      line.setText(text, opts);
+    }
+    lines.push(line);
+    return lines;
+  }
+
+  removeLines(lines, idx1 = 0, idx2 = 10000000) {
+    if (!lines || lines.length === 0) return;
+    if (idx1 >= lines.length) return;
+    if (idx1 < 0) idx1 = lines.length + idx1;
+    if (idx2 < 0) idx2 = lines.length + idx2;
+    if (idx1 >= lines.length) return;
+    if (idx2 < 0) return;
+    if (idx1 < 0) idx1 = 0;
+    if (idx2 >= lines.length) idx2 = lines.length - 1;
+    for (let i = idx1; i <= idx2; i++) {
+      this.map.removeLayer(lines[i]);
+    }
+    lines.splice(idx1, idx2 - idx1 + 1); // poista vastaavat taulukosta
+  }
+
+  getCoordXY(coord) {
+    if (Array.isArray(coord)) {
+      coord = this.L.latLng(coord[0], coord[1]);
+    }
+    const point = this.map.latLngToContainerPoint(coord);
+    return [point.x, point.y];
+  }
+
+  getXYCoord(xy) {
+    if (Array.isArray(xy)) {
+      xy = this.L.point(xy[0], xy[1]);
+    }
+    const coord = this.map.containerPointToLatLng(xy);
+    return [coord.lat, coord.lng];
+  }
+
+ } // MapWrapper ends
