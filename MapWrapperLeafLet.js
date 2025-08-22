@@ -14,8 +14,8 @@ class MapWrapper {
       this.L = L;
       this.currentLayer = null;
       this.mapModes = mapmodes;
-      // this.mapMode = mapModes["OpenStreet"];
-      this.mapMode = this.mapModes["b-bark SuomiTopo"];
+      this.mapModeKey = "OpenStreet";
+      this.mapMode = this.mapModes[this.mapModeKey];
       this.map = this.L.map('map', { zoomControl: false }).setView([60.1699, 24.9384], 13);
       this.pins = [];
       // L.control.zoom({ position: 'topright' }).addTo(map);
@@ -133,8 +133,11 @@ class MapWrapper {
 
   // Aluksi luodaan ja lisätään ensimmäinen layer
   setMapMode(modeKey) {
-    this.mapMode = this.mapModes[modeKey];
-    this.mapModeKey = modeKey;
+    const mapMode = this.mapModes[modeKey];
+    if (mapMode) {
+      this.mapMode = mapMode;
+      this.mapModeKey = modeKey;
+    }
     if (this.currentLayer) {
       this.removeLayer(this.currentLayer);
     }
