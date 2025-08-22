@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json?v=0.4.2">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.4">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -226,6 +226,11 @@
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('offline-worker.js');
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    if (event.data?.type === "log") {
+      console.log(event.data.message);
+    }
+  });
 }
 </script>
 </head>
@@ -1165,8 +1170,20 @@ function getStringFromParamsOrStrore(name, def) {
 //#endregion LocalStorage and URL parameters
 
 //#region Initialization
-function initializeMapPage() {
+function showVersion() {
+  const manifestLink = document.getElementById('manifest-link');
+  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.4"
 
+  // Parsitaan query-parametri
+  const url = new URL(href, window.location.href);
+  const version = url.searchParams.get('v') || "n/a";
+
+  // Näytetään Asetukset-kohtaan
+  document.getElementById('version-display').textContent = version;
+}
+
+function initializeMapPage() {
+  showVersion()
   checkSavedValues();
 
   const pzoom = parseInt(getValueFromParamsOrStrore("zoom", 8));
@@ -1876,7 +1893,9 @@ async function clearServiceWorker() {
 <div class="popup" id="about" style=" ">
   <label class="closebtn" onclick="toggleDiv('about')">&times;</label>
   <div class="popupIn">
+  <p>Kartta versio: <span id="version-display">?</span></p>
   <h2>Pika-ohjeet</h2>
+
   <p>Dataa tähän karttaan voit lähettää <a href="https://trac.cc.jyu.fi/projects/dotnet/wiki/CycloLite">CycloLite</a>llä,
   <a href="https://play.google.com/store/apps/details?id=jyu.sendpos&hl=en_IE">SendPos Androidilla</a>
     tai <a href="s.html">Lähetys-sivulla</a>.</p>

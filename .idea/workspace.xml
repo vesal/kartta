@@ -186,7 +186,7 @@
       <workItem from="1754835919103" duration="350000" />
       <workItem from="1754836285386" duration="11554000" />
       <workItem from="1754904718618" duration="251000" />
-      <workItem from="1754904988042" duration="200348000" />
+      <workItem from="1754904988042" duration="207276000" />
     </task>
     <servers />
   </component>
@@ -238,10 +238,16 @@
           <option name="timeStamp" value="160" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/offline-worker.js</url>
-          <line>59</line>
+          <url>file://$PROJECT_DIR$/k3.html</url>
+          <line>1723</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="176" />
+          <option name="timeStamp" value="177" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/k3.html</url>
+          <line>1181</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="186" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
