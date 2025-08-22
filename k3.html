@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json?v=2">
+  <link rel="manifest" href="manifest.json?v=4">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -658,21 +658,6 @@ function setTimeCompsValues() {
     }
 }
 
-function displayLoc(e) {
-	if (e.targetType === 'pushpin') displayLocPin(e.target);
-}
-
-function displayLocPin(pin) {
-  if ( !pin ) return;
-  const pinLoc = mapWrapper.getPinLocation(pin);
-  const alt = pinLoc.altitude;
-  let alts = "";
-  if ( !(alt === undefined) ) alts = " " + (alt/3.280839895).toFixed(0) + " m";
-  setPinInputText(pinLoc[0].toFixed(5) + " " + pinLoc[1].toFixed(5) + " " + mapWrapper.getPinLabel(pin) + alts);
-  calcDistance(-1, -1);
-}
-
-
 function mapMove() {
   mouseDown = true;
   const pos = mapWrapper.getCenter();
@@ -760,7 +745,6 @@ function postPosition(position) {
 
 
 let sending = false;
-let lastGPSCoord;
 
 function sendPosition() {
    // checkTimer("send",true);
@@ -829,6 +813,8 @@ function geocodeQuery(query) {
     .catch(err => console.error('Virhe:', err));
 }
 
+//#region Pin management
+
 let _lastSelected = null;
 
 Object.defineProperty(window, 'lastSelected', {
@@ -856,79 +842,6 @@ function removePin(pin = lastSelected) {
   if (pin === lastSelected) lastSelected = null;
   mapWrapper.removePin(pin);
 }
-
-function clearSearchResults() {
-    if (searchPins.length > 0) {
-        searchPins.forEach(pin => {
-            if (pin === lastSelected) lastSelected = null;
-            mapWrapper.removePin(pin);
-        });
-        searchPins = [];
-    }
-    toggleDiv('searchSpan', false)
-}
-
-function search() {
-    //Remove any previous results from the map.
-    clearSearchResults();
-    //Get the users query and geocode it.
-    const query = getPinInputText();
-    geocodeQuery(query);
-}
-
-function getCoordinateFromText(s) {
-  // Etsitään koordinaatit tekstistä
-  const latLongArray = s.split(/[\s,]+/);
-  if (latLongArray.length < 2) return null;
-  const lat = parseFloat(latLongArray[0]);
-  const lng = parseFloat(latLongArray[1]);
-  if (isNaN(lat) || isNaN(lng)) return null;
-  return [lat, lng];
-}
-
-let distanceLines = [];
-
-function calcDistance(idx1 = -1000, idx2 = -1000) {
-  let d = 0;
-  let sum = 0;
-  if ( !hitPin ) return;
-  let from = null;
-  if (idx1 === -1) {
-    if (distanceLines.length >= 1) {
-        lastHitPoint = distanceLines[distanceLines.length - 1].from;
-    }
-  }
-  const to = mapWrapper.getPinLocation(hitPin);
-  if ( lastSelected ) {
-    from = mapWrapper.getPinLocation(lastSelected);
-    mapWrapper.removeLines(distanceLines);
-  } else {
-    if (!lastHitPoint) return;
-    from = lastHitPoint;
-  }
-  if (!options.calcDistanceSum) {
-    mapWrapper.removeLines(distanceLines);
-  }
-  d = WGS84_distance(from, to);
-  const deg = bearingDegrees(from, to);
-  const s  = `${d.toFixed(3)} km, ${deg.toFixed(1)}°`;
-  if (idx1 >= -1) mapWrapper.removeLines(distanceLines, idx1, idx2);
-  distanceLines = mapWrapper.addLines(distanceLines, from, to, {
-    color: 'red',
-    weight: 1,
-    opacity: 0.8
-  }, s, options.drawDistanceLine);
-  const line = distanceLines[distanceLines.length - 1];
-  line.d = d;
-  line.deg = deg;
-  for (let i = 0; i < distanceLines.length; i++) {
-    if (distanceLines[i].d) sum += distanceLines[i].d;
-  }
-  if (!dstTextElem) dstTextElem = document.getElementById("distance");
-  if (sum !== d) dstTextElem.innerText = s + ` = ${sum.toFixed(3)} km`;
-  else dstTextElem.innerText = s;
-}
-
 
 function selectActivePin(pin, calcDist) {
   changeSelected(pin, true);
@@ -1023,6 +936,173 @@ function setHitPinLoc(loc, idx1 = -1000, idx2 = -1000) {
 }
 
 
+function clearSearchResults() {
+    if (searchPins.length > 0) {
+        searchPins.forEach(pin => {
+            if (pin === lastSelected) lastSelected = null;
+            mapWrapper.removePin(pin);
+        });
+        searchPins = [];
+    }
+    toggleDiv('searchSpan', false)
+}
+
+function displayLocPin(pin) {
+  if ( !pin ) return;
+  const pinLoc = mapWrapper.getPinLocation(pin);
+  const alt = pinLoc.altitude;
+  let alts = "";
+  if ( !(alt === undefined) ) alts = " " + (alt/3.280839895).toFixed(0) + " m";
+  setPinInputText(pinLoc[0].toFixed(5) + " " + pinLoc[1].toFixed(5) + " " + mapWrapper.getPinLabel(pin) + alts);
+  calcDistance(-1, -1);
+}
+
+
+//#endregion Pin management
+
+function search() {
+    //Remove any previous results from the map.
+    clearSearchResults();
+    //Get the users query and geocode it.
+    const query = getPinInputText();
+    geocodeQuery(query);
+}
+
+function getCoordinateFromText(s) {
+  // Etsitään koordinaatit tekstistä
+  const latLongArray = s.split(/[\s,]+/);
+  if (latLongArray.length < 2) return null;
+  const lat = parseFloat(latLongArray[0]);
+  const lng = parseFloat(latLongArray[1]);
+  if (isNaN(lat) || isNaN(lng)) return null;
+  return [lat, lng];
+}
+
+//#region Distance calculation
+
+let distanceLines = [];
+
+function calcDistance(idx1 = -1000, idx2 = -1000) {
+  let d = 0;
+  let sum = 0;
+  if ( !hitPin ) return;
+  let from = null;
+  if (idx1 === -1) {
+    if (distanceLines.length >= 1) {
+        lastHitPoint = distanceLines[distanceLines.length - 1].from;
+    }
+  }
+  const to = mapWrapper.getPinLocation(hitPin);
+  if ( lastSelected ) {
+    from = mapWrapper.getPinLocation(lastSelected);
+    mapWrapper.removeLines(distanceLines);
+  } else {
+    if (!lastHitPoint) return;
+    from = lastHitPoint;
+  }
+  if (!options.calcDistanceSum) {
+    mapWrapper.removeLines(distanceLines);
+  }
+  d = WGS84_distance(from, to);
+  const deg = bearingDegrees(from, to);
+  const s  = `${d.toFixed(3)} km, ${deg.toFixed(1)}°`;
+  if (idx1 >= -1) mapWrapper.removeLines(distanceLines, idx1, idx2);
+  distanceLines = mapWrapper.addLines(distanceLines, from, to, {
+    color: 'red',
+    weight: 1,
+    opacity: 0.8
+  }, s, options.drawDistanceLine);
+  const line = distanceLines[distanceLines.length - 1];
+  line.d = d;
+  line.deg = deg;
+  for (let i = 0; i < distanceLines.length; i++) {
+    if (distanceLines[i].d) sum += distanceLines[i].d;
+  }
+  if (!dstTextElem) dstTextElem = document.getElementById("distance");
+  if (sum !== d) dstTextElem.innerText = s + ` = ${sum.toFixed(3)} km`;
+  else dstTextElem.innerText = s;
+}
+
+//#endregion Distance calculation
+
+//#region Error handling
+function setErrorGen(name, s) {
+  const e = document.getElementById(name);
+  e.innerHTML += " " + s;
+  return s;
+}
+
+
+function clearErrorGen(name) {
+  const e = document.getElementById(name);
+  e.innerHTML = "";
+	return "";
+}
+
+//function setMessage(s) { return setErrorGen('searchMsg', s); }
+function setError(s) { return setErrorGen('errorMsg', s); }
+// function setErrorTrack(s) { return setErrorGen('errorMsgTrack', s); }
+// function setErrorRoute(s) { return setErrorGen('errorMsgRoute', s); }
+
+//function clearMessage() { return clearErrorGen('searchMsg'); }
+function clearError() { return clearErrorGen('errorMsg'); }
+// function clearErrorTrack() { return clearErrorGen('errorMsgTrack'); }
+// function clearErrorRoute() { return clearErrorGen('errorMsgRoute'); }
+//#endregion Error handling
+
+//#region Geolocation
+function errorCallBack() {
+    setError("getLocation error");
+}
+
+let lastGPSCoord;
+
+const geo_options = {
+  enableHighAccuracy: true,
+  maximumAge: 500,
+  timeout: 27000
+};
+
+let watcher = null;
+
+function getGeoLocation() {
+    if ( watcher ) return;
+    if (navigator.geolocation) {
+        watcher = navigator.geolocation.watchPosition(displayCurrentPosition, errorCallBack, geo_options);
+    } else {
+        setError("Geolocation is not supported by this browser.");
+    }
+}
+
+
+function startGeoLocation(enable) {
+   if ( watcher ) navigator.geolocation.clearWatch(watcher);
+   watcher = null;
+   if ( enable ) getGeoLocation();
+}
+
+
+function checkGeoLocation() {
+    startGeoLocation(document.getElementById("readGPS").checked);
+}
+
+function displayCurrentPosition(position) {
+  if ( !position || !position.coords ) return;
+  lastGPSCoord = position;
+  const lat = position.coords.latitude;
+  const lng = position.coords.longitude;
+  const loc = [lat, lng];
+  if (myPin) {
+    mapWrapper.setPinLocation(myPin, loc);
+  } else {
+    myPin = createPin(loc, 'I', 'green', "Olet tässä");
+    mapWrapper.setView(loc);
+  }
+  // mapWrapper.setView(loc);
+}
+//#endregion Geolocation
+
+
 function initializeMapPage() {
 
   checkSavedValues();
@@ -1046,35 +1126,7 @@ function initializeMapPage() {
     mapWrapper.setMapMode(e.target.value);
   });
 
-  // Ensimmäinen sijainnin hakukutsu, tarkalla sijainnilla
-  navigator.geolocation.getCurrentPosition(function(position) {
-    const lat = position.coords.latitude;
-    const lng = position.coords.longitude;
-
-    myPin = createPin([lat, lng], 'I', 'green', "Olet tässä");
-
-    // Siirretään kartta käyttäjän sijaintiin
-    mapWrapper.setView([lat, lng]);
-  }, function(err) {
-    console.error("Sijainnin haku epäonnistui:", err);
-  }, {
-    enableHighAccuracy: true,
-    timeout: 10000,
-    maximumAge: 0
-  });
-
-  // Seurataan sijainnin muutoksia
-  navigator.geolocation.watchPosition(function(pos) {
-    const lat = pos.coords.latitude;
-    const lng = pos.coords.longitude;
-    mapWrapper.setPinLocation([lat, lng]);
-  }, function(err) {
-    console.error("Sijainnin päivitys epäonnistui:", err);
-  }, {
-    enableHighAccuracy: true,
-    timeout: 10000,
-    maximumAge: 0
-  });
+  checkGeoLocation();
 
   async function getElevation(loc) {
   // Hae korkeus OpenTopoDatasta
