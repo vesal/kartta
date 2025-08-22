@@ -1,5 +1,5 @@
-const CACHE_NAME = "k3-cache-v19";
-const DEBUG = false;
+const CACHE_NAME = "k3-cache-v0.4.2";
+const DEBUG = true;
 const FILES_TO_CACHE = [
   "k3.html",
   "js/leaflet.js",
@@ -12,12 +12,14 @@ const FILES_TO_CACHE = [
   "icons/cyclo-192.png",
   "icons/cyclo-512.png",
   "icons/map-360.png",
+  "icons/map-800.png",
 ];
 
-let FILE_NAMES = [];
+// let FILE_NAMES = [];
+const FILE_NAMES = FILES_TO_CACHE.map(f => f.split("/").pop());
 
 self.addEventListener("install", (event) => {
-  FILE_NAMES = FILES_TO_CACHE.map(f => f.split("/").pop());
+  // FILE_NAMES = FILES_TO_CACHE.map(f => f.split("/").pop());
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(FILES_TO_CACHE).then(() => {
