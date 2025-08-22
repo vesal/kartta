@@ -1,4 +1,6 @@
 {
+  "version": "0.4.0",
+  "description": "Kartta App for CycloLite3",
   "name": "Kartta App",
   "short_name": "Kartta3",
   "start_url": "./k3.html",
