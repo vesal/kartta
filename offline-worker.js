@@ -1,4 +1,4 @@
-const CACHE_NAME = "k3-cache-v16";
+const CACHE_NAME = "k3-cache-v19";
 const DEBUG = false;
 const FILES_TO_CACHE = [
   "k3.html",
@@ -9,6 +9,9 @@ const FILES_TO_CACHE = [
   "MapWrapperLeafLet.js",
   "manifest.json",
   "offline-worker.js",
+  "icons/cyclo-192.png",
+  "icons/cyclo-512.png",
+  "icons/map-360.png",
 ];
 
 let FILE_NAMES = [];
