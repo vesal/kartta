@@ -60,26 +60,6 @@ class MapWrapper {
       this.outer = outer;
     }
 
-    // noinspection JSUnusedGlobalSymbols
-    createTile2(coords, done) {
-      const tile = document.createElement('img');
-      tile.alt = '';
-      tile.setAttribute('role', 'presentation');
-
-      // Käytetään sun omaa URL-funktiota
-      const tileInfo = {
-        zoom: coords.z,
-        x: coords.x,
-        y: coords.y
-      };
-      tile.src = this.outer.mapMode.f(tileInfo);
-
-      // Kun kuva latautuu tai epäonnistuu, kerrotaan Leafletille
-      tile.onload = () => done(null, tile);
-      tile.onerror = () => done(new Error('Tile load error'), tile);
-
-      return tile;
-    }
 
   createTile(coords, done) {
     const tile = document.createElement('img');
@@ -160,21 +140,33 @@ class MapWrapper {
     return tsize;
   }
 
-  customPin(label = 'I', color = 'green', baseColor = 'black') {
-    label = label.trim()
+  customPin(label = 'I', color = 'green', baseColor = 'black', flip = false) {
+    label = label.trim();
+    let textY = 16;
+    let trY = 0;
+    let scaleY = 1;
+    const iconAnchor = [16, 48];
+    if (flip) {
+      trY = -48;
+      scaleY = -1;
+      textY = 32;
+      iconAnchor[1] = 0;
+    }
     const tsize = this.calcPinFontSize(label);
     const svg = `
       <svg width="32" height="48" viewBox="0 0 32 48" xmlns="http://www.w3.org/2000/svg">
-        <!-- Kolmion muotoinen jalka -->
-        <path d="M 3 16 L 16 48 L 29 16 Z" fill="${baseColor}" />
-        <!-- Eri värinen valinta-alue -->
-        <path id="pin-foot" d="M 4 15 L 16 47 L 28 15 Z" fill="red" style="visibility:hidden;" />
-        <!-- Iso musta ympyrä -->
-        <circle cx="16" cy="16" r="16" fill="${baseColor}" />
-        <!-- Sisempi värillinen ympyrä -->
-        <circle cx="16" cy="16" r="14" fill="${color}" />
+        <g transform="scale(1,${scaleY}) translate(0,${trY})">
+          <!-- Kolmion muotoinen jalka -->
+          <path d="M 3 16 L 16 48 L 29 16 Z" fill="${baseColor}" />
+          <!-- Eri värinen valinta-alue -->
+          <path id="pin-foot" d="M 4 15 L 16 47 L 28 15 Z" fill="red" style="visibility:hidden;" />
+          <!-- Iso musta ympyrä -->
+          <circle cx="16" cy="16" r="16" fill="${baseColor}" />
+          <!-- Sisempi värillinen ympyrä -->
+          <circle cx="16" cy="16" r="14" fill="${color}" />
+        </g>
         <!-- Valkoinen teksti keskellä -->
-        <text x="16" y="16" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="${tsize}" fill="white" dominant-baseline="middle">
+        <text x="16" y="${textY}" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="${tsize}" fill="white" dominant-baseline="middle">
           ${label}
         </text>
       </svg>
@@ -184,7 +176,7 @@ class MapWrapper {
       className: '',
       html: svg,
       iconSize: [32, 48],
-      iconAnchor: [16, 48], // kärki osoittaa koordinaattiin
+      iconAnchor: iconAnchor, // kärki osoittaa koordinaattiin
       popupAnchor: [0, -48]
     });
   }  // customPin ends
@@ -201,8 +193,8 @@ class MapWrapper {
     }
   }
 
-  createPin(coord, label, color, click, text = null) {
-    const pin = this.L.marker(coord, {icon: this.customPin(label, color)});
+  createPin(coord, label, color, click, text = null, flip = false) {
+    const pin = this.L.marker(coord, {icon: this.customPin(label, color, 'black', flip)});
     pin.addTo(this.map);
     if (text) {
       pin.bindPopup(text);

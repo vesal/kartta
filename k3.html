@@ -162,7 +162,7 @@
 
     .ui-layout-north {
       z-index: 2000;
-      height: 22px;
+      /* height: 22px; */
       position: relative;
       background: #f8f9fa;
       border-bottom: 1px solid #dee2e6;
@@ -665,6 +665,7 @@ const options = {
   useCache: true,
   drawDistanceLine: true,
   calcDistanceSum: true,
+  flipPins: ('ontouchstart' in window) || (navigator.maxTouchPoints > 0),
 };
 
 const areaDatas = [
@@ -963,7 +964,7 @@ function addPinAt(pinLoc, label = null) {
   if (!loc) return null;
   if (!name) name = "" + pinNr++;
 
-  return createPin(loc, name, 'blue');
+  return createPin(loc, name, 'blue', null, options.flipPins);
 }
 
 
@@ -1060,10 +1061,10 @@ function changeSelected(pin, selected=true) {
   }
 }
 
-function createPin(coord, label, color, text = null) {
+function createPin(coord, label, color, text = null, flip = false) {
   return mapWrapper.createPin(coord, label, color, function(pin) {
     changeSelected(pin);
-  }, text);
+  }, text, flip);
 }
 
 //#endregion Pin management
@@ -1256,7 +1257,7 @@ function initializeMapPage() {
         // setPinText(`${lastHitPoint[0].toFixed(5)} ${lastHitPoint[1].toFixed(5)} Hi`);
         // calcDistance();
         // lastHitPoint = mapWrapper.getPinLocation(hitPin);
-      });
+      }, null, options.flipPins);
       mapWrapper.setPinDragging(hitPin, true);
       mapWrapper.setPinOn(hitPin, 'dragend', function() {
         // Kun hitPin on siirretty, päivitetään sen sijainti
@@ -1667,6 +1668,7 @@ function checkSavedValues() {
   getCBOption("followMe",function() { /*checkTimer("followMe");*/ } );
   getCBOption("selectNewPin",function() { /*checkTimer("followMe");*/ } );
   // getCBOption("useDummyRect",function() { /*checkTimer("followMe");*/ } );
+  getCBOption("flipPins");
   getCBOption("preventSleep",function() { checkSleep(); } );
   getCBOption("smallRaport",function() { changeRaportView(); } );
   // getCBOption("showAccuracy");
@@ -1834,6 +1836,7 @@ async function clearServiceWorker() {
     <label><input type="text" name="editFollowMeColor" id="editFollowMeColor" value="orange" size="8" /></label>
     <label><input type="text" name="editFollowMeWidth" id="editFollowMeWidth" value="3" size="1" /> pt</label><br>
     <label><input type="checkbox" name="selectNewPin" id="selectNewPin" value="selectNewPin"  />Valitse uusi pin aktiiviseksi</label><br>
+    <label><input type="checkbox" name="flipPins" id="flipPins" value="flipPins" title="Kosketusnäytöllä parempi, vaikuttaa uusiin pinneihin." />Käännä pinnit</label><br>
     <!-- <input type="checkbox" name="useDummyRect" id="useDummyRect" value="useDummyRect"  />Käytä tyhjää hakualuetta (jos ei osaa hakea)<br> -->
     <span id="preventSleepSpan"><label><input type="checkbox" name="preventSleep" id="preventSleep" value="preventSleep"  />Estä näytön sammuminen</label></span><br>
     <span id="spanUseCache"><label><input type="checkbox" name="useCache" id="useCache" value="useCache"  />Käytä paikallista muistia <a class="help" data-href="#usecache"></a></label></span>
