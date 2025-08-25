@@ -782,7 +782,9 @@ function getfollow()  {
   if ( !options.id || !options.email ) return;
 
   clearError();
-  postCyclo({id: options.id, e: getEmailTag(), f : options.usersTofollow}, setPins(data));
+  postCyclo({id: options.id, e: getEmailTag(), f : options.usersTofollow}, function( data ) {
+    setPins(data)
+  });
 }
 
 
