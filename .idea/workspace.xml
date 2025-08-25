@@ -9,8 +9,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/IncrementVersion.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MapWrapperLeafLet.js" beforeDir="false" afterPath="$PROJECT_DIR$/MapWrapperLeafLet.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/manifest.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/offline-worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/offline-worker.js" afterDir="false" />
@@ -23,9 +23,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
         <option value="JavaScript File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -64,6 +64,7 @@
     "JavaScript Debug.k.executor": "Debug",
     "JavaScript Debug.k.html.executor": "Debug",
     "JavaScript Debug.k3.html.executor": "Debug",
+    "Python.IncrementVersion.executor": "Run",
     "Python.convertFlykKartta.executor": "Debug",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -77,7 +78,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
+    "settings.editor.selected.configurable": "preferences.keymap",
     "ts.external.directory.path": "C:\\devel\\PyCharm\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
@@ -104,7 +105,27 @@
     <configuration name="k.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:8080/k.html?lat=61.88961&amp;lon=25.94575&amp;zoom=15&amp;mapName=Google%20satellite&amp;route=!havu/81,!havu/82,!havu/83,!havu/8r34&amp;readGPS=false&amp;routeoptions=c:red,w:10">
       <method v="2" />
     </configuration>
-    <configuration name="s.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/kartta/src/s.html">
+    <configuration name="IncrementVersion" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="kartta" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/IncrementVersion.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
     <configuration name="convertFlykKartta" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
@@ -136,17 +157,17 @@
       <item itemvalue="JavaScript Debug.k" />
       <item itemvalue="JavaScript Debug.k3.html" />
       <item itemvalue="JavaScript Debug.k.html" />
-      <item itemvalue="JavaScript Debug.s.html" />
       <item itemvalue="JavaScript Debug.account.html" />
+      <item itemvalue="Python.IncrementVersion" />
       <item itemvalue="Python.convertFlykKartta" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="JavaScript Debug.k3.html" />
+        <item itemvalue="Python.IncrementVersion" />
         <item itemvalue="JavaScript Debug.k.html" />
         <item itemvalue="Python.convertFlykKartta" />
         <item itemvalue="JavaScript Debug.account.html" />
-        <item itemvalue="JavaScript Debug.s.html" />
       </list>
     </recent_temporary>
   </component>
@@ -187,7 +208,7 @@
       <workItem from="1754835919103" duration="350000" />
       <workItem from="1754836285386" duration="11554000" />
       <workItem from="1754904718618" duration="251000" />
-      <workItem from="1754904988042" duration="223032000" />
+      <workItem from="1754904988042" duration="226587000" />
     </task>
     <servers />
   </component>
@@ -238,12 +259,6 @@
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="160" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/k3.html</url>
-          <line>1742</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="177" />
-        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -261,5 +276,6 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/kartta$convertFlykKartta.coverage" NAME="convertFlykKartta Coverage Results" MODIFIED="1750688971217" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/kartta$IncrementVersion.coverage" NAME="IncrementVersion Coverage Results" MODIFIED="1756124477206" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
