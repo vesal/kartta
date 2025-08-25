@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.6">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.8">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -1162,6 +1162,29 @@ function displayCurrentPosition(position) {
   }
   // mapWrapper.setView(loc);
 }
+
+function simulateGPS() {
+  for (let i = 0; i < 10; i++) {
+    const lat = 62.25 + (Math.random() - 0.5) * 0.1;
+    const lng = 25.75 + (Math.random() - 0.5) * 0.1;
+    const coords = {
+      latitude: lat,
+      longitude: lng,
+      altitude: 100 + Math.random() * 50,
+      accuracy: 5 + Math.random() * 5,
+      altitudeAccuracy: 10 + Math.random() * 10,
+      heading: Math.random() * 360,
+      speed: Math.random() * 10
+    };
+    const position = {
+      coords: coords,
+      timestamp: Date.now()
+    };
+    displayCurrentPosition(position);
+  }
+}
+
+
 //#endregion Geolocation
 
 //#region LocalStorage and URL parameters
@@ -1190,7 +1213,7 @@ function getStringFromParamsOrStrore(name, def) {
 //#region Initialization
 function showVersion() {
   const manifestLink = document.getElementById('manifest-link');
-  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.4"
+  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.6"
 
   // Parsitaan query-parametri
   const url = new URL(href, window.location.href);
@@ -1314,7 +1337,7 @@ function initializeMapPage() {
     if (options.HCenter2 && options.HStationary) {
       mapWrapper.setView(loc);
     }
-
+    // simulateGPS();
   });  // mapWarpper.on  click end
 
   mapWrapper.on('move', mapMove);
@@ -1704,8 +1727,6 @@ function checkSavedValues() {
   const cb1 = document.getElementById('area1cb');
   const cb2 = document.getElementById('area1cbCopy');
 
-
-
   for (let area of areaDatas) {
     getCBOption(area.cb, function() { checkArea(area);});
     getCBOption(area.cb+ "Own", function() { checkAreaColor(area);});
@@ -1729,15 +1750,8 @@ function checkSavedValues() {
   changeRaportView();
 
   checkSleep(); // check if use wake lock or not
-
-  /*
-  options.follow=getCookie("follow"); if (options.follow=="true") { document.getElementById('follow').checked = true; options.follow = true; } else options.follow = false;
-  options.showAccuracy=getCookie("showAccuracy"); if (options.showAccuracy=="true") { document.getElementById('showAccuracy').checked = true; options.showAccuracy = true; } else options.showAccuracy = false;
-  options.HCenter2=getCookie("HCenter2"); if (options.HCenter2=="true") { document.getElementById('HCenter2').checked = true; options.HCenter2 = true; } else options.HCenter2 = false;
-  options.showAccuracy=getCookie("showAccuracy"); if (options.showAccuracy=="true") { document.getElementById('showAccuracy').checked = true; options.showAccuracy = true; } else options.showAccuracy = false;
-  checkTimer("follow");
-  */
 }
+
 
 async function clearServiceWorker() {
   if ('serviceWorker' in navigator) {
@@ -1753,7 +1767,7 @@ async function clearServiceWorker() {
         await caches.delete(name);
       }
     }
-    // location.reload(); // Reload the page to ensure everything is reset
+    location.reload(); // Reload the page to ensure everything is reset
   }
 }
 
