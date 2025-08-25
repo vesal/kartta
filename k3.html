@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.11">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.12">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -1172,6 +1172,11 @@ function createPin(coord, label, color, text = null, flip = false) {
   }, text, flip);
 }
 
+function setPins(data) {
+  const lines = data.split("\n");
+  for (let i=0; i <lines.length; i++)
+     setPin(lines[i]);
+}
 //#endregion Pin management
 
 //#region Error handling
@@ -1310,7 +1315,7 @@ function getStringFromParamsOrStrore(name, def) {
 //#region Initialization
 function showVersion() {
   const manifestLink = document.getElementById('manifest-link');
-  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.9"
+  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.10"
 
   // Parsitaan query-parametri
   const url = new URL(href, window.location.href);
