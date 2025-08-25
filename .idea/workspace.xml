@@ -10,6 +10,7 @@
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MapWrapperLeafLet.js" beforeDir="false" afterPath="$PROJECT_DIR$/MapWrapperLeafLet.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/manifest.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/offline-worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/offline-worker.js" afterDir="false" />
@@ -186,7 +187,7 @@
       <workItem from="1754835919103" duration="350000" />
       <workItem from="1754836285386" duration="11554000" />
       <workItem from="1754904718618" duration="251000" />
-      <workItem from="1754904988042" duration="217965000" />
+      <workItem from="1754904988042" duration="223032000" />
     </task>
     <servers />
   </component>
@@ -239,7 +240,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/k3.html</url>
-          <line>1725</line>
+          <line>1742</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="177" />
         </line-breakpoint>

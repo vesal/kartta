@@ -352,4 +352,29 @@ class MapWrapper {
     return [coord.lat, coord.lng];
   }
 
+  createPolyline(options = {}) {
+    const lineOptions = {
+      color: options.color || 'blue',
+      weight: options.weight || 2,
+      opacity: options.opacity || 0.6
+    };
+    const polyline = {
+      points: [],
+      line: null,
+    }
+    polyline.line = this.L.polyline(polyline.points, lineOptions);
+    return polyline;
+  }
+
+  addPolylinePoint(polyline, point, draw = true) {
+    if (!polyline || !polyline.line || !polyline.points) {
+      return;
+    }
+    polyline.points.push(point);
+    polyline.line.setLatLngs(polyline.points);
+    if (draw && !this.map.hasLayer(polyline.line)) {
+      this.map.addLayer(polyline.line);
+    }
+  }
+
  } // MapWrapper ends
