@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.13">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.15">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -293,6 +293,11 @@ const cycloServerUrl = "https://www.mit.jyu.fi/demowww/cyclo";
 const helpServerUrl = "https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta";
 
 //#region Helpper functions
+function normalizeLongitude(lon) {
+  lon = ((lon + 180) % 360 + 360) % 360 - 180;
+  return lon;
+}
+
 
 function prefixHelpLinks() {
     document.querySelectorAll('a.help').forEach(link => {
@@ -304,6 +309,7 @@ function prefixHelpLinks() {
         }
     });
 }
+
 
  function fixed(d,n) {
     if ( d == null ) return "NaN";
@@ -1174,6 +1180,57 @@ function createPin(coord, label, color, text = null, flip = false) {
   }, text, flip);
 }
 
+const followPinList = {};
+const followPolylineList = {};
+const followLocationsList = {};
+
+function setPin(line) {
+  line = line.trim();
+  if ( line === "" ) return;
+  if ( line[0] !== 'D' )  return setError(line);
+  const parts = line.split(":");
+  const n = parts[1].split("=");
+  const name = n[0];
+  const d = n[1].split(",");
+  const latVal = parseFloat(d[0]);
+  const longVal = normalizeLongitude(parseFloat(d[1]));
+  const alt = parseFloat(d[3]);
+  const newLoc = [latVal, longVal, alt];
+  newLoc.altitude = alt;
+  let pin;
+  let pline;
+  let lineVertices;
+  if ( name in followPinList ) {
+    pin = followPinList[name];
+    pline = followPolylineList[name];
+    const len = pline.points.length;
+    if (len !== 0) {
+      const prevLoc = pline.points[len - 1];
+      const same = prevLoc[0] === newLoc[0] && prevLoc[1] === newLoc[1];
+      if (!same) {
+        if (options.drawLogLine) mapWrapper.addPolylinePoint(pline, newLoc);
+        // else pline.getLocations().length = 0;
+        mapWrapper.setPinLocation(pin, newLoc);
+        // if (lineVertices.length % 1 === 0) // To let it draw also with big zoom factors
+        //   pline.setLocations(lineVertices);
+      }
+    }
+  }
+  else {
+    // var pinInfobox = new Microsoft.Maps.Infobox(center, {title: name, visible: false});
+    pin = mapWrapper.createPin(newLoc, name, 'green ', function(pin) {
+      changeSelected(pin);
+    }, null, false);
+    pline = mapWrapper.createPolyline({color: 'green', weight: 2, opacity: 0.7});
+    if (options.drawLogLine)  mapWrapper.addPolylinePoint(pline, newLoc);
+    followPinList[name] = pin;
+    followPolylineList[name] = pline;
+    // map.entities.push(pinInfobox);
+  }
+  if ( pin === lastSelected ) mapWrapper.setView(newLoc);
+}
+
+
 function setPins(data) {
   const lines = data.split("\n");
   for (let i=0; i <lines.length; i++)
@@ -1317,7 +1374,7 @@ function getStringFromParamsOrStrore(name, def) {
 //#region Initialization
 function showVersion() {
   const manifestLink = document.getElementById('manifest-link');
-  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.11"
+  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.13"
 
   // Parsitaan query-parametri
   const url = new URL(href, window.location.href);
@@ -1992,7 +2049,7 @@ async function clearServiceWorker() {
           <label for="editUsersTofollow">Seurattavat käyttäjät: </label><input type="text" name="editUsersTofollow" id="editUsersTofollow" value="" size="15" /><br>
         </div>
         <br>
-        <button type="button" onclick="getfollow(); closeDiv('settings');">Hae muiden paikka</button> (jos automaatti ei ole päällä)<br>
+        <button type="button" onclick="getfollow(); toggleDiv('settings', false);">Hae muiden paikka</button> (jos automaatti ei ole päällä)<br>
         <br>
         <label><input type="checkbox" name="follow" id="follow" value="follow"  />Seuraa muita automaattisesti</label><br>
         <label><input type="checkbox" name="drawLogLine" id="drawLogLine" value="drawLogLine"  />Piirrä viivaa seurattavista</label><br>
