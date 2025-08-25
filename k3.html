@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.5">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.6">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -74,8 +74,12 @@
       background-color: #007bff;
       color: #fff;
     }
+
     .ui-menu li span {
       color: inherit; /* Ensure span inherits the hover color */
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .ui-menu {
@@ -115,6 +119,7 @@
       /*min-height: 100px; */
       overflow: hidden; /* Prevent scrolling */
     }
+
     #mapModeSelect {
       /* position: absolute;
       top: 0px;
@@ -129,6 +134,7 @@
       font-family: Arial, Helvetica, sans-serif;
       font-size: 1.0em;
     }
+
     #distance {
       background-color: white;
       align-self: baseline;
@@ -206,6 +212,7 @@
       right: 0;
       z-index: 3000;
     }
+
     button.icon-btn {
       background: none;
       border: none;
@@ -401,7 +408,7 @@ https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/
 	"b-bark SuomiTopo"   : { f:function(tile) {
                             return String.format(belectro.link, tile.zoom, tile.x, tile.y);
 						               },
-	                         c:'<span>Render:</span> <a href="https://www.b-bark.com" target="_blank"><img style="vertical-align:middle" src="css/b_bark_logo.png" width="10%" height="10%"  alt=""/></a> (c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>',
+	                         c:'<span>Render:</span> <a href="https://www.b-bark.com" target="_blank"><img style="vertical-align:middle" src="css/b_bark_logo.png" width="39" height="18"  alt=""/></a> (c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>',
                              i: belectro.init },
   "World Topo Map":      {f: function(tile) {
                             return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{0}/{2}/{1}", tile.zoom, tile.x, tile.y);
@@ -648,6 +655,8 @@ const options = {
   resend: false,
   follow: false,
   followMe: false,
+  followMeWidth: 3,
+  followMeColor: "orange",
   showTime: true,
   selectNewPin: true,
   useDummyRect: false,
@@ -655,7 +664,7 @@ const options = {
   smallRaport: false,
   drawLogLine: false,
   HStationary: true,
-  HCenter: false,
+  HCenter2: false,  // korvattu nimi jotta vanhat localstoraget eivät sotke
   showAccuracy: true,
   extra: false,
   tpR: "0",
@@ -724,7 +733,7 @@ function mapMove() {
   localStorage.lat = pos[0];
   localStorage.lon = pos[1];
   localStorage.zoom = mapWrapper.getZoom();
-  if ( options.HCenter ) {
+  if ( options.HCenter2 ) {
      setHitPinLoc(mapWrapper.getCenter(),-1, -1);
      displayLocPin(hitPin);
   } else if (options.HStationary) {
@@ -1130,6 +1139,8 @@ function checkGeoLocation() {
     startGeoLocation(document.getElementById("readGPS").checked);
 }
 
+let myPolyline = null;
+
 function displayCurrentPosition(position) {
   if ( !position || !position.coords ) return;
   lastGPSCoord = position;
@@ -1142,6 +1153,12 @@ function displayCurrentPosition(position) {
     myPin = createPin(loc, 'I', 'green', "Olet tässä");
     // jos URLissa ei ole tullut paikkaa, käytä
     if (!params.lat) mapWrapper.setView(loc);
+  }
+  if (options.followMe) {
+    if (!myPolyline) {
+      myPolyline = mapWrapper.createPolyline({color: options.followMeColor, weight: options.followMeWidth, opacity: 1});
+    }
+    mapWrapper.addPolylinePoint(myPolyline, loc);
   }
   // mapWrapper.setView(loc);
 }
@@ -1263,7 +1280,7 @@ function initializeMapPage() {
         // Kun hitPin on siirretty, päivitetään sen sijainti
         calcDistance(-1, -1);
         lastHitPoint = mapWrapper.getPinLocation(hitPin);
-        if (options.HCenter && options.HStationary) {
+        if (options.HCenter2 && options.HStationary) {
           // preventMapMove = true;
           mapWrapper.setView(lastHitPoint);
         }
@@ -1294,7 +1311,7 @@ function initializeMapPage() {
     const elevation = await getElevation(loc);
 
     setPinInputText(`${lat.toFixed(5)} ${lng.toFixed(5)} H ${elevation}`);
-    if (options.HCenter && options.HStationary) {
+    if (options.HCenter2 && options.HStationary) {
       mapWrapper.setView(loc);
     }
 
@@ -1302,7 +1319,7 @@ function initializeMapPage() {
 
   mapWrapper.on('move', mapMove);
 
-  mapWrapper.map.on('zoomend', function(e) {
+  mapWrapper.map.on('zoomend', function() {
     const zoom = mapWrapper.getZoom();
     localStorage.zoom = zoom;
   });
@@ -1674,7 +1691,7 @@ function checkSavedValues() {
   // getCBOption("showAccuracy");
   getCBOption("useCache",function() { if (mapWrapper) mapWrapper.setUseCache(options.useCache); });
   getCBOption("HStationary");
-  getCBOption("HCenter");
+  getCBOption("HCenter2");
   getCBOption("send"); // ,sendPosition);
   getCBOption("drawLogLine");
   // getCBOption("readGPS",function() { checkTimer("readGPS"); });
@@ -1716,7 +1733,7 @@ function checkSavedValues() {
   /*
   options.follow=getCookie("follow"); if (options.follow=="true") { document.getElementById('follow').checked = true; options.follow = true; } else options.follow = false;
   options.showAccuracy=getCookie("showAccuracy"); if (options.showAccuracy=="true") { document.getElementById('showAccuracy').checked = true; options.showAccuracy = true; } else options.showAccuracy = false;
-  options.HCenter=getCookie("HCenter"); if (options.HCenter=="true") { document.getElementById('HCenter').checked = true; options.HCenter = true; } else options.HCenter = false;
+  options.HCenter2=getCookie("HCenter2"); if (options.HCenter2=="true") { document.getElementById('HCenter2').checked = true; options.HCenter2 = true; } else options.HCenter2 = false;
   options.showAccuracy=getCookie("showAccuracy"); if (options.showAccuracy=="true") { document.getElementById('showAccuracy').checked = true; options.showAccuracy = true; } else options.showAccuracy = false;
   checkTimer("follow");
   */
@@ -1829,7 +1846,7 @@ async function clearServiceWorker() {
   <div class="popupIn">
     <h2>Asetukset</h2>
     <label><input type="checkbox" id="HStationary" value="HStationary"  />Pidä H paikallaan</label>
-    <label><input type="checkbox" id="HCenter" value="HCenter"  />Pidä H keskellä <a class="help" data-href="#othersettings"></a></label><br>
+    <label><input type="checkbox" id="HCenter2" value="HCenter2"  />Pidä H keskellä <a class="help" data-href="#othersettings"></a></label><br>
     <!-- <input type="checkbox" id="showAccuracy" value="showAccuray"  />Näytä tarkkuusympyrä<br> -->
     <label><input type="checkbox" id="readGPS" value="readGPS"  />Lue GPS:ää</label><br>
     <label><input type="checkbox" name="followMe" id="followMe" value="followMe"  />Piirrä oma jälki</label>
