@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.8">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.10">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -292,6 +292,8 @@ function sanitizeInput(input, type = "html") {
 const cycloServerUrl = "https://www.mit.jyu.fi/demowww/cyclo";
 const helpServerUrl = "https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta";
 
+//#region Helpper functions
+
 function prefixHelpLinks() {
     document.querySelectorAll('a.help').forEach(link => {
         link.target = "help";
@@ -303,6 +305,15 @@ function prefixHelpLinks() {
     });
 }
 
+ function fixed(d,n) {
+    if ( d == null ) return "NaN";
+	  return d.toFixed(n);
+ }
+
+ function cleanNumbers(s) {
+  return s.replace(/[^0-9]/g,'').trim();
+}
+//#endregion Helpper functions
 
 //#region MapModes
 
@@ -752,14 +763,21 @@ function showCurrentPosition() {
 function postCyclo(data, callback) {
   fetch(cycloServerUrl, {
     method: "POST",
+    /*
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
+      "Content-Type": "application/x-www-form-urlencoded",
+      // "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest" // jQuery lisää tämän, joskus tarpeen
     },
     body: Object.keys(data)
       .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
       .join("&")
+     */
+    body: new URLSearchParams(data)
   })
-  .then(response => response.text())
+  .then(response => {
+    console.log(response);
+    response.text(); })
   .then(callback);
 }
 
@@ -770,6 +788,76 @@ function getfollow()  {
   postCyclo({id: options.id, e: getEmailTag(), f : options.usersTofollow}, setPins(data));
 }
 
+function oldSchoolPost(url, params, callback, extra) {
+  // Muutetaan olio URL-enkoodattuun muotoon
+  const formBody = Object.keys(params)
+    .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
+    .join("&");
+
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", url, true);
+  // xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+
+  // Tämä jäljittelee jQueryn "done"
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        callback(xhr.responseText, extra);
+      } else {
+        console.error("POST error:", xhr.status, xhr.statusText);
+      }
+    }
+  };
+
+  xhr.send(formBody);
+}
+
+function sendCyclo(command,f, extra) {
+  clearError();
+  options.id = cleanNumbers(options.id);
+  const params = { ...command, id: options.id, e: getEmailTag() };
+  oldSchoolPost(cycloServerUrl+"/index.php", params, f, extra);
+}
+
+function sendCyclo3(command,f, extra) {
+  clearError();
+  options.id = cleanNumbers(options.id);
+  const params = { ...command, id: options.id, e: getEmailTag() };
+  postCyclo(params,
+   function( data ) {
+    f(data, extra)
+  } );
+}
+
+function sendCyclo2(command,f, extra) {
+  clearError();
+  options.id = cleanNumbers(options.id);
+  const params = { ...command, id: options.id, e: getEmailTag() };
+  const query = new URLSearchParams(params).toString();
+  fetch(`${cycloServerUrl}/index.php?${query}`)
+  .then(res => res.text())
+  .then(data => f(data, extra))
+  .catch(err => console.error(err));
+}
+
+function getEmailTag() {
+   if ( !options.tag ) return options.email;
+   return options.email + "+" + options.tag
+ }
+
+
+function getLogname() {
+  if ( options.logname ) return options.logname;
+  const today = new Date();
+  const dd = today.getDate();
+  const mm = today.getMonth() + 1; //January is 0!
+  const yy = today.getFullYear() - 2000;
+
+  return i2(yy) + i2(mm) + i2(dd);
+}
+
+let lastSend = "";
 function postPosition(position) {
     if ( sending ) return;
     if ( !options.id || !options.email ) return;
@@ -1160,6 +1248,7 @@ function displayCurrentPosition(position) {
     }
     mapWrapper.addPolylinePoint(myPolyline, loc);
   }
+  if ( options.send ) postPosition(position);
   // mapWrapper.setView(loc);
 }
 
@@ -1213,7 +1302,7 @@ function getStringFromParamsOrStrore(name, def) {
 //#region Initialization
 function showVersion() {
   const manifestLink = document.getElementById('manifest-link');
-  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.6"
+  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.8"
 
   // Parsitaan query-parametri
   const url = new URL(href, window.location.href);
@@ -1337,7 +1426,7 @@ function initializeMapPage() {
     if (options.HCenter2 && options.HStationary) {
       mapWrapper.setView(loc);
     }
-    // simulateGPS();
+    simulateGPS();
   });  // mapWarpper.on  click end
 
   mapWrapper.on('move', mapMove);
@@ -1976,6 +2065,10 @@ async function clearServiceWorker() {
   </div>
 </div>
 
+<div style="bottom: 0; right: 0; position: absolute; z-index:370; background-color: white;">
+   	<span class="coord" id="coord"></span>
+   <a class="link" onclick="copyToUrl()">Laita&nbsp;URLiin</a>
+ </div>
 
 </body>
 </html>
