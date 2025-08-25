@@ -9,8 +9,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/IncrementVersion.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.php" beforeDir="false" afterPath="$PROJECT_DIR$/index.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/manifest.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/offline-worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/offline-worker.js" afterDir="false" />
@@ -64,7 +64,7 @@
     "JavaScript Debug.k.executor": "Debug",
     "JavaScript Debug.k.html.executor": "Debug",
     "JavaScript Debug.k3.html.executor": "Debug",
-    "Python.IncrementVersion.executor": "Run",
+    "Python.IncrementVersion.executor": "Debug",
     "Python.convertFlykKartta.executor": "Debug",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -78,7 +78,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "preferences.keymap",
+    "settings.editor.selected.configurable": "editor.preferences.folding",
     "ts.external.directory.path": "C:\\devel\\PyCharm\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
@@ -164,8 +164,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="JavaScript Debug.k3.html" />
-        <item itemvalue="Python.IncrementVersion" />
         <item itemvalue="JavaScript Debug.k.html" />
+        <item itemvalue="Python.IncrementVersion" />
         <item itemvalue="Python.convertFlykKartta" />
         <item itemvalue="JavaScript Debug.account.html" />
       </list>
@@ -208,7 +208,8 @@
       <workItem from="1754835919103" duration="350000" />
       <workItem from="1754836285386" duration="11554000" />
       <workItem from="1754904718618" duration="251000" />
-      <workItem from="1754904988042" duration="226587000" />
+      <workItem from="1754904988042" duration="228616000" />
+      <workItem from="1756132556973" duration="8995000" />
     </task>
     <servers />
   </component>
@@ -226,38 +227,29 @@
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/k.html</url>
           <line>581</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="37" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>http://localhost:8080/sw.js</url>
           <line>10</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="88" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>http://localhost:8080/sw.js</url>
           <line>15</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="89" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/k.html</url>
-          <line>711</line>
+          <line>1125</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="158" />
+          <option name="timeStamp" value="203" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/k.html</url>
-          <line>458</line>
+          <line>1130</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="159" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/k.html</url>
-          <line>361</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="160" />
+          <option name="timeStamp" value="204" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -276,6 +268,6 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/kartta$convertFlykKartta.coverage" NAME="convertFlykKartta Coverage Results" MODIFIED="1750688971217" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/kartta$IncrementVersion.coverage" NAME="IncrementVersion Coverage Results" MODIFIED="1756124477206" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/kartta$IncrementVersion.coverage" NAME="IncrementVersion Coverage Results" MODIFIED="1756132288266" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

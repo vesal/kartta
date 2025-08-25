@@ -1,4 +1,16 @@
-<?php header('Access-Control-Allow-Origin: *');   // muista poistaa tuo Access-Control-Allow-Origin!!!
+<?php
+header('Access-Control-Allow-Origin: *');   // muista poistaa tuo Access-Control-Allow-Origin!!!
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: X-Requested-With, Content-Type");
+
+// *** OPTIONS-preflight ***
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    // Preflight vastataan tyhjällä bodyllä
+    http_response_code(200);
+    exit(0);
+}
+
+
 error_reporting(E_ALL | E_STRICT);
 ini_set("display_errors", "1");
 
