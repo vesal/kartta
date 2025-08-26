@@ -2280,8 +2280,8 @@ function saveWindowPos(w) {
 
 function createComps() {
   readComponents();
-  if (options.useCompsWindow && compsWindow === null) {
     // noinspection JSUnresolvedReference
+  if (options.useCompsWindow && compsWindow === null && typeof WinBox === "function") {
     compsWindow = new WinBox("Mittarit", {
       id: "compsWindow",
       mount: document.getElementById("showComps"),
