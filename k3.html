@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.16">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.19">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -33,7 +33,7 @@
     .popup {
       padding: 5%;
       position: absolute;
-      z-index: 400;
+      z-index: 4000;
       background-color: lightyellow;
       visibility: hidden;
       top: 30pt;
@@ -227,10 +227,45 @@
       align-items: center;
       justify-content: center;
     }
+
+    /*noinspection CssUnusedSymbol*/
     .leaflet-bar {
         margin-right: 20px !important;
         margin-top: -5px !important;
     }
+
+    /*noinspection CssUnusedSymbol*/
+    .data {
+        font-family: sans-serif;
+        font-weight: bold;
+    }
+
+    /*noinspection CssUnusedSymbol*/
+    .comp {
+      display: inline-block;
+      text-align: center;
+      padding: 0 7px 0 7px;
+      line-height: 0.9;
+      font-size: x-small;
+    }
+    /*noinspection CssUnusedSymbol*/
+    .winbox {
+      z-index: 6000 !important;
+    }
+    /*noinspection CssUnusedSymbol*/
+    .wb-icon {
+      height: 15px;
+    }
+    /*noinspection CssUnusedSymbol*/
+    .wb-title {
+      line-height: 15px;
+    }
+
+    /*noinspection CssUnusedSymbol*/
+    .wb-body {
+      overflow: hidden !important;
+    }
+
   </style>
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/idb-keyval/3.0.1/idb-keyval-iife.min.js"></script>!-->
 <script src="KeyValStore.js" defer></script>
@@ -252,12 +287,13 @@ if ('serviceWorker' in navigator) {
 <!-- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> -->
 <!-- <script src="https://unpkg.com/leaflet-textpath/leaflet.textpath.js"></script>-->
 
+<script src="js/winbox.bundle.min.js" defer></script>
 <script src="js/leaflet.js" defer></script>
 <script src="js/leaflet.textpath.js" defer></script>
 <script src="MapWrapperLeafLet.js" defer></script>
 <script>
 
-// Globass for databases
+// Globals for databases
 // const tileStore = new KeyValStore('kartta-db', 'tiles');
 // const settingsStore = new KeyValStore('kartta-db', 'settings');
 
@@ -322,6 +358,12 @@ function prefixHelpLinks() {
 
  function cleanNumbers(s) {
   return s.replace(/[^0-9]/g,'').trim();
+}
+
+function d2(d) {
+	  d = Math.round(d);
+	  if ( d < 10 ) return "0" + d;
+	  return ""+d;
 }
 //#endregion Helpper functions
 
@@ -438,6 +480,9 @@ https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/
                           },
   "World Imagery"      : { f:function(tile) { return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{0}/{2}/{1}",tile.zoom ,tile.x, tile.y);},
 	                         c:'(c) <a href="https://www.esri.com/en-us/home" target="_blank">ArgGIS</a>', mz: 18},
+                         // ks: https://julkinen.traficom.fi/rasteripalvelu/wmts?request=getcapabilities
+  "Merikartat"         : { f:function(tile) { return String.format("https://julkinen.traficom.fi/rasteripalvelu/wmts/rest/Traficom:Merikarttasarjat public/default/WGS84_Pseudo-Mercator/WGS84_Pseudo-Mercator:{0}/{2}/{1}?format=image/png",tile.zoom ,tile.x, tile.y);},
+	                         c:'(c) <a href="https://www.traficom.fi/en/news/spatial-dataset-material/download-and-view-service" target="_blank">Traficom</a>', mz: 15},
 	/*
   "Ilmailu merged"      : { f:function(tile) {
                               const airac = "1806";
@@ -458,6 +503,24 @@ https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/
 	                         c:'(c) <a href="https://openflightmaps.org/live/ef-finland/" target="_blank">openflightmaps.org</a>'},
 */
 };
+
+/*
+function tileToWMSRect(tile)  {
+  const mapSize = 256 << tile.zoom;
+  const pixelX = 256 * tile.x + 128;
+  const pixelY = 256 * tile.y + 128;
+  const x1 = (Clip(pixelX - 128, 0, mapSize - 1) / mapSize) - 0.5;
+  const y1 = 0.5 - (Clip(pixelY+128, 0, mapSize - 1) / mapSize);
+  const x2 = (Clip(pixelX+128, 0, mapSize - 1) / mapSize) - 0.5;
+  const y2 = 0.5 - (Clip(pixelY-128, 0, mapSize - 1) / mapSize);
+  return {
+      x1 : 90 - 360 * Math.atan(Math.exp(-y1 * 2 * Math.PI)) / Math.PI,
+      y1 : 360 * x1,
+      x2 : 90 - 360 * Math.atan(Math.exp(-y2 * 2 * Math.PI)) / Math.PI,
+      y2 : 360 * x2
+  };
+}
+*/
 
 //#endregion MapModes
 
@@ -704,6 +767,7 @@ const areaDatas = [
   {name: "Varaukset", url: "https://flyk.com/api/reservations.geojson", cb: "area3cb"},
 ];
 
+
 const params = getUrlVars();
 
 function getUrlVars()
@@ -738,15 +802,6 @@ function checkTimer(timer, clear) {
      clearInterval(tim.t);
 }
 
-function setTimeCompsValues() {
-    const now = new Date();
-    for (let comp of timecomponents) {
-        let v = comp.f(comp, now);
-        if (v === null) continue;
-        comp.span.innerText = v;
-        comp.value = v;
-    }
-}
 
 function mapMove() {
   mouseDown = true;
@@ -1186,7 +1241,6 @@ function createPin(coord, label, color, text = null, flip = false) {
 
 const followPinList = {};
 const followPolylineList = {};
-const followLocationsList = {};
 
 function setPin(line) {
   line = line.trim();
@@ -1203,7 +1257,6 @@ function setPin(line) {
   newLoc.altitude = alt;
   let pin;
   let pline;
-  let lineVertices;
   if ( name in followPinList ) {
     pin = followPinList[name];
     pline = followPolylineList[name];
@@ -1311,6 +1364,10 @@ function displayCurrentPosition(position) {
   const lat = position.coords.latitude;
   const lng = position.coords.longitude;
   const loc = [lat, lng];
+  if (options.useComps) {
+      setGeoCompsValues(position);
+  }
+
   if (myPin) {
     mapWrapper.setPinLocation(myPin, loc);
   } else {
@@ -1328,6 +1385,7 @@ function displayCurrentPosition(position) {
   // mapWrapper.setView(loc);
 }
 
+// noinspection JSUnusedGlobalSymbols
 function simulateGPS() {
   for (let i = 0; i < 10; i++) {
     const lat = 62.25 + (Math.random() - 0.5) * 0.1;
@@ -1378,7 +1436,7 @@ function getStringFromParamsOrStrore(name, def) {
 //#region Initialization
 function showVersion() {
   const manifestLink = document.getElementById('manifest-link');
-  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.14"
+  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.17"
 
   // Parsitaan query-parametri
   const url = new URL(href, window.location.href);
@@ -1391,6 +1449,7 @@ function showVersion() {
 function initializeMapPage() {
   showVersion()
   checkSavedValues();
+  createCompsSettings();
 
   const pzoom = parseInt(getValueFromParamsOrStrore("zoom", 8));
   const lat = getValueFromParamsOrStrore("lat", 62.25); // params["lat"] || localStorage.lat || 62.25;
@@ -1528,6 +1587,10 @@ function initializeMapPage() {
     }
   });
 
+  readComponents();
+  checkShowComponents();
+  adjustComponents();
+
 //if ('serviceWorker' in navigator) {
 //  navigator.serviceWorker.register('sw.js');
 //}
@@ -1653,19 +1716,6 @@ function openFullscreen(elem) {
     }
   }
 }
-
-
-function adjustComponents() {
-  /*  TODO: korjaa komponenttien muokkaus
-   saveComponents();
-   const compsdiv = document.getElementById("showComps");
-   compsdiv.style.backgroundColor = document.getElementById("editCompsBackground").value;
-   compsdiv.style.color = document.getElementById("editCompsColor").value;
-   createComps();
-   checkTimer("showTime", timecomponents.length === 0 || !options.useComps);
-   */
-}
-
 
 
 window.addEventListener('DOMContentLoaded', initializeMapPage)
@@ -1949,13 +1999,430 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   }
 }
 
+//#region Meter Components
+//=================================================================
+// Functions to handle components:
+//=================================================================
+//#region meter components helppers
+function setAutoComp(comp, name, value) {
+  comp[name] = value;
+  localStorage.setItem("acomp." + comp.name +"." + name, JSON.stringify(value));
+}
+
+function getAutoComp(comp, name, def, f) {
+  const s = localStorage.getItem("acomp." + comp.name +"." + name);
+  if (s===null) {
+     setAutoComp(comp, name, def);
+     return def;
+  }
+  let value = JSON.parse(s);
+  if (f) value = f(value);
+  return value
+}
+
+const getSpeed = function(comp, position) {
+  return position.coords.speed * 3.6;
+}
+
+const getAlt = function(comp, position) {
+   return position.coords.altitude;
+}
+
+const getDir = function(comp, position) {
+   return position.coords.heading;
+}
+
+const clearTrip = function (comp) {
+   setAutoComp(comp, "distSum", 0);
+   comp.lastPos = undefined;
+   localStorage.removeItem("acomp.Trip.lastPos");
+   comp.value = 0;
+   comp.span.innerText = "0.000";
+}
+
+const getTrip = function(comp, position) {
+   let coord = {latitude: position.coords.latitude, longitude: position.coords.longitude};
+   if (!startstop.checked) {
+     setAutoComp(comp, "lastPos", coord);
+     if ( comp.temp === undefined ) {
+        comp.temp = getAutoComp(comp, "distSum", 0);
+        return comp.temp;
+     }
+     return null;
+   }
+   let old = comp.lastPos;
+   if (old === undefined) {
+      old = getAutoComp(comp, "lastPos", coord);
+   }
+   const d = WGS84_distance(coord, old);
+   // componentsList["Temp"].span.innerText = d + " " +  JSON.stringify(old);
+   let distSum = comp["distSum"];
+   if (distSum === undefined) {
+      distSum = getAutoComp(comp, "distSum", 0);
+   }
+   if (d < 0.005) return distSum;
+   distSum += d;
+   setAutoComp(comp, "distSum", distSum);
+   setAutoComp(comp, "lastPos", coord);
+   return distSum;
+}
+
+const clearElap = function(comp) {
+   setAutoComp(comp, "elapZero", (new Date()).getTime());
+   setAutoComp(comp, "elapSum", 0);
+}
+
+const startCounters = function(start) {
+   // let trip = namedComponents["Trip"];
+   let elap = namedComponents["Elap"];
+   if (elap) {
+       if (start) setAutoComp(elap, "elapZero", (new Date()).getTime());
+       else setAutoComp(elap, "elapSum", elap.sum);
+   }
+}
+
+const msToHMS = function(ms) {
+   const h = Math.floor(ms / 1000 / 60 / 60);
+   ms -= h* 1000 * 60 *60;
+   const m = Math.floor(ms / 1000 / 60);
+   ms -= m* 1000 * 60;
+   const s = Math.floor(ms / 1000);
+   return h + ":" + d2(m) + ":" + d2(s);
+}
+
+const getElap = function(comp, now) {
+   if (!startstop.checked) {
+      if ( comp.temp !== undefined) return null;
+      comp.temp = getAutoComp(comp, "elapSum", 0);
+      return msToHMS(comp.temp);
+   }
+   let old = comp["elapZero"];
+   if (old === undefined) {
+      // old = getAutoComp(comp, "elapZero", now, value => new Date(value));
+      old = getAutoComp(comp, "elapZero", now.getTime());
+   }
+   // let diff = now.getTime() - old.getTime();
+   let nowt = now.getTime();
+   let diff = nowt - old;
+   const elapSum = getAutoComp(comp, "elapSum", 0);
+   diff += elapSum;
+   comp.sum = diff;
+   return msToHMS(diff);
+}
+
+const getTime = function(comp, now) {
+   const time = now.getHours() + ":" + d2(now.getMinutes()) + ":" + d2(now.getSeconds());
+   return time;
+}
+
+
+
+const componentsList = {
+  "Speed": {inUse: true,  label: "Nopeus",  unit: "km/h", font: "50px", back: "", len: 5, des: 1,  f: getSpeed, type: 0},
+  "Trip":  {inUse: true,  label: "Matka",   unit: "km",   font: "40px", back: "", len:-4, des: 3,  f: getTrip,  type: 0, click: clearTrip},
+  "Alt":   {inUse: true,  label: "Korkeus", unit: "m",    font: "30px", back: "", len: 4, des: 0,  f: getAlt,   type: 0},
+  "Dir":   {inUse: true,  label: "Suunta",  unit: "deg",  font: "20px", back: "", len: 3, des: 0,  f: getDir,   type: 0},
+  "Elap":  {inUse: true,  label: "Aika",    unit: "aika", font: "20px", back: "", len: 3, des: -1, f: getElap,  type: 1, click: clearElap},
+  "Time":  {inUse: false, label: "Kello",   unit: "",     font: "20px", back: "", len: 3, des: -1, f: getTime,  type: 1},
+//  "Temp":  {inUse: true,  label: "Temp",    unit: "temp", font: "10px", back: "rgba(255, 255, 255, 0.6)", len: 3, des: -1, f: null,     type: 2},
+}
+//#endregion meter components helppers
+
+
+let compsdiv = null;
+let startstop = {checked: false};  // Matki checkboxia jos ei luotu
+const namedComponents = {};
+
+function checkShowComponents() {
+   let cb = options.useComps;
+   let setDiv = document.getElementById("showCompsSettings");
+   let useDiv = document.getElementById("showComps");
+   if (!cb) {
+      setDiv.style.display = "none";
+      useDiv.style.display = "none";
+   } else {
+      setDiv.style.display = "block";
+      useDiv.style.display = "block";
+   }
+}
+
+function adjustComponents() {
+   saveComponents();
+   const compsdiv = document.getElementById("showComps");
+   compsdiv.style.backgroundColor = document.getElementById("editCompsBackground").value;
+   compsdiv.style.color = document.getElementById("editCompsColor").value;
+   createComps();
+   checkTimer("showTime", timecomponents.length === 0 || !options.useComps);
+}
+
+function readComponents() {
+  let bs = localStorage.getItem("editCompsBackground");
+  if (bs) document.getElementById("editCompsBackground").value = bs;
+
+  bs = localStorage.getItem("editCompsColor");
+  if (bs) document.getElementById("editCompsColor").value = bs;
+
+  for (const name in componentsList) {
+     const comp = componentsList[name];
+     let s = localStorage.getItem(name);
+     if ( s ) comp.editFont.value = s;
+     s = localStorage.getItem(name + "Col");
+     if ( s !== null ) comp.editCol.value = s;
+     s = localStorage.getItem(name + "Cb");
+     if ( s !== null) {
+       comp.cbUse.checked = s === "1";
+       comp.inUse = comp.cbUse.checked;
+     }
+   }
+}
+
+function saveComponents() {
+  localStorage.setItem("editCompsBackground", document.getElementById("editCompsBackground").value);
+  localStorage.setItem("editCompsColor", document.getElementById("editCompsColor").value);
+  for (const name in componentsList) {
+     const comp = componentsList[name];
+     localStorage.setItem(name, comp.editFont.value);
+     localStorage.setItem(name + "Col", comp.editCol.value);
+     localStorage.setItem(name + "Cb",  comp.cbUse.checked ? "1" : "0");
+     comp.inUse = comp.cbUse.checked;
+   }
+}
+
+function addTD(tr, text) {
+     const td = document.createElement("td");
+     td.innerText = text;
+     tr.appendChild(td);
+}
+
+function addTDInput(tr) {
+  const td = document.createElement("td");
+  tr.appendChild(td);
+  // <input type="text" id="editSpeed" value="50px" size="3" /></td><td><input type="text" id="editSpeedCol" value="rgba(255, 255, 255, 0.6)" size="20" />
+  const input = document.createElement("input");
+  td.appendChild(input);
+  return input;
+}
+
+function addTDCB(tr) {
+     const cb = addTDInput(tr);
+     cb.setAttribute("type", "checkbox");
+     return cb;
+}
+
+function addTDEdit(tr, name, size, text) {
+     // <input type="text" id="editSpeed" value="50px" size="3" /></td><td><input type="text" id="editSpeedCol" value="rgba(255, 255, 255, 0.6)" size="20" />
+     const edit = addTDInput(tr);
+     edit.setAttribute("id", "edit"+name);
+     edit.setAttribute("size", size);
+     edit.setAttribute("value", text);
+     edit.innerHTML = text;
+     return edit;
+}
+
+function createCompsSettings() {
+
+  compsdiv = document.getElementById("showComps");
+  const table = document.getElementById("tableCompsSettings");
+  table.innerHTML = "<tr><td></td><td>Mittari</td><td>Fontti</td><td>Taustan väri</td></tr>";
+
+  for (const name in componentsList) {
+     const comp = componentsList[name];
+     const tr = document.createElement("tr");
+     const cbUse = addTDCB(tr);
+     cbUse.checked = comp.inUse;
+     addTD(tr, comp.label);
+     const editFont = addTDEdit(tr, name, 3, comp.font);
+     const editCol = addTDEdit(tr, name + "Col", 20, comp.back);
+     comp.cbUse = cbUse;
+     comp.editFont = editFont;
+     comp.editCol = editCol;
+     comp.div = null;
+     comp.span = null;
+     comp.name = name;
+     comp.value = 0;
+     table.appendChild(tr);
+  }
+  createComps();
+}
+
+function showCompsDiv(show) {
+   if (show) {
+     compsdiv.style.display = "inherit";
+     if (compsWindow) compsWindow.show();
+   } else {
+     compsdiv.style.display = "none";
+     if (compsWindow) compsWindow.hide();
+   }
+}
+
+
+let compsWindow = null;
+
+function readWindowPos(w) {
+   if (w === null ) return;
+   const s = localStorage.getItem(w.id + 'Pos');
+   if ( s === null ) return;
+   let xywh = s.split(";");
+   w.x = parseInt(xywh[0]);
+   w.y = parseInt(xywh[1]);
+   w.width = parseInt(xywh[2]);
+   w.height = parseInt(xywh[3]);
+   w.move(w.x, w.y);
+   w.resize(w.width, w.height);
+}
+
+function saveWindowPos(w) {
+   if (w === null ) return;
+   const s = `${w.x};${w.y};${w.width};${w.height}`;
+   localStorage.setItem(w.id + 'Pos', s);
+}
+
+
+function createComps() {
+  readComponents();
+  if (options.useCompsWindow && compsWindow === null) {
+    // noinspection JSUnresolvedReference
+    compsWindow = new WinBox("Mittarit", {
+      id: "compsWindow",
+      mount: document.getElementById("showComps"),
+      height: 69,
+      width: 410,
+      header: 16,
+      y: "bottom",
+      onresize: function() { saveWindowPos(compsWindow); },
+      onmove: function() { saveWindowPos(compsWindow); },
+      onclose: function() { compsWindow = null; return false; },
+      // background: document.getElementById("editCompsBackground").value,
+    });
+    readWindowPos(compsWindow);
+    // compsWindow.onmove = function(x,y) { saveWindowPos(compsWindow); };
+    // compsWindow.onresize = function(w,h) { saveWindowPos(compsWindow); };
+  }
+  if (!options.useCompsWindow && compsWindow !== null) {
+      compsWindow.close(true);
+      compsWindow = null;
+  }
+
+  if ( compsWindow !== null ) {
+     const sheet = document.styleSheets[4]; // TODO: keksi oikea tapa löytää
+     let bc = document.getElementById("editCompsBackground").value;
+     if (bc.startsWith("rgba(") || bc.startsWith("hsla(") ) {
+         bc = bc.replace(/,[^,]*\)/, ",1)");
+     }
+     if (sheet && sheet.cssRules) {
+       if (sheet.cssRules[0].cssText.startsWith("#compsWindow .wb-body")) sheet.deleteRule(0);
+       sheet.insertRule(`#compsWindow .wb-body {background: ${bc}}`, 0);
+     }
+  }
+
+  geocomponents = [];
+  timecomponents = [];
+  compsdiv.innerHTML = '<span style="top: 0;  position: absolute" onclick="showCompsDiv(false)"><</span>'+
+          ''  ; //'<br />';
+
+  startstop = document.createElement("input");
+  startstop.setAttribute("type", "checkbox");
+  startstop.onclick = function() {
+    localStorage.setItem("startstop", startstop.checked ? "1": "0");
+    startCounters(startstop.checked);
+  }
+  startstop.checked = localStorage.getItem("startstop") !== "0"; // oletus päällä
+  compsdiv.appendChild(startstop);
+
+  for (const name in componentsList) {
+    const comp = componentsList[name];
+    comp.div = null;
+    comp.span = null;
+  }
+
+
+  for (const name in componentsList) {
+      const comp = componentsList[name];
+      if (!comp.inUse) continue;
+      const compdiv = document.createElement("div");
+      compdiv.setAttribute("id", "div" + name);
+      compdiv.style.backgroundColor = comp.editCol.value;
+      compdiv.classList.add("comp");
+      compdiv.style.display = "inline-block"
+      compsdiv.appendChild(compdiv);
+      comp.div = compdiv;
+      if (comp.unit) {
+        const labelspan = document.createElement("span");
+        labelspan.innerHTML = comp.unit;
+        compdiv.appendChild(labelspan);
+        compdiv.appendChild(document.createElement("br"));
+      }
+      const compspan = document.createElement("span");
+      compspan.setAttribute("id", name.toLowerCase() + "Comp");
+      compspan.style.fontSize = comp.editFont.value;
+      compspan.classList.add("data");
+      compspan.innerText = comp.value;
+      if (comp.click) compspan.onclick = () => comp.click(comp);
+      compdiv.appendChild(compspan);
+      comp.span = compspan;
+      if ( comp.type === 0)  geocomponents.push(comp);
+      if ( comp.type === 1)  timecomponents.push(comp);
+      namedComponents[name] = comp;
+      // const space = document.createElement("span");
+      // space.innerHTML = "&nbsp;&nbsp;"
+      // compsdiv.appendChild(space);
+  }
+}
+
+function setTimeCompsValues() {
+    const now = new Date();
+    for (let comp of timecomponents) {
+        let v = comp.f(comp, now);
+        if (v === null) continue;
+        comp.span.innerText = v;
+        comp.value = v;
+    }
+}
+
+
+function setGeoCompsValues(position) {
+    // componentsList["Speed"].span.innerHTML = Math.round(position.coords.speed * 3.6 * 10) / 10;
+    // componentsList["Alt"].span.innerHTML = Math.round(position.coords.altitude);
+    // componentsList["Dir"].span.innerHTML = Math.round(position.coords.heading);
+    for (let comp of geocomponents) {
+        let v = comp.f(comp, position);
+        if (v === null) continue;
+        let d = comp.len;
+        if (d < 0) {
+           let s = v.toPrecision(-d).slice(0,-d+1);
+           comp.span.innerText = s;
+           comp.value = s;
+           continue;
+        }
+        let des = comp.des;
+        if (des < 0) {
+           comp.span.innerText = v;
+           comp.value = v;
+           continue;
+        }
+        let s = v.toFixed(des);
+        while (s.length < d) s = "\u2000" + s;
+        // s = s.replace(/ /g, "&nbsp;")
+        comp.span.innerText = s;
+        comp.value = s;
+    }
+}
+
+
+
+//=================================================================
+// Functions to handle components ends
+//=================================================================
+//#endregion Meter Components
+
+
 </script>
 <div id="mySidenavHamburger" style="top: 0; left: 0; width: 30px; height: 35px; position: absolute; z-index:3600;  background-color: lightgray;">
   <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;<br></span>
   <span style="font-size:30px;cursor:pointer" onclick="findMyPlace()">&#9737;</span>
 </div>
 
-<div id="mySidenav" style="top: 45px; left: 0;  visibility: hidden; position: absolute; z-index:3500;  background-color: lightgray;" onclick="closeNav()">
+<div id="mySidenav" style="top: 45px; left: 0;  visibility: hidden; position: absolute; z-index:4500;  background-color: lightgray;" onclick="closeNav()">
   <label class="closebtn" style="visibility: hidden" onclick="closeNav()">&times;</label>
 
   <ul class="ui-menu" id="menu" style="visibility: hidden">
@@ -2048,7 +2515,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     <label><input type="checkbox" name="flipPins" id="flipPins" value="flipPins" title="Kosketusnäytöllä parempi, vaikuttaa uusiin pinneihin." />Käännä pinnit</label><br>
     <!-- <input type="checkbox" name="useDummyRect" id="useDummyRect" value="useDummyRect"  />Käytä tyhjää hakualuetta (jos ei osaa hakea)<br> -->
     <span id="preventSleepSpan"><label><input type="checkbox" name="preventSleep" id="preventSleep" value="preventSleep"  />Estä näytön sammuminen</label></span><br>
-    <span id="spanUseCache"><label><input type="checkbox" name="useCache" id="useCache" value="useCache"  />Käytä paikallista muistia <a class="help" data-href="#usecache"></a></label></span>
+    <span id="spanUseCache"><label><input type="checkbox" name="useCache" id="useCache" value="useCache"  />Käytä paikallista muistia <a class="help" data-href="#usecache"></a></label></span><br>
     <label><input type="checkbox" id="drawDistanceLine" value="drawDistanceLine"  />Piirrä mittaviivaa</label>
     <label><input type="checkbox" id="calcDistanceSum" value="calcDistanceSum"  />Laske summaa <a class="help" data-href="#addpins"></a></label><br>
     <br><br>
@@ -2155,6 +2622,13 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
    </div>
   </div>
 </div>
+
+ <div id="openShowComps"  style="bottom: 3em; left: 0; position: absolute; z-index:5390" onclick="showCompsDiv(true)">
+   <span style="font-size: 30px;">></span>
+ </div>
+ <div id="showComps" class="showComps" style="bottom: 0; left: 0; position: absolute; z-index:5390">
+ </div>
+
 
 <div style="bottom: 0; right: 0; position: absolute; z-index:370; background-color: white;">
    	<span class="coord" id="coord"></span>

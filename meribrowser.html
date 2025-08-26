@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<title>WMTS Tiler ETRS89_TM35-FIN</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align:center; padding:20px; }
+  img { border:1px solid #ccc; margin-top:10px; }
+  input { width:60px; text-align:center; }
+  label { margin:0 5px; }
+</style>
+</head>
+<body>
+<h1>WMTS Tiler ETRS89_TM35-FIN</h1>
+<div>
+  <label>Zoom: <input type="number" id="zoom" value="11" min="0" max="15"></label>
+  <button id="zoomIn">Zoom +</button>
+  <button id="zoomOut">Zoom -</button>
+  <label>Row: <input type="number" id="row" value="1648"></label>
+  <label>Col: <input type="number" id="col" value="699"></label>
+  <label>Map: <input type="text" id="map" value="ETRS89_TM35-FIN"></label>
+</div>
+<p>Nuolinäppäimillä voit muuttaa row ja col (Shift = ±10). Zoom + kasvattaa zomin yhdellä ja kertoo row/col *2. Zoom - pienentää zomin yhdellä ja jakaa row/col kahdella (pyöristää alas).</p>
+<img id="tile" src="" width="256" height="256" alt="Karttalaatta">
+<p id="url"></p>
+<script>
+  //   EPSG:3395_FTA
+
+  const img = document.getElementById('tile');
+  const urlEl = document.getElementById('url');
+  const zoomInput = document.getElementById('zoom');
+  const rowInput = document.getElementById('row');
+  const colInput = document.getElementById('col');
+  const zoomInBtn = document.getElementById('zoomIn');
+  const zoomOutBtn = document.getElementById('zoomOut');
+
+  function buildUrl(zoom, row, col, map) {
+    return `https://julkinen.traficom.fi/rasteripalvelu/wmts/rest/Traficom:Merikarttasarjat%20public/default/${map}/${map}:${zoom}/${row}/${col}?format=image/png`;
+  }
+
+  function updateTile() {
+    let zoom = Number(zoomInput.value);
+    let row = Number(rowInput.value);
+    let col = Number(colInput.value);
+    let map = document.getElementById('map').value || 'ETRS89_TM35-FIN';
+    // sanitize
+    if (zoom < 0) { zoom = 0; zoomInput.value = 0; }
+    if (zoom > 17) { zoom = 17; zoomInput.value = 17; }
+    if (row < 0) { row = 0; rowInput.value = 0; }
+    if (col < 0) { col = 0; colInput.value = 0; }
+
+    const url = buildUrl(zoom, row, col, map);
+    img.src = url;
+    urlEl.textContent = url + 'Zoom: ' + zoom + '  Row: ' + row + '  Col: ' + col;
+  }
+
+  zoomInput.addEventListener('change', updateTile);
+  rowInput.addEventListener('change', updateTile);
+  colInput.addEventListener('change', updateTile);
+
+  zoomInBtn.addEventListener('click', () => {
+    let zoom = Number(zoomInput.value);
+    if (zoom >= 24) return;
+    zoom++;
+    // multiply row/col by 2
+    rowInput.value = Number(rowInput.value) * 2;
+    colInput.value = Number(colInput.value) * 2;
+    zoomInput.value = zoom;
+    updateTile();
+  });
+
+  zoomOutBtn.addEventListener('click', () => {
+    let zoom = Number(zoomInput.value);
+    if (zoom <= 0) return;
+    zoom--;
+    // divide row/col by 2 (floor)
+    rowInput.value = Math.floor(Number(rowInput.value) / 2);
+    colInput.value = Math.floor(Number(colInput.value) / 2);
+    zoomInput.value = zoom;
+    updateTile();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const step = e.shiftKey ? 10 : 1;
+    switch (e.key) {
+      case 'ArrowUp':
+        rowInput.value = Number(rowInput.value) - step;
+        break;
+      case 'ArrowDown':
+        rowInput.value = Number(rowInput.value) + step;
+        break;
+      case 'ArrowLeft':
+        colInput.value = Number(colInput.value) - step;
+        break;
+      case 'ArrowRight':
+        colInput.value = Number(colInput.value) + step;
+        break;
+      default:
+        return;
+    }
+    updateTile();
+    e.preventDefault();
+  });
+
+  updateTile();
+</script>
+</body>
+</html>
