@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.15">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.16">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -227,6 +227,10 @@
       align-items: center;
       justify-content: center;
     }
+    .leaflet-bar {
+        margin-right: 20px !important;
+        margin-top: -5px !important;
+    }
   </style>
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/idb-keyval/3.0.1/idb-keyval-iife.min.js"></script>!-->
 <script src="KeyValStore.js" defer></script>
@@ -378,30 +382,30 @@ const belectro = {
 const mapModes = {
   "Bing Maps normal"   : { f:function(tile) {
 	                            return String.format("https://ecn.t1.tiles.virtualearth.net/tiles/r{0}?g=1135",TileXYToQuadKey(tile));
-							}, c:""},
+							}, c:"", mz: 20},
 	"Bing Maps aerial"   : { f:function(tile) {
 	                            return String.format("https://ecn.t1.tiles.virtualearth.net/tiles/h{0}?g=1135",TileXYToQuadKey(tile));
-							}, c:""},
+							}, c:"", mz: 19},
 	"Google street"      : { f:function(tile) { return String.format("https://mt1.google.com/vt/lyrs=m&z={0}&x={1}&y={2}",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="https://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>'},
+	                         c:'(c) <a href="https://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>', mz: 22},
 	"Google satellite"   : { f:function(tile) { return String.format("https://mt1.google.com/vt/lyrs=y&z={0}&x={1}&y={2}",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="https://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>'},
+	                         c:'(c) <a href="https://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>', mz: 21},
 //  "Google Street"      : { f:function(tile) { tile = nokiaConvert(tile); return String.format("https://maps.googleapis.com/maps/api/staticmap?center={1},{2}&zoom={0}&size=256x256&key=AIzaSyCpXjAoV19MUbpGd6e6YD9IketR2Gu-tqc",tile.zoom ,tile.x, tile.y); }, c:""},
 //  "Google satellite"   : { f:function(tile) { tile = nokiaConvert(tile); return String.format("https://maps.googleapis.com/maps/api/staticmap?center={1},{2}&zoom={0}&size=256x256&key=AIzaSyCpXjAoV19MUbpGd6e6YD9IketR2Gu-tqc&maptype=hybrid",tile.zoom ,tile.x, tile.y); }, c:""},
 //    "Nokia"              : { f:function(tile) { tile = nokiaConvert(tile); return String.format("http://m.nok.it/?app_id=_peU-uCkp-j8ovkzFGNU&app_code=gBoUkAMoxoqIWfxWA5DuMQ&h=256&w=256&ctr={1},{2}&z={0}&t=0&nord",tile.zoom ,tile.x, tile.y); }, c:""},
 //	"MapQuest"           : { f:function(tile) { return String.format("http://otile1.mqcdn.com/tiles/1.0.0/map/{0}/{1}/{2}.png",Clip(tile.zoom,0,19) ,tile.x, tile.y); },
 //	                         c:'(c) <a href="http://info.mapquest.com/terms-of-use/" target="_blank">MapQuest</a>'},
 	"OpenStreet"         : { f:function(tile) { return String.format("https://tile.openstreetmap.org/{0}/{1}/{2}.png",tile.zoom,tile.x,tile.y); },
-	                         c:'(c) <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'},
+	                         c:'(c) <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>', mz: 19},
 	"OpenCycle"          : //{ f:function(tile) { return String.format("http://a.tile.opencyclemap.org/cycle/{0}/{1}/{2}.png",tile.zoom ,tile.x, tile.y ); },
 	                         { f:function(tile) { return String.format("https://tile.thunderforest.com/cycle/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>', mz: 22},
 	"Landscape"          : { f:function(tile) { return String.format("https://tile.thunderforest.com/landscape/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>', mz: 22},
 	"Transport"          : { f:function(tile) { return String.format("https://tile.thunderforest.com/transport/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>', mz: 22},
 	"Outdoors"           : { f:function(tile) { return String.format("https://tile.thunderforest.com/outdoors/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>'},
+	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>', mz: 22},
 	/* Ei voi käyttää, koska ei ole enää saatavilla WGS84, vaan vain EPSG:3067
   "Kapsi peruskartta"  : { f:function(tile) { return getKapsiTilePath(tile); },
 	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
@@ -415,25 +419,25 @@ https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/defa
 https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/12/1116/2297.png?api-key=
 	 */
   "MML maasto"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/maastokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>', mz: 18},
   "MML tausta"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>', mz: 18},
   "MML selko"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/selkokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>', mz: 18},
   "MML ilma"           : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>', mz: 18},
 	"b-bark SuomiTopo"   : { f:function(tile) {
                             return String.format(belectro.link, tile.zoom, tile.x, tile.y);
 						               },
 	                         c:'<span>Render:</span> <a href="https://www.b-bark.com" target="_blank"><img style="vertical-align:middle" src="css/b_bark_logo.png" width="39" height="18"  alt=""/></a> (c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>',
-                             i: belectro.init },
+                             i: belectro.init, mz: 26 },
   "World Topo Map":      {f: function(tile) {
                             return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{0}/{2}/{1}", tile.zoom, tile.x, tile.y);
                           },
-                          c: '(c) <a href="https://www.esri.com/" target="_blank">Esri</a>'
+                          c: '(c) <a href="https://www.esri.com/" target="_blank">Esri</a>', mz: 19
                           },
   "World Imagery"      : { f:function(tile) { return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{0}/{2}/{1}",tile.zoom ,tile.x, tile.y);},
-	                         c:'(c) <a href="https://www.esri.com/en-us/home" target="_blank">ArgGIS</a>'},
+	                         c:'(c) <a href="https://www.esri.com/en-us/home" target="_blank">ArgGIS</a>', mz: 18},
 	/*
   "Ilmailu merged"      : { f:function(tile) {
                               const airac = "1806";
@@ -1374,7 +1378,7 @@ function getStringFromParamsOrStrore(name, def) {
 //#region Initialization
 function showVersion() {
   const manifestLink = document.getElementById('manifest-link');
-  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.13"
+  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.14"
 
   // Parsitaan query-parametri
   const url = new URL(href, window.location.href);
@@ -1932,6 +1936,19 @@ async function clearServiceWorker() {
   }
 }
 
+function checkMemoryUsage() {
+  if ('storage' in navigator && 'estimate' in navigator.storage) {
+    navigator.storage.estimate().then(estimate => {
+      document.getElementById('memoryUsage').textContent =
+        `Käytetty: ${(estimate.usage / 1e6).toFixed(2)} MB
+Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
+    });
+  } else {
+    document.getElementById('memoryUsage').textContent =
+      "Muistin käyttöä ei voi arvioida tässä ympäristössä.";
+  }
+}
+
 </script>
 <div id="mySidenavHamburger" style="top: 0; left: 0; width: 30px; height: 35px; position: absolute; z-index:3600;  background-color: lightgray;">
   <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;<br></span>
@@ -1953,7 +1970,7 @@ async function clearServiceWorker() {
   <li><span onclick="toggleDiv('loadAreas'); ">Alueet...</span>  <a class="help" data-href="#areas"></a></li>
   <li><span onclick="googleDirections();">Ajo-ohjeet Google Mapsillä</span> <a class="help" data-href="#googledirections"></a></li>
   <li><span onclick="toggleFullscreen()">Fullscreen</span></li>
-  <li><span onclick="toggleDiv('about'); ">Pika-apu...</span></li>
+  <li><span onclick="checkMemoryUsage(); toggleDiv('about'); ">Pika-apu/Versio...</span></li>
   </ul>
   <!--Muista muuttaa korkeus openNav  (tai tee tähän tyyli automaattiseksi) -->
 </div>
@@ -2032,7 +2049,6 @@ async function clearServiceWorker() {
     <!-- <input type="checkbox" name="useDummyRect" id="useDummyRect" value="useDummyRect"  />Käytä tyhjää hakualuetta (jos ei osaa hakea)<br> -->
     <span id="preventSleepSpan"><label><input type="checkbox" name="preventSleep" id="preventSleep" value="preventSleep"  />Estä näytön sammuminen</label></span><br>
     <span id="spanUseCache"><label><input type="checkbox" name="useCache" id="useCache" value="useCache"  />Käytä paikallista muistia <a class="help" data-href="#usecache"></a></label></span>
-    <button id="clear-worker" onclick="clearServiceWorker()">Tarkista uusi versio</button><br>
     <label><input type="checkbox" id="drawDistanceLine" value="drawDistanceLine"  />Piirrä mittaviivaa</label>
     <label><input type="checkbox" id="calcDistanceSum" value="calcDistanceSum"  />Laske summaa <a class="help" data-href="#addpins"></a></label><br>
     <br><br>
@@ -2088,7 +2104,10 @@ async function clearServiceWorker() {
 <div class="popup" id="about" style=" ">
   <label class="closebtn" onclick="toggleDiv('about')">&times;</label>
   <div class="popupIn">
-  <p>Kartta versio: <span id="version-display">?</span></p>
+  <p>Kartta versio: <span id="version-display">?</span>&nbsp;&nbsp;
+  <button id="clear-worker" onclick="clearServiceWorker()">Tarkista uusi versio</button><br>
+  </p>
+  <p id="memoryUsage">Muistin käyttö: ?</p>
   <h2>Pika-ohjeet</h2>
 
   <p>Dataa tähän karttaan voit lähettää <a href="https://trac.cc.jyu.fi/projects/dotnet/wiki/CycloLite">CycloLite</a>llä,
