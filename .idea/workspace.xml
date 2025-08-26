@@ -10,9 +10,8 @@
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MapWrapperLeafLet.js" beforeDir="false" afterPath="$PROJECT_DIR$/MapWrapperLeafLet.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/offline-worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/offline-worker.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,7 +87,7 @@
       <recent name="E:\riippu\kartta\src" />
     </key>
   </component>
-  <component name="RunManager" selected="JavaScript Debug.k3.html">
+  <component name="RunManager" selected="Python.IncrementVersion">
     <configuration name="account.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/kartta/src/account.html">
       <method v="2" />
     </configuration>
@@ -208,7 +207,7 @@
       <workItem from="1754836285386" duration="11554000" />
       <workItem from="1754904718618" duration="251000" />
       <workItem from="1754904988042" duration="228616000" />
-      <workItem from="1756132556973" duration="14054000" />
+      <workItem from="1756132556973" duration="25079000" />
     </task>
     <servers />
   </component>
@@ -237,18 +236,6 @@
           <url>http://localhost:8080/sw.js</url>
           <line>15</line>
           <option name="timeStamp" value="89" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/k.html</url>
-          <line>1125</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="203" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/k.html</url>
-          <line>1130</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="204" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

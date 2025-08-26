@@ -16,9 +16,15 @@ class MapWrapper {
       this.mapModes = mapmodes;
       this.mapModeKey = "OpenStreet";
       this.mapMode = this.mapModes[this.mapModeKey];
-      this.map = this.L.map('map', { zoomControl: false }).setView([60.1699, 24.9384], 13);
+      const tileLayerOptions = {
+        attribution: this.mapMode.c,
+        // maxZoom: 26,
+        minZoom: 2,
+        zoomControl: false,
+      }
+      this.map = this.L.map('map', tileLayerOptions).setView([60.1699, 24.9384], 13);
       this.pins = [];
-      // L.control.zoom({ position: 'topright' }).addTo(map);
+      this.L.control.zoom({ position: 'topright' }).addTo(this.map);
     }
 
    setUseCache(useCache) {
@@ -29,6 +35,7 @@ class MapWrapper {
      if (zoom === null) {
        zoom = this.map.getZoom();
      }
+     if (zoom > this.mapMode.mz) zoom = this.mapMode.mz;
      if (Array.isArray(coord)) {
        coord = this.L.latLng(coord[0], coord[1]);
      }
@@ -97,8 +104,10 @@ class MapWrapper {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(tile, 0, 0);
           const dataURL = canvas.toDataURL('image/png');
-          this.outer.tileStore.set(cacheKey, dataURL);
-          // console.log(`Tile cached: ${cacheKey}`);
+          // Tässä yritetty zipata, mutta siitä ei ollut kuin haittaa
+          this.outer.tileStore.set(cacheKey, dataURL).catch(e => {
+            console.log('Tile cache error:', e, e.name, e.message, e.code);
+          });          // console.log(`Tile cached: ${cacheKey}`);
         } catch (e) {
           // Ignore storage errors
         }
@@ -124,8 +133,13 @@ class MapWrapper {
     if (typeof this.mapMode.i !== 'undefined') {
          this.mapMode.i();
     }
+    const tileLayerOptions = {
+      attribution: this.mapMode.c,
+      maxZoom: this.mapMode.mz,
+      minZoom: 2,
+    };
     // Ota oma karttataso käyttöön
-    this.currentLayer = new MapWrapper.CustomTileLayer({ attribution: this.mapMode.c }, this);
+    this.currentLayer = new MapWrapper.CustomTileLayer(tileLayerOptions, this);
     this.addLayer(this.currentLayer);
 
     // Päivitä attribution-kenttä Leafletin oikeaan alakulmaan
