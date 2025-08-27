@@ -15,7 +15,7 @@ error_reporting(E_ALL | E_STRICT);
 ini_set("display_errors", "1");
 
 if (isset($_GET['getredirect'])) {
-    $targetUrl = $_GET['getredirect'];
+    $targetUrl = urldecode($_GET['getredirect']);
 
     header("Content-Type: application/json");
 
