@@ -2528,16 +2528,20 @@ function setGeoCompsValues(position) {
 }
 
 function showRoutePane(routerType=0) {
+  let fromPin = lastSelected;
+  if (!fromPin) fromPin = myPin;
+  const from = mapWrapper.getPinLocation(fromPin);
+  const to = mapWrapper.getPinLocation(hitPin);
   loadRoutingMachine(function() {
     switch (routerType) {
       case 0:
-        findRouteHERE([62.29975, 25.73228], [62.25577, 25.77725], options.hereApiKey);
+        findRouteHERE(from, to, options.hereApiKey);
         break;
       case 1:
-        findRouteHERE([62.29975, 25.73228], [62.25577, 25.77725], options.hereApiKey, true);
+        findRouteHERE(from, to, options.hereApiKey, true);
         break;
       case 2:
-        findRouteOSRM([62.29975, 25.73228], [62.25577, 25.77725], options.hereApiKey);
+        findRouteOSRM(from, to, options.hereApiKey);
         break;
     }
     });
