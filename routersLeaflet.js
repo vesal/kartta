@@ -107,26 +107,40 @@ function findRouteHERE(from, to, apikey, useSample = false) {
                 }
                 let text;
                 let modifier = null;
+                let mode = "driving";
+                let road = a.roadName;
 
                 switch (type) {
                   case "turn":
                     text = `Käänny ${direction} tielle ${roadName}`;
                     modifier = a.direction;
+                    if (a.direction === "left" || a.direction === "slight left" || a.direction === "sharp left") {
+                      type = "Left"; // LRM tyyppi
+                      mode = "driving"
+                      modifier = "Left"
+                    } else {
+                      type = "Right"; // LRM tyyppi
+                      mode = "driving"
+                      modifier = "Right"
+                    }
                     break;
                   case "depart":
                     text = `Lähde tieltä ${roadName}`;
+                    type = "Head"; // LRM tyyppi
+                    mode = "driving"
                     break;
                   case "arrive":
+                    type = "DestinationReached"
                     text = "Saavut perille";
                     break;
                   case "roundaboutEnter":
-                    type = "roundabout";
-                    modifier = "right"; // aina oikea
-                    text = `Aja liikenneympyrään ${roadName}`;
+                    type = "Roundabout";
+                    modifier = "SlightRight"; // aina oikea
+                    text = `Aja liikenneympyrään ja poistu liittymästä ${exit}`;
                     break;
                   case "roundaboutExit":
-                    type = "roundabout";
-                    modifier = "right"; // aina oikea
+                    type = "SlightRight";
+                    modifier = "SlightRight"; // aina oikea
                     text = `Poistu liittymästä ${exit} tielle ${roadName}`;
                     break;
                   case "merge":
@@ -157,6 +171,8 @@ function findRouteHERE(from, to, apikey, useSample = false) {
                   exit: exit,
                   direction: direction,
                   roadName: roadName,
+                  road: road,
+                  mode: mode,
                   maneuver: {type: type, modifier: modifier, exit: exit}
                 };
               });
