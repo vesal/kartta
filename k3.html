@@ -11,10 +11,22 @@
   <link rel="stylesheet" href="js/leaflet.css"/>
 
   <style>
+    /* aloitetaan z-indeksit 1000, koska leaflet käyttää 400-800 */
     html, body {
       height: 100%;
       margin: 0;
       padding: 0;
+      /*
+      width: 100vw;
+      height: 100vh;
+      box-sizing: border-box;
+      background: #fff;
+      /* For notches/cutouts:
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+       */
     }
 
     .errorClass {
@@ -33,7 +45,7 @@
     .popup {
       padding: 5%;
       position: absolute;
-      z-index: 4000;
+      z-index: 1030;
       background-color: lightyellow;
       visibility: hidden;
       top: 30pt;
@@ -151,7 +163,7 @@
     }
 
     .closebtn {
-        z-index: 1000;
+        z-index: 1040;
         position: absolute;
         top: 0;
         width: 20px;
@@ -167,7 +179,7 @@
     }
 
     .ui-layout-north {
-      z-index: 2000;
+      z-index: 1030;
       /* height: 22px; */
       position: relative;
       background: #f8f9fa;
@@ -194,7 +206,7 @@
       position: absolute;
       top: 0;
       left: 0;
-      z-index: 1100;
+      z-index: 1030;
       background: rgba(255,255,255,0.9);
       padding: 0;
       border-radius: 0;
@@ -210,7 +222,7 @@
       position: absolute;
       top: 0;
       right: 0;
-      z-index: 3000;
+      z-index: 1030;
     }
 
     button.icon-btn {
@@ -250,7 +262,7 @@
     }
     /*noinspection CssUnusedSymbol*/
     .winbox {
-      z-index: 6000 !important;
+      z-index: 1015 !important;
     }
     /*noinspection CssUnusedSymbol*/
     .wb-icon {
@@ -266,8 +278,16 @@
       overflow: hidden !important;
     }
 
+  .leaflet-routing-container {
+    max-height: 30vh !important; /* Näkyy enintään 30% näytöstä */
+    overflow-y: auto !important;;
+    font-size: 0.85em !important;;
+  }
+
+  .leaflet-routing-container h2 {
+    font-size: 1em !important;;
+  }
   </style>
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/idb-keyval/3.0.1/idb-keyval-iife.min.js"></script>!-->
 <script src="KeyValStore.js" defer></script>
 <script>
 if ('serviceWorker' in navigator) {
@@ -290,8 +310,30 @@ if ('serviceWorker' in navigator) {
 <script src="js/winbox.bundle.min.js" defer></script>
 <script src="js/leaflet.js" defer></script>
 <script src="js/leaflet.textpath.js" defer></script>
+<!--<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />-->
+<!--<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js" defer></script>-->
 <script src="MapWrapperLeafLet.js" defer></script>
+
+
 <script>
+//#region TODO
+/*
+  Kartta 3 - Cyclo karttasovelluksen jatke
+  (c) 2016-2024 Vesa Lappalainen, vesal,
+
+  Todo:
+  - reitit
+  - tracks
+  - select input when touch
+  - z-index
+  - meter area south
+  - tunnuksen tilaaminen
+  - piilota seuranta-asetukset jos ei tunnuksia
+  - dialogi pinnin arvoille
+  - reititys
+  - google route
+ */
+//#endregion TODO
 
 // Globals for databases
 // const tileStore = new KeyValStore('kartta-db', 'tiles');
@@ -333,6 +375,74 @@ const cycloServerUrl = "https://www.mit.jyu.fi/demowww/cyclo";
 const helpServerUrl = "https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta";
 
 //#region Helpper functions
+
+function decodePolyline(encoded) {
+    let points = [], index = 0, lat = 0, lng = 0;
+    while (index < encoded.length) {
+        let b, shift = 0, result = 0;
+        do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+        let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1)); lat += dlat;
+        shift = 0; result = 0;
+        do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+        let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1)); lng += dlng;
+        points.push([lat / 1e5, lng / 1e5]);
+    }
+    return points;
+}
+
+function decodeFlexPolyline(encoded) {
+  const table = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  let index = 0;
+
+  function getCharCode() {
+    if (index >= encoded.length) throw new Error("Out of range");
+    return table.indexOf(encoded.charAt(index++));
+  }
+
+  function decodeUnsignedVarint() {
+    let result = 0, shift = 0, b;
+    do {
+      b = getCharCode();
+      result |= (b & 0x1F) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    return result;
+  }
+
+  function decodeSignedVarint() {
+    const res = decodeUnsignedVarint();
+    return (res & 1) ? ~(res >> 1) : (res >> 1);
+  }
+
+  // Header
+  decodeUnsignedVarint(); // headerversion
+  const header = decodeUnsignedVarint();
+  const precision = header & 0x0F;
+  const thirdDim = (header >> 4) & 0x07;
+  const thirdDimPrecision = (header >> 7) & 0x0F;
+  const factor = Math.pow(10, precision);
+  const thirdDimFactor = Math.pow(10, thirdDimPrecision);
+
+  let lastLat = 0, lastLng = 0, lastZ = 0;
+  const coordinates = [];
+
+  while (index < encoded.length) {
+    lastLat += decodeSignedVarint();
+    lastLng += decodeSignedVarint();
+    let lat = lastLat / factor;
+    let lng = lastLng / factor;
+    if (thirdDim) {
+      lastZ += decodeSignedVarint();
+      let z = lastZ / thirdDimFactor;
+      coordinates.push({ lat, lng, z });
+    } else {
+      coordinates.push({ lat, lng });
+    }
+  }
+  return coordinates;
+}
+
+
 function normalizeLongitude(lon) {
   lon = ((lon + 180) % 360 + 360) % 360 - 180;
   return lon;
@@ -728,6 +838,8 @@ let lastHitPoint = null;
 let hitPinXY = [100,100];
 let searchPins = [];
 
+const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
 const options = {
   email: "",
   id: "",
@@ -758,7 +870,9 @@ const options = {
   useCache: true,
   drawDistanceLine: true,
   calcDistanceSum: true,
-  flipPins: ('ontouchstart' in window) || (navigator.maxTouchPoints > 0),
+  flipPins: isTouch,
+  showZoomButtons: !isTouch,
+  hereApiKey: "",
 };
 
 const areaDatas = [
@@ -1461,6 +1575,7 @@ function initializeMapPage() {
   localStorage.mapName = mapName;
 
   mapWrapper = new MapWrapper('map', mapModes, options.useCache);
+  mapWrapper.setZoomButtons(options.showZoomButtons);
   // Täytetään select-valikko
   const mapSelect = document.getElementById('mapModeSelect');
   for (const key in mapModes) {
@@ -1739,6 +1854,7 @@ function getOptionValue(name) {
 
 
 function getOption(name,editName) {
+  if ( !editName ) editName = name;
   const edit = document.getElementById(editName);
   if (!edit) return;
   options[name] = params[name] || localStorage.getItem(name) || "";
@@ -1912,6 +2028,7 @@ function checkSavedValues() {
   getOption("to","editTo");
   getOption("from","editFrom");
   getOption("tpR","editTPR");
+  getOption("hereApiKey");
 
   getOption("tag","editTag");
   getOption("logname","editLog");
@@ -1938,6 +2055,7 @@ function checkSavedValues() {
   getCBOption("useCompsWindow");
   getCBOption("drawDistanceLine");
   getCBOption("calcDistanceSum");
+  getCBOption("showZoomButtons", function() { if (mapWrapper) mapWrapper.setZoomButtons(options.showZoomButtons); } );
 
   const cb1 = document.getElementById('area1cb');
   const cb2 = document.getElementById('area1cbCopy');
@@ -2280,8 +2398,9 @@ function saveWindowPos(w) {
 
 function createComps() {
   readComponents();
-    // noinspection JSUnresolvedReference
+  // noinspection JSUnresolvedReference
   if (options.useCompsWindow && compsWindow === null && typeof WinBox === "function") {
+    // noinspection JSUnresolvedReference
     compsWindow = new WinBox("Mittarit", {
       id: "compsWindow",
       mount: document.getElementById("showComps"),
@@ -2408,6 +2527,23 @@ function setGeoCompsValues(position) {
     }
 }
 
+function showRoutePane(routerType=0) {
+  loadRoutingMachine(function() {
+    switch (routerType) {
+      case 0:
+        findRouteHERE([62.29975, 25.73228], [62.25577, 25.77725], options.hereApiKey);
+        break;
+      case 1:
+        findRouteHERE([62.29975, 25.73228], [62.25577, 25.77725], options.hereApiKey, true);
+        break;
+      case 2:
+        findRouteOSRM([62.29975, 25.73228], [62.25577, 25.77725], options.hereApiKey);
+        break;
+    }
+    });
+    // const pl = decodeFlexPolyline("BG6lv62D-pyixBxtCi3DvlBjxD_OnpB7GjNzU_TjI_OjDjIjXw0BvCoGzjBosCrO4c3NwWrOoV_EoGrEAjXwWvbkcjDkDrEoL_EvRrJjhB_pF36QrE3NrO7uBrJriBnL_sBrErOrErTnBnQ8BvHUnGT7L");
+    // console.log(pl);
+}
 
 
 //=================================================================
@@ -2417,18 +2553,20 @@ function setGeoCompsValues(position) {
 
 
 </script>
-<div id="mySidenavHamburger" style="top: 0; left: 0; width: 30px; height: 35px; position: absolute; z-index:3600;  background-color: lightgray;">
+<div id="mySidenavHamburger" style="top: 0; left: 0; width: 30px; height: 35px; position: absolute; z-index:1050;  background-color: lightgray;">
   <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;<br></span>
   <span style="font-size:30px;cursor:pointer" onclick="findMyPlace()">&#9737;</span>
 </div>
 
-<div id="mySidenav" style="top: 45px; left: 0;  visibility: hidden; position: absolute; z-index:4500;  background-color: lightgray;" onclick="closeNav()">
+<div id="mySidenav" style="top: 45px; left: 0;  visibility: hidden; position: absolute; z-index:1040;  background-color: lightgray;" onclick="closeNav()">
   <label class="closebtn" style="visibility: hidden" onclick="closeNav()">&times;</label>
 
   <ul class="ui-menu" id="menu" style="visibility: hidden">
   <li><span onclick="toggleDiv('settings');">Asetukset...</span> <a class="help" data-href="#settings"></a></li>
   <li><span onclick="toggleDiv('findDiv'); closeNav();">Pinnien lisääminen...</span> <a class="help" data-href="#addpins"></a></li>
   <li><span onclick="showRoutePane(); closeNav()">Ajo-ohjeet...</span> <a class="help" data-href="#directions"></a></li>
+  <li><span onclick="showRoutePane(1); closeNav()">Ajo-ohjeet sample</span> <a class="help" data-href="#directions"></a></li>
+  <li><span onclick="showRoutePane(2); closeNav()">Ajo-ohjeet OSRM</span> <a class="help" data-href="#directions"></a></li>
   <li><span onclick="toggleDiv('loadTrack'); ">Lataa track-tiedosto...</span> <a class="help" data-href="#loadtrack"></a></li>
   <li><span onclick="toggleDiv('trackDiv'); ">Näytä track-tiedot</span> <a class="help" data-href="#showtrackdetails"></a></li>
   <li><span onclick="toggleDiv('loadRoute'); ">Lataa reittitiedosto...</span>  <a class="help" data-href="#loadroute"></a></li>
@@ -2489,7 +2627,7 @@ function setGeoCompsValues(position) {
   <div id='map'></div>
   <div class="logo"></div>
   <div class="mapType">
-      <div class="ui-widget" style="z-index: 1001;">
+      <div class="ui-widget" style="z-index: 10;">
         <label class="hamburgerSpace"><select id="mapModeSelect"></select></label>&nbsp;
         <span  id="distance" onclick="removeDistance()">0 km</span>
       </div>
@@ -2518,6 +2656,7 @@ function setGeoCompsValues(position) {
     <span id="spanUseCache"><label><input type="checkbox" name="useCache" id="useCache" value="useCache"  />Käytä paikallista muistia <a class="help" data-href="#usecache"></a></label></span><br>
     <label><input type="checkbox" id="drawDistanceLine" value="drawDistanceLine"  />Piirrä mittaviivaa</label>
     <label><input type="checkbox" id="calcDistanceSum" value="calcDistanceSum"  />Laske summaa <a class="help" data-href="#addpins"></a></label><br>
+    <label><input type="checkbox" id="showZoomButtons" value="showZoomButtons"  />Näytä Zoom-painikkeet (+/-)</label><br>
     <br><br>
 
 
@@ -2563,6 +2702,8 @@ function setGeoCompsValues(position) {
         <span class="idMsg" id = "idMsg"></span>
         <br>
         <button type="button" onclick="toggleDiv('followArea', true); toggleDiv('accountArea', false);" >Palaa seuranta-asetuksiin...</button>
+        <p>Eri reitityspalvelujen API-avaimia</p>
+        <label>HERE API-key<input type="text" id="hereApiKey"></label>
       </div>
     </div>
   </div>
@@ -2623,14 +2764,14 @@ function setGeoCompsValues(position) {
   </div>
 </div>
 
- <div id="openShowComps"  style="bottom: 3em; left: 0; position: absolute; z-index:5390" onclick="showCompsDiv(true)">
+ <div id="openShowComps"  style="bottom: 3em; left: 0; position: absolute; z-index:1011" onclick="showCompsDiv(true)">
    <span style="font-size: 30px;">></span>
  </div>
- <div id="showComps" class="showComps" style="bottom: 0; left: 0; position: absolute; z-index:5390">
+ <div id="showComps" class="showComps" style="bottom: 0; left: 0; position: absolute; z-index:1012">
  </div>
 
 
-<div style="bottom: 0; right: 0; position: absolute; z-index:370; background-color: white;">
+<div style="bottom: 0; right: 0; position: absolute; z-index:1013; background-color: white;">
    	<span class="coord" id="coord"></span>
    <a class="link" onclick="copyToUrl()">Laita&nbsp;URLiin</a>
  </div>

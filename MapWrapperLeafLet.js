@@ -24,8 +24,21 @@ class MapWrapper {
       }
       this.map = this.L.map('map', tileLayerOptions).setView([60.1699, 24.9384], 13);
       this.pins = [];
-      this.L.control.zoom({ position: 'topright' }).addTo(this.map);
+      // this.L.control.zoom({ position: 'topright' }).addTo(this.map);
+      this.L.control.scale({
+        position: 'bottomright',
+        imperial: false
+      }).addTo(this.map);
     }
+
+   setZoomButtons(show) {
+      if (show) {
+        this.zoomControl = this.L.control.zoom({ position: 'topright' }).addTo(this.map);
+      } else {
+        if (this.zoomControl) this.zoomControl.remove();
+        this.zoomControl = null
+      }
+   }
 
    setUseCache(useCache) {
      this.useCache = useCache;
@@ -390,5 +403,53 @@ class MapWrapper {
       this.map.addLayer(polyline.line);
     }
   }
+ }
+ // MapWrapper ends
 
- } // MapWrapper ends
+
+
+
+function loadRoutingMachine(callback) {
+  // Load CSS
+  function loadCSS() {
+    return new Promise(resolve => {
+      if (document.getElementById('leaflet-routing-css')) return resolve();
+      const link = document.createElement('link');
+      link.id = 'leaflet-routing-css';
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css';
+      link.onload = resolve;
+      link.onerror = resolve; // resolve anyway
+      document.head.appendChild(link);
+    });
+  }
+
+  // Load JS
+  function loadJS() {
+    return new Promise(resolve => {
+      if (window.L && window.L["Routing"]) return resolve();
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js';
+      script.onload = resolve;
+      script.onerror = resolve;
+      document.head.appendChild(script);
+    });
+  }
+
+  // Load routersLeaflet.js
+  function loadRouter() {
+    return new Promise(resolve => {
+      if (typeof findRouteOSRM !== "undefined") return resolve();
+      const script = document.createElement('script');
+      script.src = 'routersLeaflet.js';
+      script.onload = resolve;
+      script.onerror = resolve;
+      document.head.appendChild(script);
+    });
+  }
+
+  Promise.all([loadCSS(), loadJS(), loadRouter()]).then(() => {
+    if (callback) callback();
+  });
+}
+

@@ -14,6 +14,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 error_reporting(E_ALL | E_STRICT);
 ini_set("display_errors", "1");
 
+if (isset($_GET['getredirect'])) {
+    $targetUrl = $_GET['getredirect'];
+
+    header("Content-Type: application/json");
+
+    $ch = curl_init($targetUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $response = curl_exec($ch);
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    if ($response === false) {
+        header("HTTP/1.1 500 Internal Server Error");
+        echo json_encode(array(
+            "error" => "Pyynnön suorittaminen epäonnistui",
+            "http_code" => $httpcode,
+            "curl_error" => $curlError,
+            "url" => $targetUrl
+        ));
+        exit;
+    }
+
+    // Palauta palvelimen vastaus suoraan
+    // mm. HERE API:n 400/404 jne. virheet tulevat JSONina, joten curl_error on tyhjä
+    if ($httpcode >= 400) {
+        header("HTTP/1.1 $httpcode Error");
+    } else {
+        header("HTTP/1.1 200 OK");
+    }
+
+    echo $response;
+    exit;
+}
+
+
 // Change the following address to the one that is admin for this service
 $EmailToPostInfoFromNewUsers = "vesal@jyu.fi";
 $replyNames = array();
