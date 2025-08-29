@@ -441,7 +441,7 @@ function loadRoutingMachine(callback) {
     return new Promise(resolve => {
       if (typeof findRouteOSRM !== "undefined") return resolve();
       const script = document.createElement('script');
-      script.src = 'routersLeaflet.js';
+      script.src = 'routersLeaflet.js?v=' + Date.now();
       script.onload = resolve;
       script.onerror = resolve;
       document.head.appendChild(script);

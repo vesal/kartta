@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.20">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.21">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -278,6 +278,7 @@
       overflow: hidden !important;
     }
 
+    /*noinspection CssUnusedSymbol*/
   .leaflet-routing-container {
     max-height: 30vh !important; /* Näkyy enintään 30% näytöstä */
     overflow-y: auto !important;;
@@ -286,6 +287,11 @@
 
   .leaflet-routing-container h2 {
     font-size: 1em !important;;
+  }
+
+  /*noinspection CssUnusedSymbol*/
+  .routing-selected {
+    background-color: yellow;
   }
   </style>
 <script src="KeyValStore.js" defer></script>
@@ -1550,7 +1556,7 @@ function getStringFromParamsOrStrore(name, def) {
 //#region Initialization
 function showVersion() {
   const manifestLink = document.getElementById('manifest-link');
-  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.18"
+  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.19"
 
   // Parsitaan query-parametri
   const url = new URL(href, window.location.href);
@@ -2527,28 +2533,121 @@ function setGeoCompsValues(position) {
     }
 }
 
+
+function speakText(text) {
+  if (!('speechSynthesis' in window)) {
+    setError("ei puhetta!")
+    return;
+  }
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'fi-FI'; // Aseta haluttu kieli, esimerkiksi suomeksi
+  window.speechSynthesis.speak(utterance);
+}
+
+function numberToFinnishWords(n) {
+  if (n < 20) {
+    const ones = ["nolla","yksi","kaksi","kolme","neljä","viisi","kuusi","seitsemän","kahdeksan","yhdeksän",
+      "kymmenen","yksitoista","kaksitoista","kolmetoista","neljätoista","viisitoista","kuusitoista","seitsemäntoista","kahdeksantoista","yhdeksäntoista"];
+    return ones[n];
+  }
+  if (n < 100) {
+    const tens = ["", "", "kaksikymmentä", "kolmekymmentä", "neljäkymmentä", "viisikymmentä", "kuusikymmentä", "seitsemänkymmentä", "kahdeksankymmentä", "yhdeksänkymmentä"];
+    if (n % 10 === 0) return tens[Math.floor(n/10)];
+    return tens[Math.floor(n/10)] + " " + numberToFinnishWords(n % 10);
+  }
+  if (n < 1000) {
+    if (n === 100) return "sata";
+    if (n < 200) return "sata " + numberToFinnishWords(n % 100);
+    if (n % 100 === 0) return numberToFinnishWords(Math.floor(n/100)) + " sataa";
+    return numberToFinnishWords(Math.floor(n/100)) + " sataa " + numberToFinnishWords(n % 100);
+  }
+  if (n < 10000) {
+    if (n === 1000) return "tuhat";
+    if (n % 1000 === 0) return numberToFinnishWords(Math.floor(n/1000)) + " tuhatta";
+    return numberToFinnishWords(Math.floor(n/1000)) + " tuhatta " + numberToFinnishWords(n % 1000);
+  }
+  return n.toString(); // fallback
+}
+
+function numberToFinnishDistance(n) {
+  if (n === 0) return "";
+  if (n >= 1000) {
+    const km = Math.floor(n / 1000);
+    const m = n % 1000;
+    let result = (km === 1 ? "kilometri" : numberToFinnishWords(km) + " kilometriä");
+    if (m > 0) {
+      result += " " + numberToFinnishWords(m) + " metriä";
+    }
+    return result;
+  }
+  return numberToFinnishWords(n) + " metriä";
+}
+
 function showRoutePane(routerType=0) {
   let fromPin = lastSelected;
   if (!fromPin) fromPin = myPin;
   const from = mapWrapper.getPinLocation(fromPin);
   const to = mapWrapper.getPinLocation(hitPin);
   loadRoutingMachine(function() {
+    let routingControl = null;
     switch (routerType) {
       case 0:
-        findRouteHERE(from, to, options.hereApiKey);
+        routingControl = findRouteHERE(from, to, options.hereApiKey);
         break;
       case 1:
-        findRouteHERE(from, to, options.hereApiKey, true);
+        routingControl = findRouteHERE(from, to, options.hereApiKey, true);
         break;
       case 2:
-        findRouteOSRM(from, to, options.hereApiKey);
+        routingControl = findRouteOSRM(from, to, options.hereApiKey);
         break;
+      default:
+        return;
     }
+    // routingControl = mapWrapper.routingControl;
+    routingControl.on('routeselected', function (e) {
+      const container = document.querySelector('.leaflet-routing-container');
+      if (!container) return;
+      const selectedRouteSection = container.querySelector('.leaflet-routing-alt:not(.leaflet-routing-alt-minimized)');
+      const instructions = selectedRouteSection ? selectedRouteSection.querySelectorAll('tr') : [];
+      const routeInstructions = e.route.instructions;
+
+      for (let idx = 0; idx < instructions.length; idx++) {
+        const row = instructions[idx];
+        if (row._clickHandler) {
+          row.removeEventListener('click', row._clickHandler);
+        }
+
+        row._clickHandler = function () {
+          instructions.forEach(r => r.classList.remove('routing-selected'));
+          row.classList.add('routing-selected');
+          // Get the corresponding instruction
+          const instr = routeInstructions[idx];
+          if (instr) {
+            const meters = routingStyleRound(instr.distance);
+            const smeters = numberToFinnishDistance(meters);
+            let nextInstr = "";
+            if (smeters !== "") nextInstr = `, sitten aja ${smeters}.`;
+            const text = `${instr.text}${nextInstr}`;
+            speakText(text);
+          } else {
+            speakText(row.innerText);
+          }
+        };
+        row.addEventListener('click', row._clickHandler);
+      }
     });
     // const pl = decodeFlexPolyline("BG6lv62D-pyixBxtCi3DvlBjxD_OnpB7GjNzU_TjI_OjDjIjXw0BvCoGzjBosCrO4c3NwWrOoV_EoGrEAjXwWvbkcjDkDrEoL_EvRrJjhB_pF36QrE3NrO7uBrJriBnL_sBrErOrErTnBnQ8BvHUnGT7L");
     // console.log(pl);
+  });
 }
 
+function routingStyleRound(meters) {
+  if (meters < 20) return Math.ceil(meters);
+  if (meters < 500) return Math.ceil(meters / 10) * 10;
+  if (meters < 1000) return Math.ceil(meters / 50) * 50;
+  // For 1000 or more, round up to nearest 100 and convert to km if needed
+  return Math.ceil(meters / 100) * 100;
+}
 
 //=================================================================
 // Functions to handle components ends
