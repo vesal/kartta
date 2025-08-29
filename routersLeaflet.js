@@ -4,7 +4,7 @@ ja että on olemassa globaali muuttuja mapWrapper, jossa on kartta ja L.Routing.
  */
 
 
-function findRouteHERE(from, to, apikey, useSample = false) {
+function findRouteHERE(from, to, apikey, callback, useSample = false) {
     // Poista vanha reitti, jos se on olemassa
     if (mapWrapper.routingControl) {
         mapWrapper.map.removeControl(mapWrapper.routingControl);
@@ -107,7 +107,8 @@ function findRouteHERE(from, to, apikey, useSample = false) {
                   if (direction === "left" || direction === "slight left" || direction === "sharp left") {
                     direction = "vasemmalle";
                   } else if (direction === "right" || direction === "slight right" || direction === "sharp right") {
-                    direction = "oikealle";
+                    // direction = "oikealle";
+                    direction = "oikeelle"
                   } else if (direction === "straight") {
                     direction = "suoraan";
                   } else {
@@ -124,7 +125,8 @@ function findRouteHERE(from, to, apikey, useSample = false) {
 
                 switch (type) {
                   case "turn":
-                    text = `Käänny ${direction} tielle ${roadName}`;
+                    // text = `Käänny ${direction} tielle ${roadName}`;
+                    text = `Suaatatko kiäntyä ${direction} tiellepä ${roadName}`;
                     modifier = a.direction;
                     if (a.direction === "left" || a.direction === "slight left" || a.direction === "sharp left") {
                       type = "Left"; // LRM tyyppi
@@ -241,6 +243,10 @@ function findRouteHERE(from, to, apikey, useSample = false) {
           styles: [{ color: 'gray', opacity: 0.5, weight: 5 }]
         }
     }).addTo(mapWrapper.map);
+    mapWrapper.routingControl.on('routesfound', function(e) {
+      mapWrapper.routingControl.currentRoutes = e.routes; // talletetaan kaikki reitit
+      if (callback) callback(mapWrapper.routingControl);
+    });
     return mapWrapper.routingControl;
   }
 
@@ -276,6 +282,10 @@ function findRouteHERE(from, to, apikey, useSample = false) {
     });
 
     mapWrapper.routingControl.addTo(mapWrapper.map);
+    mapWrapper.routingControl.on('routesfound', function(e) {
+      mapWrapper.routingControl.currentRoutes = e.routes; // talletetaan kaikki reitit
+      if (callback) callback(mapWrapper.routingControl);
+    });
     return mapWrapper.routingControl;
   }
 
