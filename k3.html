@@ -2534,9 +2534,20 @@ function setGeoCompsValues(position) {
 }
 
 
+let voicesInitialized = false;
+
 function speakText(text) {
   if (!('speechSynthesis' in window)) {
     setError("ei puhetta!")
+    return;
+  }
+  if (!voicesInitialized) {
+    speechSynthesis.getVoices();
+    speechSynthesis.onvoiceschanged = () => {
+      // console.log(speechSynthesis.getVoices());
+      voicesInitialized = true;
+      speakText(text); // Retry speaking after voices are loaded
+    };
     return;
   }
   const utterance = new SpeechSynthesisUtterance(text);
