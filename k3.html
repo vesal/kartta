@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.22">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.23">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -1657,7 +1657,7 @@
   //#region Initialization
   function showVersion() {
     const manifestLink = document.getElementById('manifest-link');
-    const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.20"
+    const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.21"
 
     // Parsitaan query-parametri
     const url = new URL(href, window.location.href);
@@ -2712,8 +2712,10 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
       }
     }
     voicesInitialized = true;
+    window.speechSynthesis.cancel(); // Stop any ongoing speech
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'fi-FI'; // Aseta haluttu kieli, esimerkiksi suomeksi
+    utterance.rate = 1.3;
     window.speechSynthesis.speak(utterance);
   }
 
@@ -2762,56 +2764,62 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     const from = mapWrapper.getPinLocation(fromPin);
     const to = mapWrapper.getPinLocation(hitPin);
     loadRoutingMachine(function () {
-      let routingControl = null;
       switch (routerType) {
         case 0:
-          routingControl = findRouteHERE(from, to, options.hereApiKey);
+          findRouteHERE(from, to, options.hereApiKey, initRoutingEvents);
           break;
         case 1:
-          routingControl = findRouteHERE(from, to, options.hereApiKey, true);
+          findRouteHERE(from, to, options.hereApiKey, initRoutingEvents, true);
           break;
         case 2:
-          routingControl = findRouteOSRM(from, to, options.hereApiKey);
+          findRouteOSRM(from, to, options.hereApiKey, initRoutingEvents);
           break;
         default:
           return;
       }
-      // routingControl = mapWrapper.routingControl;
-      routingControl.on('routeselected', function (e) {
-        const container = document.querySelector('.leaflet-routing-container');
-        if (!container) return;
-        const selectedRouteSection = container.querySelector('.leaflet-routing-alt:not(.leaflet-routing-alt-minimized)');
-        const instructions = selectedRouteSection ? selectedRouteSection.querySelectorAll('tr') : [];
-        const routeInstructions = e.route.instructions;
-
-        for (let idx = 0; idx < instructions.length; idx++) {
-          const row = instructions[idx];
-          if (row._clickHandler) {
-            row.removeEventListener('click', row._clickHandler);
-          }
-
-          row._clickHandler = function () {
-            instructions.forEach(r => r.classList.remove('routing-selected'));
-            row.classList.add('routing-selected');
-            // Get the corresponding instruction
-            const instr = routeInstructions[idx];
-            if (instr) {
-              const meters = routingStyleRound(instr.distance);
-              const smeters = numberToFinnishDistance(meters);
-              let nextInstr = "";
-              if (smeters !== "") nextInstr = `, sitten aja ${smeters}.`;
-              const text = `${instr.text}${nextInstr}`;
-              speakText(text);
-            } else {
-              speakText(row.innerText);
-            }
-          };
-          row.addEventListener('click', row._clickHandler);
-        }
-      });
-      // const pl = decodeFlexPolyline("BG6lv62D-pyixBxtCi3DvlBjxD_OnpB7GjNzU_TjI_OjDjIjXw0BvCoGzjBosCrO4c3NwWrOoV_EoGrEAjXwWvbkcjDkDrEoL_EvRrJjhB_pF36QrE3NrO7uBrJriBnL_sBrErOrErTnBnQ8BvHUnGT7L");
-      // console.log(pl);
     });
+  }
+
+  function initRoutingEvents(routingControl) {
+    // routingControl = mapWrapper.routingControl;
+    routingControl.on('routeselected', function (e) {
+      const routeIndex = routingControl.currentRoutes.findIndex(r => r === e.route);
+      if (routeIndex < 0) return;
+      const container = document.querySelector('.leaflet-routing-container');
+      if (!container) return;
+      const elements = document.querySelectorAll('.leaflet-routing-alt');
+      const selectedRouteSection = elements[routeIndex];
+      const instructions = selectedRouteSection ? selectedRouteSection.querySelectorAll('tr') : [];
+      const routeInstructions = e.route.instructions;
+
+      for (let idx = 0; idx < instructions.length; idx++) {
+        const row = instructions[idx];
+        if (row._clickHandler) {
+          row.removeEventListener('click', row._clickHandler);
+        }
+
+        const instr = routeInstructions[idx];
+        if (instr) {
+          const meters = routingStyleRound(instr.distance);
+          const smeters = numberToFinnishDistance(meters);
+          let nextInstr = "";
+          if (smeters !== "") nextInstr = `, sitten aja ${smeters}.`;
+          const text = `${instr.text}${nextInstr}`;
+          row.speakText = text;
+        } else {
+          row.speakText = row.innerText;
+        }
+
+        row._clickHandler = function () {
+          instructions.forEach(r => r.classList.remove('routing-selected'));
+          row.classList.add('routing-selected');
+          speakText(row.speakText);
+        };
+        row.addEventListener('click', row._clickHandler);
+      }
+    });
+    // const pl = decodeFlexPolyline("BG6lv62D-pyixBxtCi3DvlBjxD_OnpB7GjNzU_TjI_OjDjIjXw0BvCoGzjBosCrO4c3NwWrOoV_EoGrEAjXwWvbkcjDkDrEoL_EvRrJjhB_pF36QrE3NrO7uBrJriBnL_sBrErOrErTnBnQ8BvHUnGT7L");
+    // console.log(pl);
   }
 
   function routingStyleRound(meters) {

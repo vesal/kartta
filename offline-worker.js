@@ -1,4 +1,4 @@
-const CACHE_NAME = "k3-cache-v0.4.22";
+const CACHE_NAME = "k3-cache-v0.4.23";
 const DEBUG = false;
 const FILES_TO_CACHE = [
   "k3.html",
