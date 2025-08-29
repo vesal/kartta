@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="fi">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.21">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.22">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -30,12 +30,12 @@
     }
 
     .errorClass {
-      color:#ff0000;
+      color: #ff0000;
       font-weight: bold;
     }
 
     #searchCombo {
-      max-width: 250px;      /* Adjust as needed */
+      max-width: 250px; /* Adjust as needed */
       width: 100%;
       white-space: nowrap;
       overflow: hidden;
@@ -68,18 +68,18 @@
       left: 0;
       right: 0;
       bottom: 0;
-      overflow:auto;
+      overflow: auto;
       border-radius: 20px;
     }
 
     .ui-menu li {
-        margin: 0;
-        cursor: pointer;
-        list-style-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7);
-        position: relative;
-        padding: 3px 2em 3px 0;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 1em;
+      margin: 0;
+      cursor: pointer;
+      list-style-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7);
+      position: relative;
+      padding: 3px 2em 3px 0;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 1em;
     }
 
     .ui-menu li:hover {
@@ -95,29 +95,29 @@
     }
 
     .ui-menu {
-        background: #ffffff;
-        /* width: 230px; */
-        margin-left: 25px;
-        /* margin-top: 40px; */
-        margin-right: 20px;
-        height: auto !important;
-        display: block;
-        list-style-type: none;
-        margin-block-start: 1em;
-        margin-block-end: 1em;
-        padding-inline-start: 6px;
+      background: #ffffff;
+      /* width: 230px; */
+      margin-left: 25px;
+      /* margin-top: 40px; */
+      margin-right: 20px;
+      height: auto !important;
+      display: block;
+      list-style-type: none;
+      margin-block-start: 1em;
+      margin-block-end: 1em;
+      padding-inline-start: 6px;
     }
 
     li a.help {
-        padding: unset !important;
-        display: inline !important;
-        /* float: right; */
-        position: absolute !important;
-        right: 10px;
+      padding: unset !important;
+      display: inline !important;
+      /* float: right; */
+      position: absolute !important;
+      right: 10px;
     }
 
     a.help {
-        text-decoration: none !important;
+      text-decoration: none !important;
     }
 
 
@@ -163,13 +163,13 @@
     }
 
     .closebtn {
-        z-index: 1040;
-        position: absolute;
-        top: 0;
-        width: 20px;
-        right: 5px;
-        font-size: 36px;
-        /*margin-left: 50px; */
+      z-index: 1040;
+      position: absolute;
+      top: 0;
+      width: 20px;
+      right: 5px;
+      font-size: 36px;
+      /*margin-left: 50px; */
     }
 
     .layout-container {
@@ -207,7 +207,7 @@
       top: 0;
       left: 0;
       z-index: 1030;
-      background: rgba(255,255,255,0.9);
+      background: rgba(255, 255, 255, 0.9);
       padding: 0;
       border-radius: 0;
       /* width: 100%; */
@@ -242,14 +242,14 @@
 
     /*noinspection CssUnusedSymbol*/
     .leaflet-bar {
-        margin-right: 20px !important;
-        margin-top: -5px !important;
+      margin-right: 20px !important;
+      margin-top: -5px !important;
     }
 
     /*noinspection CssUnusedSymbol*/
     .data {
-        font-family: sans-serif;
-        font-weight: bold;
+      font-family: sans-serif;
+      font-weight: bold;
     }
 
     /*noinspection CssUnusedSymbol*/
@@ -260,14 +260,17 @@
       line-height: 0.9;
       font-size: x-small;
     }
+
     /*noinspection CssUnusedSymbol*/
     .winbox {
       z-index: 1015 !important;
     }
+
     /*noinspection CssUnusedSymbol*/
     .wb-icon {
       height: 15px;
     }
+
     /*noinspection CssUnusedSymbol*/
     .wb-title {
       line-height: 15px;
@@ -279,32 +282,32 @@
     }
 
     /*noinspection CssUnusedSymbol*/
-  .leaflet-routing-container {
-    max-height: 30vh !important; /* Näkyy enintään 30% näytöstä */
-    overflow-y: auto !important;;
-    font-size: 0.85em !important;;
-  }
-
-  .leaflet-routing-container h2 {
-    font-size: 1em !important;;
-  }
-
-  /*noinspection CssUnusedSymbol*/
-  .routing-selected {
-    background-color: yellow;
-  }
-  </style>
-<script src="KeyValStore.js" defer></script>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('offline-worker.js');
-  navigator.serviceWorker.addEventListener("message", (event) => {
-    if (event.data?.type === "log") {
-      console.log(event.data.message);
+    .leaflet-routing-container {
+      max-height: 30vh !important; /* Näkyy enintään 30% näytöstä */
+      overflow-y: auto !important;;
+      font-size: 0.85em !important;;
     }
-  });
-}
-</script>
+
+    .leaflet-routing-container h2 {
+      font-size: 1em !important;;
+    }
+
+    /*noinspection CssUnusedSymbol*/
+    .routing-selected {
+      background-color: yellow;
+    }
+  </style>
+  <script src="KeyValStore.js" defer></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('offline-worker.js');
+      navigator.serviceWorker.addEventListener("message", (event) => {
+        if (event.data?.type === "log") {
+          console.log(event.data.message);
+        }
+      });
+    }
+  </script>
 </head>
 <body>
 
@@ -322,945 +325,1034 @@ if ('serviceWorker' in navigator) {
 
 
 <script>
-//#region TODO
-/*
-  Kartta 3 - Cyclo karttasovelluksen jatke
-  (c) 2016-2024 Vesa Lappalainen, vesal,
+  //#region TODO
+  /*
+    Kartta 3 - Cyclo karttasovelluksen jatke
+    (c) 2016-2024 Vesa Lappalainen, vesal,
 
-  Todo:
-  - reitit
-  - tracks
-  - select input when touch
-  - z-index
-  - meter area south
-  - tunnuksen tilaaminen
-  - piilota seuranta-asetukset jos ei tunnuksia
-  - dialogi pinnin arvoille
-  - reititys
-  - google route
- */
-//#endregion TODO
+    Todo:
+    - reitit
+    - tracks
+    - select input when touch
+    - z-index
+    - meter area south
+    - tunnuksen tilaaminen
+    - piilota seuranta-asetukset jos ei tunnuksia
+    - dialogi pinnin arvoille
+    - reititys
+    - google route
+   */
+  //#endregion TODO
 
-// Globals for databases
-// const tileStore = new KeyValStore('kartta-db', 'tiles');
-// const settingsStore = new KeyValStore('kartta-db', 'settings');
+  // Globals for databases
+  // const tileStore = new KeyValStore('kartta-db', 'tiles');
+  // const settingsStore = new KeyValStore('kartta-db', 'settings');
 
 
-function sanitizeInput(input, type = "html") {
-  if (typeof input !== "string") return "";
+  function sanitizeInput(input, type = "html") {
+    if (typeof input !== "string") return "";
 
-  switch (type) {
-    case "html": // Näytetään HTML:ssä tekstinä
-      return input
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    switch (type) {
+      case "html": // Näytetään HTML:ssä tekstinä
+        return input
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
 
-    case "attr": // HTML-attribuuteissa
-      return input
-        .replace(/&/g, "&amp;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+      case "attr": // HTML-attribuuteissa
+        return input
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
 
-    case "url": // URL-parametreissa
-      return encodeURIComponent(input);
+      case "url": // URL-parametreissa
+        return encodeURIComponent(input);
 
-    case "alnum": // Vain kirjaimet ja numerot
-      return input.replace(/[^a-z0-9]/gi, '');
+      case "alnum": // Vain kirjaimet ja numerot
+        return input.replace(/[^a-z0-9]/gi, '');
 
-    default:
-      return input;
+      default:
+        return input;
+    }
   }
-}
 
-const cycloServerUrl = "https://www.mit.jyu.fi/demowww/cyclo";
-const helpServerUrl = "https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta";
+  const cycloServerUrl = "https://www.mit.jyu.fi/demowww/cyclo";
+  const helpServerUrl = "https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta";
 
-//#region Helpper functions
+  //#region Helpper functions
 
-function decodePolyline(encoded) {
+  function decodePolyline(encoded) {
     let points = [], index = 0, lat = 0, lng = 0;
     while (index < encoded.length) {
-        let b, shift = 0, result = 0;
-        do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
-        let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1)); lat += dlat;
-        shift = 0; result = 0;
-        do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
-        let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1)); lng += dlng;
-        points.push([lat / 1e5, lng / 1e5]);
+      let b, shift = 0, result = 0;
+      do {
+        b = encoded.charCodeAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.charCodeAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+      points.push([lat / 1e5, lng / 1e5]);
     }
     return points;
-}
-
-function decodeFlexPolyline(encoded) {
-  const table = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-  let index = 0;
-
-  function getCharCode() {
-    if (index >= encoded.length) throw new Error("Out of range");
-    return table.indexOf(encoded.charAt(index++));
   }
 
-  function decodeUnsignedVarint() {
-    let result = 0, shift = 0, b;
-    do {
-      b = getCharCode();
-      result |= (b & 0x1F) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    return result;
-  }
+  function decodeFlexPolyline(encoded) {
+    const table = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+    let index = 0;
 
-  function decodeSignedVarint() {
-    const res = decodeUnsignedVarint();
-    return (res & 1) ? ~(res >> 1) : (res >> 1);
-  }
-
-  // Header
-  decodeUnsignedVarint(); // headerversion
-  const header = decodeUnsignedVarint();
-  const precision = header & 0x0F;
-  const thirdDim = (header >> 4) & 0x07;
-  const thirdDimPrecision = (header >> 7) & 0x0F;
-  const factor = Math.pow(10, precision);
-  const thirdDimFactor = Math.pow(10, thirdDimPrecision);
-
-  let lastLat = 0, lastLng = 0, lastZ = 0;
-  const coordinates = [];
-
-  while (index < encoded.length) {
-    lastLat += decodeSignedVarint();
-    lastLng += decodeSignedVarint();
-    let lat = lastLat / factor;
-    let lng = lastLng / factor;
-    if (thirdDim) {
-      lastZ += decodeSignedVarint();
-      let z = lastZ / thirdDimFactor;
-      coordinates.push({ lat, lng, z });
-    } else {
-      coordinates.push({ lat, lng });
+    function getCharCode() {
+      if (index >= encoded.length) throw new Error("Out of range");
+      return table.indexOf(encoded.charAt(index++));
     }
+
+    function decodeUnsignedVarint() {
+      let result = 0, shift = 0, b;
+      do {
+        b = getCharCode();
+        result |= (b & 0x1F) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      return result;
+    }
+
+    function decodeSignedVarint() {
+      const res = decodeUnsignedVarint();
+      return (res & 1) ? ~(res >> 1) : (res >> 1);
+    }
+
+    // Header
+    decodeUnsignedVarint(); // headerversion
+    const header = decodeUnsignedVarint();
+    const precision = header & 0x0F;
+    const thirdDim = (header >> 4) & 0x07;
+    const thirdDimPrecision = (header >> 7) & 0x0F;
+    const factor = Math.pow(10, precision);
+    const thirdDimFactor = Math.pow(10, thirdDimPrecision);
+
+    let lastLat = 0, lastLng = 0, lastZ = 0;
+    const coordinates = [];
+
+    while (index < encoded.length) {
+      lastLat += decodeSignedVarint();
+      lastLng += decodeSignedVarint();
+      let lat = lastLat / factor;
+      let lng = lastLng / factor;
+      if (thirdDim) {
+        lastZ += decodeSignedVarint();
+        let z = lastZ / thirdDimFactor;
+        coordinates.push({lat, lng, z});
+      } else {
+        coordinates.push({lat, lng});
+      }
+    }
+    return coordinates;
   }
-  return coordinates;
-}
 
 
-function normalizeLongitude(lon) {
-  lon = ((lon + 180) % 360 + 360) % 360 - 180;
-  return lon;
-}
+  function normalizeLongitude(lon) {
+    lon = ((lon + 180) % 360 + 360) % 360 - 180;
+    return lon;
+  }
 
 
-function prefixHelpLinks() {
+  function prefixHelpLinks() {
     document.querySelectorAll('a.help').forEach(link => {
-        link.target = "help";
-        link.innerText = " ?";
-        const hash = link.getAttribute('data-href');
-        if (hash && hash.startsWith('#')) {
-            link.setAttribute('href',  helpServerUrl + hash);
-        }
+      link.target = "help";
+      link.innerText = " ?";
+      const hash = link.getAttribute('data-href');
+      if (hash && hash.startsWith('#')) {
+        link.setAttribute('href', helpServerUrl + hash);
+      }
     });
-}
+  }
 
 
- function fixed(d,n) {
-    if ( d == null ) return "NaN";
-	  return d.toFixed(n);
- }
+  function fixed(d, n) {
+    if (d == null) return "NaN";
+    return d.toFixed(n);
+  }
 
- function cleanNumbers(s) {
-  return s.replace(/[^0-9]/g,'').trim();
-}
+  function cleanNumbers(s) {
+    return s.replace(/[^0-9]/g, '').trim();
+  }
 
-function d2(d) {
-	  d = Math.round(d);
-	  if ( d < 10 ) return "0" + d;
-	  return ""+d;
-}
-//#endregion Helpper functions
+  function d2(d) {
+    d = Math.round(d);
+    if (d < 10) return "0" + d;
+    return "" + d;
+  }
 
-//#region MapModes
+  //#endregion Helpper functions
 
- // Simulation of C# string.Format, only {n} works.
- if (!String.format) {
-  String.format = function(format) {
-    const args = Array.prototype.slice.call(arguments, 1);
-    return format.replace(/{(\d+)}/g, function(match, number) {
-      return typeof args[number] != 'undefined'
-        ? args[number]
-        : match
-      ;
-    });
+  //#region MapModes
+
+  // Simulation of C# string.Format, only {n} works.
+  if (!String.format) {
+    String.format = function (format) {
+      const args = Array.prototype.slice.call(arguments, 1);
+      return format.replace(/{(\d+)}/g, function (match, number) {
+        return typeof args[number] != 'undefined'
+          ? args[number]
+          : match
+          ;
+      });
+    };
+  }
+
+  // Converts tile XY coordinates into a QuadKey at a specified level of detail.
+  function TileXYToQuadKey(tile) {
+    let quadKey = "";
+    for (let i = tile.zoom; i > 0; i--) {
+      let digit = '0';
+      const mask = 1 << (i - 1);
+      if ((tile.x & mask) !== 0) {
+        digit++;
+      }
+      if ((tile.y & mask) !== 0) {
+        digit++;
+        digit++;
+      }
+      quadKey += digit;
+    }
+    return quadKey;
+  }
+
+
+  const belectro = {
+    link: "https://tanger.belectro.fi/tiles/mmltopo/v9/256/{0}/{2}/{1}?ref=7f2d",
+    ok: false,
+    init: async function () {
+      if (this.ok) return;
+      this.ok = true;
+      const response = await fetch(cycloServerUrl + "/bbark.php");
+      const data = await response.text();
+      const bbarkObj = JSON.parse(data);
+      // noinspection JSUnresolvedReference
+      let url = bbarkObj.base_map_groups[0].maps[0].url;
+      url = url.replace("{W}", "256");
+      url = url.replace("{Z}", "{0}");
+      url = url.replace("{Y}", "{2}");
+      url = url.replace("{X}", "{1}");
+      belectro.link = url;
+    }
   };
-}
 
-// Converts tile XY coordinates into a QuadKey at a specified level of detail.
-function TileXYToQuadKey(tile) {
-  let quadKey = "";
-  for (let i = tile.zoom; i > 0; i--)  {
-    let digit = '0';
-    const mask = 1 << (i - 1);
-    if ((tile.x & mask) !== 0) {
-            digit++;
-    }
-    if ((tile.y & mask) !== 0) {
-        digit++;
-        digit++;
-    }
-    quadKey += digit;
-  }
-  return quadKey;
-}
-
-
-const belectro = {
-  link: "https://tanger.belectro.fi/tiles/mmltopo/v9/256/{0}/{2}/{1}?ref=7f2d",
-  ok: false,
-  init: async function () {
-    if (this.ok) return;
-    this.ok = true;
-    const response = await fetch(cycloServerUrl + "/bbark.php");
-    const data = await response.text();
-    const bbarkObj = JSON.parse(data);
-    // noinspection JSUnresolvedReference
-    let url = bbarkObj.base_map_groups[0].maps[0].url;
-    url = url.replace("{W}", "256");
-    url = url.replace("{Z}", "{0}");
-    url = url.replace("{Y}", "{2}");
-    url = url.replace("{X}", "{1}");
-    belectro.link = url;
-  }
-};
-
- // noinspection CheckImageSize
-const mapModes = {
-  "Bing Maps normal"   : { f:function(tile) {
-	                            return String.format("https://ecn.t1.tiles.virtualearth.net/tiles/r{0}?g=1135",TileXYToQuadKey(tile));
-							}, c:"", mz: 20},
-	"Bing Maps aerial"   : { f:function(tile) {
-	                            return String.format("https://ecn.t1.tiles.virtualearth.net/tiles/h{0}?g=1135",TileXYToQuadKey(tile));
-							}, c:"", mz: 19},
-	"Google street"      : { f:function(tile) { return String.format("https://mt1.google.com/vt/lyrs=m&z={0}&x={1}&y={2}",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="https://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>', mz: 22},
-	"Google satellite"   : { f:function(tile) { return String.format("https://mt1.google.com/vt/lyrs=y&z={0}&x={1}&y={2}",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="https://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>', mz: 21},
+  // noinspection CheckImageSize
+  const mapModes = {
+    "Bing Maps normal": {
+      f: function (tile) {
+        return String.format("https://ecn.t1.tiles.virtualearth.net/tiles/r{0}?g=1135", TileXYToQuadKey(tile));
+      }, c: "", mz: 20
+    },
+    "Bing Maps aerial": {
+      f: function (tile) {
+        return String.format("https://ecn.t1.tiles.virtualearth.net/tiles/h{0}?g=1135", TileXYToQuadKey(tile));
+      }, c: "", mz: 19
+    },
+    "Google street": {
+      f: function (tile) {
+        return String.format("https://mt1.google.com/vt/lyrs=m&z={0}&x={1}&y={2}", tile.zoom, tile.x, tile.y);
+      },
+      c: '(c) <a href="https://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>', mz: 22
+    },
+    "Google satellite": {
+      f: function (tile) {
+        return String.format("https://mt1.google.com/vt/lyrs=y&z={0}&x={1}&y={2}", tile.zoom, tile.x, tile.y);
+      },
+      c: '(c) <a href="https://maps.google.com/help/terms_maps.html" target="_blank">Google Maps</a>', mz: 21
+    },
 //  "Google Street"      : { f:function(tile) { tile = nokiaConvert(tile); return String.format("https://maps.googleapis.com/maps/api/staticmap?center={1},{2}&zoom={0}&size=256x256&key=AIzaSyCpXjAoV19MUbpGd6e6YD9IketR2Gu-tqc",tile.zoom ,tile.x, tile.y); }, c:""},
 //  "Google satellite"   : { f:function(tile) { tile = nokiaConvert(tile); return String.format("https://maps.googleapis.com/maps/api/staticmap?center={1},{2}&zoom={0}&size=256x256&key=AIzaSyCpXjAoV19MUbpGd6e6YD9IketR2Gu-tqc&maptype=hybrid",tile.zoom ,tile.x, tile.y); }, c:""},
 //    "Nokia"              : { f:function(tile) { tile = nokiaConvert(tile); return String.format("http://m.nok.it/?app_id=_peU-uCkp-j8ovkzFGNU&app_code=gBoUkAMoxoqIWfxWA5DuMQ&h=256&w=256&ctr={1},{2}&z={0}&t=0&nord",tile.zoom ,tile.x, tile.y); }, c:""},
 //	"MapQuest"           : { f:function(tile) { return String.format("http://otile1.mqcdn.com/tiles/1.0.0/map/{0}/{1}/{2}.png",Clip(tile.zoom,0,19) ,tile.x, tile.y); },
 //	                         c:'(c) <a href="http://info.mapquest.com/terms-of-use/" target="_blank">MapQuest</a>'},
-	"OpenStreet"         : { f:function(tile) { return String.format("https://tile.openstreetmap.org/{0}/{1}/{2}.png",tile.zoom,tile.x,tile.y); },
-	                         c:'(c) <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>', mz: 19},
-	"OpenCycle"          : //{ f:function(tile) { return String.format("http://a.tile.opencyclemap.org/cycle/{0}/{1}/{2}.png",tile.zoom ,tile.x, tile.y ); },
-	                         { f:function(tile) { return String.format("https://tile.thunderforest.com/cycle/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>', mz: 22},
-	"Landscape"          : { f:function(tile) { return String.format("https://tile.thunderforest.com/landscape/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>', mz: 22},
-	"Transport"          : { f:function(tile) { return String.format("https://tile.thunderforest.com/transport/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>', mz: 22},
-	"Outdoors"           : { f:function(tile) { return String.format("https://tile.thunderforest.com/outdoors/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88",tile.zoom ,tile.x, tile.y ); },
-	                         c:'(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>', mz: 22},
-	/* Ei voi käyttää, koska ei ole enää saatavilla WGS84, vaan vain EPSG:3067
-  "Kapsi peruskartta"  : { f:function(tile) { return getKapsiTilePath(tile); },
-	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
-	"Kapsi Tausta"       : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/taustakartta_3067/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
-	"Kapsi Ilma"         : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/ortokuva_3067/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'
+    "OpenStreet": {
+      f: function (tile) {
+        return String.format("https://tile.openstreetmap.org/{0}/{1}/{2}.png", tile.zoom, tile.x, tile.y);
+      },
+      c: '(c) <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>', mz: 19
+    },
+    "OpenCycle": //{ f:function(tile) { return String.format("http://a.tile.opencyclemap.org/cycle/{0}/{1}/{2}.png",tile.zoom ,tile.x, tile.y ); },
+      {
+        f: function (tile) {
+          return String.format("https://tile.thunderforest.com/cycle/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88", tile.zoom, tile.x, tile.y);
+        },
+        c: '(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>', mz: 22
+      },
+    "Landscape": {
+      f: function (tile) {
+        return String.format("https://tile.thunderforest.com/landscape/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88", tile.zoom, tile.x, tile.y);
+      },
+      c: '(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>', mz: 22
+    },
+    "Transport": {
+      f: function (tile) {
+        return String.format("https://tile.thunderforest.com/transport/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88", tile.zoom, tile.x, tile.y);
+      },
+      c: '(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>', mz: 22
+    },
+    "Outdoors": {
+      f: function (tile) {
+        return String.format("https://tile.thunderforest.com/outdoors/{0}/{1}/{2}.png?apikey=4e1589f40d3049469a043e2ec917dc88", tile.zoom, tile.x, tile.y);
+      },
+      c: '(c) <a href="https://www.opencyclemap.org/docs/" target="_blank">OpenCycleMap</a>', mz: 22
+    },
+    /* Ei voi käyttää, koska ei ole enää saatavilla WGS84, vaan vain EPSG:3067
+    "Kapsi peruskartta"  : { f:function(tile) { return getKapsiTilePath(tile); },
+                             c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+    "Kapsi Tausta"       : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/taustakartta_3067/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
+                             c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'},
+    "Kapsi Ilma"         : { f:function(tile) { return String.format("http://tiles.kartat.kapsi.fi/ortokuva_3067/{0}/{1}/{2}.jpg",tile.zoom ,tile.x, tile.y); },
+                             c:'(c) <a href="http://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>'
 
-                             },
-https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/default/WGS84_Pseudo-Mercator/18/72651/149809.png?api-key=
-https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/12/1116/2297.png?api-key=
-	 */
-  "MML maasto"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/maastokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>', mz: 18},
-  "MML tausta"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>', mz: 18},
-  "MML selko"         : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/selkokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>', mz: 18},
-  "MML ilma"           : {   f:function(tile) { return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445",tile.zoom ,tile.x, tile.y); },
-	                         c:'(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>', mz: 18},
-	"b-bark SuomiTopo"   : { f:function(tile) {
-                            return String.format(belectro.link, tile.zoom, tile.x, tile.y);
-						               },
-	                         c:'<span>Render:</span> <a href="https://www.b-bark.com" target="_blank"><img style="vertical-align:middle" src="css/b_bark_logo.png" width="39" height="18"  alt=""/></a> (c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>',
-                             i: belectro.init, mz: 26 },
-  "World Topo Map":      {f: function(tile) {
-                            return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{0}/{2}/{1}", tile.zoom, tile.x, tile.y);
-                          },
-                          c: '(c) <a href="https://www.esri.com/" target="_blank">Esri</a>', mz: 19
-                          },
-  "World Imagery"      : { f:function(tile) { return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{0}/{2}/{1}",tile.zoom ,tile.x, tile.y);},
-	                         c:'(c) <a href="https://www.esri.com/en-us/home" target="_blank">ArgGIS</a>', mz: 18},
-                         // ks: https://julkinen.traficom.fi/rasteripalvelu/wmts?request=getcapabilities
-  "Merikartat"         : { f:function(tile) { return String.format("https://julkinen.traficom.fi/rasteripalvelu/wmts/rest/Traficom:Merikarttasarjat public/default/WGS84_Pseudo-Mercator/WGS84_Pseudo-Mercator:{0}/{2}/{1}?format=image/png",tile.zoom ,tile.x, tile.y);},
-	                         c:'(c) <a href="https://www.traficom.fi/en/news/spatial-dataset-material/download-and-view-service" target="_blank">Traficom</a>', mz: 15},
-	/*
-  "Ilmailu merged"      : { f:function(tile) {
-                              const airac = "1806";
-                              return String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/merged/256/latest/{0}/{1}/{2}.png', tile.zoom, tile.x, tile.y);
-                              },
-	                         c:'(c) <a href="https://openflightmaps.org/live/ef-finland/" target="_blank">openflightmaps.org</a>'},
-	"Ilmailu aero"      : { f:function(tile) {
-	                             const airac = "1806";
-	                             return String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/aero/256/latest/{0}/{1}/{2}.png',tile.zoom ,tile.x, tile.y);
-	                             },
-	                         c:'(c) <a href="https://openflightmaps.org/live/ef-finland/" target="_blank">openflightmaps.org</a>'},
-*/
-/*
-	"Ilmailu base"      : { f:function(tile) {
-	                             var airac = "1806";
-	                             var url = String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/base/256/latest/{0}/{1}/{2}.png',tile.zoom ,tile.x, tile.y);
-	                             return url},
-	                         c:'(c) <a href="https://openflightmaps.org/live/ef-finland/" target="_blank">openflightmaps.org</a>'},
-*/
-};
-
-/*
-function tileToWMSRect(tile)  {
-  const mapSize = 256 << tile.zoom;
-  const pixelX = 256 * tile.x + 128;
-  const pixelY = 256 * tile.y + 128;
-  const x1 = (Clip(pixelX - 128, 0, mapSize - 1) / mapSize) - 0.5;
-  const y1 = 0.5 - (Clip(pixelY+128, 0, mapSize - 1) / mapSize);
-  const x2 = (Clip(pixelX+128, 0, mapSize - 1) / mapSize) - 0.5;
-  const y2 = 0.5 - (Clip(pixelY-128, 0, mapSize - 1) / mapSize);
-  return {
-      x1 : 90 - 360 * Math.atan(Math.exp(-y1 * 2 * Math.PI)) / Math.PI,
-      y1 : 360 * x1,
-      x2 : 90 - 360 * Math.atan(Math.exp(-y2 * 2 * Math.PI)) / Math.PI,
-      y2 : 360 * x2
+                               },
+  https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/default/WGS84_Pseudo-Mercator/18/72651/149809.png?api-key=
+  https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/12/1116/2297.png?api-key=
+     */
+    "MML maasto": {
+      f: function (tile) {
+        return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/maastokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445", tile.zoom, tile.x, tile.y);
+      },
+      c: '(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>',
+      mz: 18
+    },
+    "MML tausta": {
+      f: function (tile) {
+        return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445", tile.zoom, tile.x, tile.y);
+      },
+      c: '(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>',
+      mz: 18
+    },
+    "MML selko": {
+      f: function (tile) {
+        return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/selkokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445", tile.zoom, tile.x, tile.y);
+      },
+      c: '(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>',
+      mz: 18
+    },
+    "MML ilma": {
+      f: function (tile) {
+        return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445", tile.zoom, tile.x, tile.y);
+      },
+      c: '(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>',
+      mz: 18
+    },
+    "b-bark SuomiTopo": {
+      f: function (tile) {
+        return String.format(belectro.link, tile.zoom, tile.x, tile.y);
+      },
+      c: '<span>Render:</span> <a href="https://www.b-bark.com" target="_blank"><img style="vertical-align:middle" src="css/b_bark_logo.png" width="39" height="18"  alt=""/></a> (c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>',
+      i: belectro.init, mz: 26
+    },
+    "World Topo Map": {
+      f: function (tile) {
+        return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{0}/{2}/{1}", tile.zoom, tile.x, tile.y);
+      },
+      c: '(c) <a href="https://www.esri.com/" target="_blank">Esri</a>', mz: 19
+    },
+    "World Imagery": {
+      f: function (tile) {
+        return String.format("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{0}/{2}/{1}", tile.zoom, tile.x, tile.y);
+      },
+      c: '(c) <a href="https://www.esri.com/en-us/home" target="_blank">ArgGIS</a>', mz: 18
+    },
+    // ks: https://julkinen.traficom.fi/rasteripalvelu/wmts?request=getcapabilities
+    "Merikartat": {
+      f: function (tile) {
+        return String.format("https://julkinen.traficom.fi/rasteripalvelu/wmts/rest/Traficom:Merikarttasarjat public/default/WGS84_Pseudo-Mercator/WGS84_Pseudo-Mercator:{0}/{2}/{1}?format=image/png", tile.zoom, tile.x, tile.y);
+      },
+      c: '(c) <a href="https://www.traficom.fi/en/news/spatial-dataset-material/download-and-view-service" target="_blank">Traficom</a>',
+      mz: 15
+    },
+    /*
+    "Ilmailu merged"      : { f:function(tile) {
+                                const airac = "1806";
+                                return String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/merged/256/latest/{0}/{1}/{2}.png', tile.zoom, tile.x, tile.y);
+                                },
+                             c:'(c) <a href="https://openflightmaps.org/live/ef-finland/" target="_blank">openflightmaps.org</a>'},
+    "Ilmailu aero"      : { f:function(tile) {
+                                 const airac = "1806";
+                                 return String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/aero/256/latest/{0}/{1}/{2}.png',tile.zoom ,tile.x, tile.y);
+                                 },
+                             c:'(c) <a href="https://openflightmaps.org/live/ef-finland/" target="_blank">openflightmaps.org</a>'},
+  */
+    /*
+      "Ilmailu base"      : { f:function(tile) {
+                                   var airac = "1806";
+                                   var url = String.format('https://snapshots.openflightmaps.org/live/' + airac + '/tiles/world/noninteractive/epsg3857/base/256/latest/{0}/{1}/{2}.png',tile.zoom ,tile.x, tile.y);
+                                   return url},
+                               c:'(c) <a href="https://openflightmaps.org/live/ef-finland/" target="_blank">openflightmaps.org</a>'},
+    */
   };
-}
-*/
 
-//#endregion MapModes
-
-//#region Distance calculation
-
-class Ellipsoid {
-  constructor(name, a, invf) {
-    this.name = name;
-    this.a = a;
-    this.invf = invf;
+  /*
+  function tileToWMSRect(tile)  {
+    const mapSize = 256 << tile.zoom;
+    const pixelX = 256 * tile.x + 128;
+    const pixelY = 256 * tile.y + 128;
+    const x1 = (Clip(pixelX - 128, 0, mapSize - 1) / mapSize) - 0.5;
+    const y1 = 0.5 - (Clip(pixelY+128, 0, mapSize - 1) / mapSize);
+    const x2 = (Clip(pixelX+128, 0, mapSize - 1) / mapSize) - 0.5;
+    const y2 = 0.5 - (Clip(pixelY-128, 0, mapSize - 1) / mapSize);
+    return {
+        x1 : 90 - 360 * Math.atan(Math.exp(-y1 * 2 * Math.PI)) / Math.PI,
+        y1 : 360 * x1,
+        x2 : 90 - 360 * Math.atan(Math.exp(-y2 * 2 * Math.PI)) / Math.PI,
+        y2 : 360 * x2
+    };
   }
-}
+  */
 
-const ells = [
-  new Ellipsoid("WGS84", 6378.137 / 1.852, 298.257223563),
-  new Ellipsoid("FAI sphere", 6371.0 / 1.852, 1000000000.)
-];
+  //#endregion MapModes
+
+  //#region Distance calculation
+
+  class Ellipsoid {
+    constructor(name, a, invf) {
+      this.name = name;
+      this.a = a;
+      this.invf = invf;
+    }
+  }
+
+  const ells = [
+    new Ellipsoid("WGS84", 6378.137 / 1.852, 298.257223563),
+    new Ellipsoid("FAI sphere", 6371.0 / 1.852, 1000000000.)
+  ];
 
 
-function getEllipsoid(selection){
+  function getEllipsoid(selection) {
 //  document.spheroid.major_radius.value=ells[selection.selectedIndex+1].a*1.852
 //  document.spheroid.inverse_f.value=ells[selection.selectedIndex+1].invf
-  return ells[selection.selectedIndex];
-}
-
-function atan2(y,x) {
-  let out;
-  if (x <0)            { out= Math.atan(y/x)+Math.PI;}
-  if ((x >0) && (y>=0)){ out= Math.atan(y/x);}
-  if ((x >0) && (y<0)) { out= Math.atan(y/x)+2*Math.PI;}
-  if ((x===0) && (y>0)) { out= Math.PI/2;}
-  if ((x===0) && (y<0)) { out= 3*Math.PI/2;}
-  if ((x===0) && (y===0)) {
-  //alert("atan2(0,0) undefined")
-      out= 0.
+    return ells[selection.selectedIndex];
   }
-  return out
-}
 
-function bearingDegrees(from, to) {
-  // from and to: [lat, lon]
-  const toRad = deg => deg * Math.PI / 180;
-  const toDeg = rad => rad * 180 / Math.PI;
-
-  const lat1 = toRad(from[0]);
-  const lat2 = toRad(to[0]);
-  const dLon = toRad(to[1] - from[1]);
-
-  const y = Math.sin(dLon) * Math.cos(lat2);
-  const x = Math.cos(lat1) * Math.sin(lat2) -
-            Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-  let brng = Math.atan2(y, x);
-  brng = toDeg(brng);
-  return (brng + 360) % 360; // Normalize to 0–360
-}
-
-function WGS84_distance(p1,p2) {
-  if (Array.isArray(p1) && p1.length === 2) {
-    p1 = { latitude: p1[0], longitude: p1[1] };
-  }
-  if (Array.isArray(p2) && p2.length === 2) {
-    p2 = { latitude: p2[0], longitude: p2[1] };
-  }
-  const selection = {selectedIndex: 0};
-  const m = Math.PI / 180;
-  return crsdist_ell(p1.latitude*m,p1.longitude*m,p2.latitude*m,p2.longitude*m,getEllipsoid(selection));
-}
-
-function crsdist_ell(glat1,glon1,glat2,glon2,ellipse){
-  // glat1 initial geodetic latitude in radians N positive
-  // glon1 initial geodetic longitude in radians E positive
-  // glat2 final geodetic latitude in radians N positive
-  // glon2 final geodetic longitude in radians E positive
-  const a = ellipse.a
-  const f = 1/ellipse.invf
-  //alert("a="+a+" f="+f)
-  let r, tu1, tu2, cu1, su1, cu2, s1, b1, f1;
-  let x, sx, cx, sy, cy, y, sa, c2a, cz, e, c, d;
-  const EPS = 0.00000000005;
-  let s;
-  let iter = 1;
-  const MAXITER = 100;
-  if ((glat1+glat2===0.) && (Math.abs(glon1-glon2)===Math.PI)){
-    alert("Course and distance between antipodal points is undefined")
-    glat1=glat1+0.00001 // allow algorithm to complete
+  function atan2(y, x) {
+    let out;
+    if (x < 0) {
+      out = Math.atan(y / x) + Math.PI;
     }
-  if ( glat1===glat2 && (glon1===glon2 || Math.abs(Math.abs(glon1-glon2)-2*Math.PI) <  EPS) ) {
-    //alert("Points 1 and 2 are identical- course undefined")
-    return 0.0; // don't care???
+    if ((x > 0) && (y >= 0)) {
+      out = Math.atan(y / x);
+    }
+    if ((x > 0) && (y < 0)) {
+      out = Math.atan(y / x) + 2 * Math.PI;
+    }
+    if ((x === 0) && (y > 0)) {
+      out = Math.PI / 2;
+    }
+    if ((x === 0) && (y < 0)) {
+      out = 3 * Math.PI / 2;
+    }
+    if ((x === 0) && (y === 0)) {
+      //alert("atan2(0,0) undefined")
+      out = 0.
+    }
+    return out
   }
-  r = 1 - f
-  tu1 = r * Math.tan (glat1)
-  tu2 = r * Math.tan (glat2)
-  cu1 = 1. / Math.sqrt (1. + tu1 * tu1)
-  su1 = cu1 * tu1
-  cu2 = 1. / Math.sqrt (1. + tu2 * tu2)
-  s1 = cu1 * cu2
-  b1 = s1 * tu2
-  f1 = b1 * tu1
-  x = glon2 - glon1
-  d = x + 1 // force one pass
-  while ((Math.abs(d - x) > EPS) && (iter < MAXITER))
-    {
-      iter=iter+1
-      sx = Math.sin (x)
+
+  function bearingDegrees(from, to) {
+    // from and to: [lat, lon]
+    const toRad = deg => deg * Math.PI / 180;
+    const toDeg = rad => rad * 180 / Math.PI;
+
+    const lat1 = toRad(from[0]);
+    const lat2 = toRad(to[0]);
+    const dLon = toRad(to[1] - from[1]);
+
+    const y = Math.sin(dLon) * Math.cos(lat2);
+    const x = Math.cos(lat1) * Math.sin(lat2) -
+      Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+    let brng = Math.atan2(y, x);
+    brng = toDeg(brng);
+    return (brng + 360) % 360; // Normalize to 0–360
+  }
+
+  function WGS84_distance(p1, p2) {
+    if (Array.isArray(p1) && p1.length === 2) {
+      p1 = {latitude: p1[0], longitude: p1[1]};
+    }
+    if (Array.isArray(p2) && p2.length === 2) {
+      p2 = {latitude: p2[0], longitude: p2[1]};
+    }
+    const selection = {selectedIndex: 0};
+    const m = Math.PI / 180;
+    return crsdist_ell(p1.latitude * m, p1.longitude * m, p2.latitude * m, p2.longitude * m, getEllipsoid(selection));
+  }
+
+  function crsdist_ell(glat1, glon1, glat2, glon2, ellipse) {
+    // glat1 initial geodetic latitude in radians N positive
+    // glon1 initial geodetic longitude in radians E positive
+    // glat2 final geodetic latitude in radians N positive
+    // glon2 final geodetic longitude in radians E positive
+    const a = ellipse.a
+    const f = 1 / ellipse.invf
+    //alert("a="+a+" f="+f)
+    let r, tu1, tu2, cu1, su1, cu2, s1, b1, f1;
+    let x, sx, cx, sy, cy, y, sa, c2a, cz, e, c, d;
+    const EPS = 0.00000000005;
+    let s;
+    let iter = 1;
+    const MAXITER = 100;
+    if ((glat1 + glat2 === 0.) && (Math.abs(glon1 - glon2) === Math.PI)) {
+      alert("Course and distance between antipodal points is undefined")
+      glat1 = glat1 + 0.00001 // allow algorithm to complete
+    }
+    if (glat1 === glat2 && (glon1 === glon2 || Math.abs(Math.abs(glon1 - glon2) - 2 * Math.PI) < EPS)) {
+      //alert("Points 1 and 2 are identical- course undefined")
+      return 0.0; // don't care???
+    }
+    r = 1 - f
+    tu1 = r * Math.tan(glat1)
+    tu2 = r * Math.tan(glat2)
+    cu1 = 1. / Math.sqrt(1. + tu1 * tu1)
+    su1 = cu1 * tu1
+    cu2 = 1. / Math.sqrt(1. + tu2 * tu2)
+    s1 = cu1 * cu2
+    b1 = s1 * tu2
+    f1 = b1 * tu1
+    x = glon2 - glon1
+    d = x + 1 // force one pass
+    while ((Math.abs(d - x) > EPS) && (iter < MAXITER)) {
+      iter = iter + 1
+      sx = Math.sin(x)
 //       alert("sx="+sx)
-      cx = Math.cos (x)
+      cx = Math.cos(x)
       tu1 = cu2 * sx
       tu2 = b1 - su1 * cu2 * cx
       sy = Math.sqrt(tu1 * tu1 + tu2 * tu2)
       cy = s1 * cx + f1
-      y = atan2 (sy, cy)
+      y = atan2(sy, cy)
       sa = s1 * sx / sy
       c2a = 1 - sa * sa
       cz = f1 + f1
       if (c2a > 0.)
-     cz = cy - cz / c2a
+        cz = cy - cz / c2a
       e = cz * cz * 2. - 1.
       c = ((-3. * c2a + 4.) * f + 4.) * c2a * f / 16.
       d = x
       x = ((e * cy * c + cz) * sy * c + y) * sa
       x = (1. - c) * x * f + glon2 - glon1
     }
-  x = Math.sqrt ((1 / (r * r) - 1) * c2a + 1)
-  x +=1
-  x = (x - 2.) / x
-  c = 1. - x
-  c = (x * x / 4. + 1.) / c
-  d = (0.375 * x * x - 1.) * x
-  x = e * cy
-  s = ((((sy*sy*4.-3.)*(1.-e-e)*cz*d/6.-x)*d/4.+cz)*sy*d+y)*c*a*r
+    x = Math.sqrt((1 / (r * r) - 1) * c2a + 1)
+    x += 1
+    x = (x - 2.) / x
+    c = 1. - x
+    c = (x * x / 4. + 1.) / c
+    d = (0.375 * x * x - 1.) * x
+    x = e * cy
+    s = ((((sy * sy * 4. - 3.) * (1. - e - e) * cz * d / 6. - x) * d / 4. + cz) * sy * d + y) * c * a * r
 
-  return s*1.852;
-  /*
-  let faz, baz;
-  faz = modcrs(atan2(tu1, tu2))
-  baz = modcrs(atan2(cu1 * sx, b1 * cx - su1 * cu2) + Math.PI)
-  out=new MakeArray(0)
-  out.d=s
-  out.crs12=faz
-  out.crs21=baz
-  if (Math.abs(iter-MAXITER)<EPS){
-    alert("Algorithm did not converge")
-  }
-  return out
-  */
-} // crsdist_ell ends
+    return s * 1.852;
+    /*
+    let faz, baz;
+    faz = modcrs(atan2(tu1, tu2))
+    baz = modcrs(atan2(cu1 * sx, b1 * cx - su1 * cu2) + Math.PI)
+    out=new MakeArray(0)
+    out.d=s
+    out.crs12=faz
+    out.crs21=baz
+    if (Math.abs(iter-MAXITER)<EPS){
+      alert("Algorithm did not converge")
+    }
+    return out
+    */
+  } // crsdist_ell ends
 
 
-let distanceLines = [];
+  let distanceLines = [];
 
-function calcDistance(idx1 = -1000, idx2 = -1000) {
-  let d = 0;
-  let sum = 0;
-  if ( !hitPin ) return;
-  let from = null;
-  if (idx1 === -1) {
-    if (distanceLines.length >= 1) {
+  function calcDistance(idx1 = -1000, idx2 = -1000) {
+    let d = 0;
+    let sum = 0;
+    if (!hitPin) return;
+    let from = null;
+    if (idx1 === -1) {
+      if (distanceLines.length >= 1) {
         lastHitPoint = distanceLines[distanceLines.length - 1].from;
-    }
-  }
-  const to = mapWrapper.getPinLocation(hitPin);
-  if ( lastSelected ) {
-    from = mapWrapper.getPinLocation(lastSelected);
-    mapWrapper.removeLines(distanceLines);
-  } else {
-    if (!lastHitPoint) return;
-    from = lastHitPoint;
-  }
-  if (!options.calcDistanceSum) {
-    mapWrapper.removeLines(distanceLines);
-  }
-  d = WGS84_distance(from, to);
-  const deg = bearingDegrees(from, to);
-  const s  = `${d.toFixed(3)} km, ${deg.toFixed(1)}°`;
-  if (idx1 >= -1) mapWrapper.removeLines(distanceLines, idx1, idx2);
-  distanceLines = mapWrapper.addLines(distanceLines, from, to, {
-    color: 'red',
-    weight: 1,
-    opacity: 0.8
-  }, s, options.drawDistanceLine);
-  const line = distanceLines[distanceLines.length - 1];
-  line.d = d;
-  line.deg = deg;
-  for (let i = 0; i < distanceLines.length; i++) {
-    if (distanceLines[i].d) sum += distanceLines[i].d;
-  }
-  if (!dstTextElem) dstTextElem = document.getElementById("distance");
-  if (sum !== d) dstTextElem.innerText = s + ` = ${sum.toFixed(3)} km`;
-  else dstTextElem.innerText = s;
-}
-
-//#endregion Distance calculation
-
-
-
-//#region Globals
-// let lastSelected = null;
-let myPin = null;
-let hitPin = null;
-let mapWrapper = null;
-let pinNr = 1;
-let dstTextElem = null;
-let lastHitPoint = null;
-let hitPinXY = [100,100];
-let searchPins = [];
-
-const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-
-const options = {
-  email: "",
-  id: "",
-  logname: "",
-  interval: "5000",
-  usersTofollow: "",
-  send: false,
-  readGPS: true,
-  resend: false,
-  follow: false,
-  followMe: false,
-  followMeWidth: 3,
-  followMeColor: "orange",
-  showTime: true,
-  selectNewPin: true,
-  useDummyRect: false,
-  preventSleep: true,
-  smallRaport: false,
-  drawLogLine: false,
-  HStationary: true,
-  HCenter2: false,  // korvattu nimi jotta vanhat localstoraget eivät sotke
-  showAccuracy: true,
-  extra: false,
-  tpR: "0",
-  hasWakeLock: false,
-  useComps: false,
-  useCompsWindow: false,
-  useCache: true,
-  drawDistanceLine: true,
-  calcDistanceSum: true,
-  flipPins: isTouch,
-  showZoomButtons: !isTouch,
-  hereApiKey: "",
-};
-
-const areaDatas = [
-  {name: "Ilmatilat", url: "https://flyk.com/api/airspaces.geojson", cb: "area1cb"},
-  {name: "Suplementit", url: "https://flyk.com/api/supplements.geojson", cb: "area2cb"},
-  {name: "Varaukset", url: "https://flyk.com/api/reservations.geojson", cb: "area3cb"},
-];
-
-
-const params = getUrlVars();
-
-function getUrlVars()
- {
-   let vars = [], hash;
-   const hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-   for (let i = 0; i < hashes.length; i++) {
-        hash = hashes[i].split('=');
-        vars.push(hash[0]);
-        const val = hash[1] ? decodeURIComponent(hash[1]) : "";
-        vars[hash[0]] = val;
-    }
-    return vars;
- }
-
-const timers = {
- follow : { t:null,f:getfollow,interval:1000 },
- showPosition : { t:null, f:showCurrentPosition,interval:1000},
- send : { t:null,f:sendPosition,interval:5000 },
- resend : { t:null,f:sendPosition,interval:200000 },
- showTime: { t:null,f:setTimeCompsValues,interval:1000 },
-};
-
-//#endregion Globals
-
-function checkTimer(timer, clear) {
-  // if ( timer=="send" && !options.sendPos) return;
-  const tim = timers[timer];
-  if ( options[timer] && !clear)
-     tim.t = setInterval(function(){ tim.f();	}, tim.interval);
-  else
-     clearInterval(tim.t);
-}
-
-
-function mapMove() {
-  mouseDown = true;
-  const pos = mapWrapper.getCenter();
-  localStorage.lat = pos[0];
-  localStorage.lon = pos[1];
-  localStorage.zoom = mapWrapper.getZoom();
-  if ( options.HCenter2 ) {
-     setHitPinLoc(mapWrapper.getCenter(),-1, -1);
-     displayLocPin(hitPin);
-  } else if (options.HStationary) {
-     const loc = mapWrapper.getXYCoord(hitPinXY);
-     setHitPinLoc(loc, -1, -1);
-     displayLocPin(hitPin);
-  }
-}
-
-function showCurrentPosition() {
-
-}
-
-//#region Cyclo server communication
-
-function postCyclo(data, callback) {
-  fetch(cycloServerUrl+"/index.php", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      // "Content-Type": "application/json",
-      // "X-Requested-With": "XMLHttpRequest" // jQuery lisää tämän, joskus tarpeen
-    },
-    body: Object.keys(data)
-      .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
-      .join("&")
-  })
-  .then(response => {
-    // console.log(response);
-    return response.text(); })
-  .then(callback);
-}
-
-function getfollow()  {
-  if ( !options.id || !options.email ) return;
-
-  clearError();
-  postCyclo({id: options.id, e: getEmailTag(), f : options.usersTofollow}, function( data ) {
-    setPins(data)
-  });
-}
-
-
-//#region Old school POST for Cyclo server
-// jQueryn $.post korvaaja
-/*
-function oldSchoolPost(url, params, callback, extra) {
-  // Muutetaan olio URL-enkoodattuun muotoon
-  const formBody = Object.keys(params)
-    .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
-    .join("&");
-
-  const xhr = new XMLHttpRequest();
-  xhr.open("POST", url, true);
-  // xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
-
-  // Tämä jäljittelee jQueryn "done"
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4) {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        callback(xhr.responseText, extra);
-      } else {
-        console.error("POST error:", xhr.status, xhr.statusText);
       }
     }
+    const to = mapWrapper.getPinLocation(hitPin);
+    if (lastSelected) {
+      from = mapWrapper.getPinLocation(lastSelected);
+      mapWrapper.removeLines(distanceLines);
+    } else {
+      if (!lastHitPoint) return;
+      from = lastHitPoint;
+    }
+    if (!options.calcDistanceSum) {
+      mapWrapper.removeLines(distanceLines);
+    }
+    d = WGS84_distance(from, to);
+    const deg = bearingDegrees(from, to);
+    const s = `${d.toFixed(3)} km, ${deg.toFixed(1)}°`;
+    if (idx1 >= -1) mapWrapper.removeLines(distanceLines, idx1, idx2);
+    distanceLines = mapWrapper.addLines(distanceLines, from, to, {
+      color: 'red',
+      weight: 1,
+      opacity: 0.8
+    }, s, options.drawDistanceLine);
+    const line = distanceLines[distanceLines.length - 1];
+    line.d = d;
+    line.deg = deg;
+    for (let i = 0; i < distanceLines.length; i++) {
+      if (distanceLines[i].d) sum += distanceLines[i].d;
+    }
+    if (!dstTextElem) dstTextElem = document.getElementById("distance");
+    if (sum !== d) dstTextElem.innerText = s + ` = ${sum.toFixed(3)} km`;
+    else dstTextElem.innerText = s;
+  }
+
+  //#endregion Distance calculation
+
+
+  //#region Globals
+  // let lastSelected = null;
+  let myPin = null;
+  let hitPin = null;
+  let mapWrapper = null;
+  let pinNr = 1;
+  let dstTextElem = null;
+  let lastHitPoint = null;
+  let hitPinXY = [100, 100];
+  let searchPins = [];
+
+  const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+  const options = {
+    email: "",
+    id: "",
+    logname: "",
+    interval: "5000",
+    usersTofollow: "",
+    send: false,
+    readGPS: true,
+    resend: false,
+    follow: false,
+    followMe: false,
+    followMeWidth: 3,
+    followMeColor: "orange",
+    showTime: true,
+    selectNewPin: true,
+    useDummyRect: false,
+    preventSleep: true,
+    smallRaport: false,
+    drawLogLine: false,
+    HStationary: true,
+    HCenter2: false,  // korvattu nimi jotta vanhat localstoraget eivät sotke
+    showAccuracy: true,
+    extra: false,
+    tpR: "0",
+    hasWakeLock: false,
+    useComps: false,
+    useCompsWindow: false,
+    useCache: true,
+    drawDistanceLine: true,
+    calcDistanceSum: true,
+    flipPins: isTouch,
+    showZoomButtons: !isTouch,
+    hereApiKey: "",
   };
 
-  xhr.send(formBody);
-}
-
-// Vanha versio, joka käyttää XMLHttpRequest:iä
-function sendCyclo0(command,f, extra) {
-  clearError();
-  options.id = cleanNumbers(options.id);
-  const params = { ...command, id: options.id, e: getEmailTag() };
-  oldSchoolPost(cycloServerUrl+"/index.php", params, f, extra);
-}
-
-// Vanha versio, joka käyttää fetch:ia getin kautta
-function sendCyclo2(command,f, extra) {
-  clearError();
-  options.id = cleanNumbers(options.id);
-  const params = { ...command, id: options.id, e: getEmailTag() };
-  const query = new URLSearchParams(params).toString();
-  fetch(`${cycloServerUrl}/index.php?${query}`)
-  .then(res => res.text())
-  .then(data => f(data, extra))
-  .catch(err => console.error(err));
-}
-
- */
-//#endregion Old school POST for Cyclo server
+  const areaDatas = [
+    {name: "Ilmatilat", url: "https://flyk.com/api/airspaces.geojson", cb: "area1cb"},
+    {name: "Suplementit", url: "https://flyk.com/api/supplements.geojson", cb: "area2cb"},
+    {name: "Varaukset", url: "https://flyk.com/api/reservations.geojson", cb: "area3cb"},
+  ];
 
 
-function sendCyclo(command,f, extra) {
-  clearError();
-  options.id = cleanNumbers(options.id);
-  const params = { ...command, id: options.id, e: getEmailTag() };
-  postCyclo(params,
-   function( data ) {
-    f(data, extra)
-  } );
-}
+  const params = getUrlVars();
+
+  function getUrlVars() {
+    let vars = [], hash;
+    const hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for (let i = 0; i < hashes.length; i++) {
+      hash = hashes[i].split('=');
+      vars.push(hash[0]);
+      const val = hash[1] ? decodeURIComponent(hash[1]) : "";
+      vars[hash[0]] = val;
+    }
+    return vars;
+  }
+
+  const timers = {
+    follow: {t: null, f: getfollow, interval: 1000},
+    showPosition: {t: null, f: showCurrentPosition, interval: 1000},
+    send: {t: null, f: sendPosition, interval: 5000},
+    resend: {t: null, f: sendPosition, interval: 200000},
+    showTime: {t: null, f: setTimeCompsValues, interval: 1000},
+  };
+
+  //#endregion Globals
+
+  function checkTimer(timer, clear) {
+    // if ( timer=="send" && !options.sendPos) return;
+    const tim = timers[timer];
+    if (options[timer] && !clear)
+      tim.t = setInterval(function () {
+        tim.f();
+      }, tim.interval);
+    else
+      clearInterval(tim.t);
+  }
 
 
-function getEmailTag() {
-   if ( !options.tag ) return options.email;
-   return options.email + "+" + options.tag
- }
+  function mapMove() {
+    mouseDown = true;
+    const pos = mapWrapper.getCenter();
+    localStorage.lat = pos[0];
+    localStorage.lon = pos[1];
+    localStorage.zoom = mapWrapper.getZoom();
+    if (options.HCenter2) {
+      setHitPinLoc(mapWrapper.getCenter(), -1, -1);
+      displayLocPin(hitPin);
+    } else if (options.HStationary) {
+      const loc = mapWrapper.getXYCoord(hitPinXY);
+      setHitPinLoc(loc, -1, -1);
+      displayLocPin(hitPin);
+    }
+  }
+
+  function showCurrentPosition() {
+
+  }
+
+  //#region Cyclo server communication
+
+  function postCyclo(data, callback) {
+    fetch(cycloServerUrl + "/index.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        // "Content-Type": "application/json",
+        // "X-Requested-With": "XMLHttpRequest" // jQuery lisää tämän, joskus tarpeen
+      },
+      body: Object.keys(data)
+        .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
+        .join("&")
+    })
+      .then(response => {
+        // console.log(response);
+        return response.text();
+      })
+      .then(callback);
+  }
+
+  function getfollow() {
+    if (!options.id || !options.email) return;
+
+    clearError();
+    postCyclo({id: options.id, e: getEmailTag(), f: options.usersTofollow}, function (data) {
+      setPins(data)
+    });
+  }
 
 
-function getLogname() {
-  if ( options.logname ) return options.logname;
-  const today = new Date();
-  const dd = today.getDate();
-  const mm = today.getMonth() + 1; //January is 0!
-  const yy = today.getFullYear() - 2000;
+  //#region Old school POST for Cyclo server
+  // jQueryn $.post korvaaja
+  /*
+  function oldSchoolPost(url, params, callback, extra) {
+    // Muutetaan olio URL-enkoodattuun muotoon
+    const formBody = Object.keys(params)
+      .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
+      .join("&");
 
-  return i2(yy) + i2(mm) + i2(dd);
-}
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    // xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
 
-let lastSend = "";
-function postPosition(position) {
-    if ( sending ) return;
-    if ( !options.id || !options.email ) return;
+    // Tämä jäljittelee jQueryn "done"
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4) {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          callback(xhr.responseText, extra);
+        } else {
+          console.error("POST error:", xhr.status, xhr.statusText);
+        }
+      }
+    };
+
+    xhr.send(formBody);
+  }
+
+  // Vanha versio, joka käyttää XMLHttpRequest:iä
+  function sendCyclo0(command,f, extra) {
+    clearError();
+    options.id = cleanNumbers(options.id);
+    const params = { ...command, id: options.id, e: getEmailTag() };
+    oldSchoolPost(cycloServerUrl+"/index.php", params, f, extra);
+  }
+
+  // Vanha versio, joka käyttää fetch:ia getin kautta
+  function sendCyclo2(command,f, extra) {
+    clearError();
+    options.id = cleanNumbers(options.id);
+    const params = { ...command, id: options.id, e: getEmailTag() };
+    const query = new URLSearchParams(params).toString();
+    fetch(`${cycloServerUrl}/index.php?${query}`)
+    .then(res => res.text())
+    .then(data => f(data, extra))
+    .catch(err => console.error(err));
+  }
+
+   */
+  //#endregion Old school POST for Cyclo server
+
+
+  function sendCyclo(command, f, extra) {
+    clearError();
+    options.id = cleanNumbers(options.id);
+    const params = {...command, id: options.id, e: getEmailTag()};
+    postCyclo(params,
+      function (data) {
+        f(data, extra)
+      });
+  }
+
+
+  function getEmailTag() {
+    if (!options.tag) return options.email;
+    return options.email + "+" + options.tag
+  }
+
+
+  function getLogname() {
+    if (options.logname) return options.logname;
+    const today = new Date();
+    const dd = today.getDate();
+    const mm = today.getMonth() + 1; //January is 0!
+    const yy = today.getFullYear() - 2000;
+
+    return i2(yy) + i2(mm) + i2(dd);
+  }
+
+  let lastSend = "";
+
+  function postPosition(position) {
+    if (sending) return;
+    if (!options.id || !options.email) return;
     sending = true;
-   clearError();
-   // var position ="62.4596956,25.7324266,0,433,41478.4036846991,2.390,254.9,3.0,3.0";
-  const pos = fixed(position.coords.latitude, 7) + "," +
-    fixed(position.coords.longitude, 7) + "," +
-    "0" + "," +
-    fixed(((position.coords.altitude) * 3.280839895), 0) + "," +
-    fixed((position.timestamp / 1000 / 3600 / 24) + 25569.00, 10) + "," +
-    fixed(position.coords.speed, 1) + "," +
-    fixed(position.coords.heading, 1) + "," +
-    fixed(position.coords.accuracy, 1) + "," +
-    fixed(position.coords.altitudeAccuracy, 1);
-  const posmsg = fixed(position.coords.latitude, 4) + "," +
-    fixed(position.coords.longitude, 4);
+    clearError();
+    // var position ="62.4596956,25.7324266,0,433,41478.4036846991,2.390,254.9,3.0,3.0";
+    const pos = fixed(position.coords.latitude, 7) + "," +
+      fixed(position.coords.longitude, 7) + "," +
+      "0" + "," +
+      fixed(((position.coords.altitude) * 3.280839895), 0) + "," +
+      fixed((position.timestamp / 1000 / 3600 / 24) + 25569.00, 10) + "," +
+      fixed(position.coords.speed, 1) + "," +
+      fixed(position.coords.heading, 1) + "," +
+      fixed(position.coords.accuracy, 1) + "," +
+      fixed(position.coords.altitudeAccuracy, 1);
+    const posmsg = fixed(position.coords.latitude, 4) + "," +
+      fixed(position.coords.longitude, 4);
 
-  // let tag = "";
-  // if ( options.tag ) tag = "+" + options.tag;
+    // let tag = "";
+    // if ( options.tag ) tag = "+" + options.tag;
 
-   if ( lastSend === posmsg ) {
+    if (lastSend === posmsg) {
       setError("");
       // timers["send"].interval = options.interval;
       // checkTimer("send",false);
       // checkTimer("resend",true);
       sending = false;
       return;
-   }
+    }
 
-   sendCyclo({id: options.id, e: getEmailTag(), d : pos, log:getLogname()},
-    function( data ) {
-      setError(data);
-      // timers["send"].interval = options.interval;
-      // checkTimer("send",false);
-      // checkTimer("resend",true);
-      sending = false;
-      lastSend = posmsg;
-	  }
-	);
-  const c = document.getElementById('coord');
-  c.innerHTML = " " + posmsg;
-}
-
-
-let sending = false;
-
-function sendPosition() {
-   // checkTimer("send",true);
-   // checkTimer("resend",true);
-   clearError();
-   // getLocation();
-   if ( options.send ) {
-       if ( lastGPSCoord )
-          postPosition(lastGPSCoord);
-       else
-          navigator.geolocation.getCurrentPosition(postPosition, errorCallBack, geo_options);
-   }
- }
-//#endregion Cyclo server communication
-
-//#region Geocoding
-function isCoordinate(s) {
-     if ( s === "" ) return false;
-     return "0123456789-".indexOf(s[0]) >= 0;
-}
-
-function geocodeQuery(query) {
-
-  const select = document.getElementById('searchCombo');
-  select.innerText = "";
-  toggleDiv("searchSpan", true);
-
-  if (isCoordinate(query)) {
-    const loc = getCoordinateFromText(query);
-    const pin = addPinAt(loc)
-    searchPins.push(pin);
-    // map.entities.push([pin]);
-    // map.setView({center: loc});
-    return;
+    sendCyclo({id: options.id, e: getEmailTag(), d: pos, log: getLogname()},
+      function (data) {
+        setError(data);
+        // timers["send"].interval = options.interval;
+        // checkTimer("send",false);
+        // checkTimer("resend",true);
+        sending = false;
+        lastSend = posmsg;
+      }
+    );
+    const c = document.getElementById('coord');
+    c.innerHTML = " " + posmsg;
   }
-  fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json`)
-    .then(response => response.json())
-    .then(data => {
-      const opt0 = document.createElement('option');
-      opt0.value = "0";
-      let text = "Ei löytynyt";
-      if (data.length === 1) {
-        text = "Löytyi 1 kohde: ";
-      }
-      if (data.length > 1) {
-        text = "Löytyi " + data.length + " kohdetta: ";
-      }
-      opt0.text = text;
-      select.appendChild(opt0);
 
-      if (data.length > 0) {
-        // console.log('Löytyi useita tuloksia:', data.length);
-        data.forEach((item, i) => {
-          // console.log(`${i + 1}: ${item.display_name} — lat: ${item.lat}, lon: ${item.lon}`);
-          // noinspection JSUnresolvedReference
-          const pin = createPin([item.lat,item.lon], `s${i+1}`, 'violet', item.display_name);
-          searchPins.push(pin)
-          // noinspection JSUnresolvedReference
-          const opt = (i + 1) + ') ' + item.display_name;
-          const option = document.createElement('option');
-          option.value = "" + (i + 1);
-          option.text = opt;
-          select.appendChild(option);
-        });
-      }
-    })
-    .catch(err => console.error('Virhe:', err));
-}
 
-function search() {
+  let sending = false;
+
+  function sendPosition() {
+    // checkTimer("send",true);
+    // checkTimer("resend",true);
+    clearError();
+    // getLocation();
+    if (options.send) {
+      if (lastGPSCoord)
+        postPosition(lastGPSCoord);
+      else
+        navigator.geolocation.getCurrentPosition(postPosition, errorCallBack, geo_options);
+    }
+  }
+
+  //#endregion Cyclo server communication
+
+  //#region Geocoding
+  function isCoordinate(s) {
+    if (s === "") return false;
+    return "0123456789-".indexOf(s[0]) >= 0;
+  }
+
+  function geocodeQuery(query) {
+
+    const select = document.getElementById('searchCombo');
+    select.innerText = "";
+    toggleDiv("searchSpan", true);
+
+    if (isCoordinate(query)) {
+      const loc = getCoordinateFromText(query);
+      const pin = addPinAt(loc)
+      searchPins.push(pin);
+      // map.entities.push([pin]);
+      // map.setView({center: loc});
+      return;
+    }
+    fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json`)
+      .then(response => response.json())
+      .then(data => {
+        const opt0 = document.createElement('option');
+        opt0.value = "0";
+        let text = "Ei löytynyt";
+        if (data.length === 1) {
+          text = "Löytyi 1 kohde: ";
+        }
+        if (data.length > 1) {
+          text = "Löytyi " + data.length + " kohdetta: ";
+        }
+        opt0.text = text;
+        select.appendChild(opt0);
+
+        if (data.length > 0) {
+          // console.log('Löytyi useita tuloksia:', data.length);
+          data.forEach((item, i) => {
+            // console.log(`${i + 1}: ${item.display_name} — lat: ${item.lat}, lon: ${item.lon}`);
+            // noinspection JSUnresolvedReference
+            const pin = createPin([item.lat, item.lon], `s${i + 1}`, 'violet', item.display_name);
+            searchPins.push(pin)
+            // noinspection JSUnresolvedReference
+            const opt = (i + 1) + ') ' + item.display_name;
+            const option = document.createElement('option');
+            option.value = "" + (i + 1);
+            option.text = opt;
+            select.appendChild(option);
+          });
+        }
+      })
+      .catch(err => console.error('Virhe:', err));
+  }
+
+  function search() {
     //Remove any previous results from the map.
     clearSearchResults();
     //Get the users query and geocode it.
     const query = getPinInputText();
     geocodeQuery(query);
-}
-
-function getCoordinateFromText(s) {
-  // Etsitään koordinaatit tekstistä
-  const latLongArray = s.split(/[\s,]+/);
-  if (latLongArray.length < 2) return null;
-  const lat = parseFloat(latLongArray[0]);
-  const lng = parseFloat(latLongArray[1]);
-  if (isNaN(lat) || isNaN(lng)) return null;
-  return [lat, lng];
-}
-//#endregion Geocoding
-
-//#region Pin management
-
-let _lastSelected = null;
-
-Object.defineProperty(window, 'lastSelected', {
-  get() {
-    return _lastSelected;
-  },
-  set(pin) {
-    setLastSelected(pin);
   }
-});
 
-function setLastSelected(pin) {
-  _lastSelected = pin;
-  // Tee tässä mitä haluat, esim. loggaa tai muuta logiikkaa
-  const pinButtonsDiv = document.getElementById('pinButtons');
-  if (pin && pin !== myPin && pin !== hitPin) {
-    pinButtonsDiv.style.display = 'inline-block';
-  } else {
-    pinButtonsDiv.style.display = 'none';
+  function getCoordinateFromText(s) {
+    // Etsitään koordinaatit tekstistä
+    const latLongArray = s.split(/[\s,]+/);
+    if (latLongArray.length < 2) return null;
+    const lat = parseFloat(latLongArray[0]);
+    const lng = parseFloat(latLongArray[1]);
+    if (isNaN(lat) || isNaN(lng)) return null;
+    return [lat, lng];
   }
-}
 
-function removePin(pin = lastSelected) {
-  if (pin === myPin || pin === hitPin)  return;
-  if (pin === lastSelected) lastSelected = null;
-  mapWrapper.removePin(pin);
-}
+  //#endregion Geocoding
 
-function selectActivePin(pin, calcDist) {
-  changeSelected(pin, true);
-  mapWrapper.selectPin(pin, true);
-  if ( calcDist ) {
-    mapWrapper.setPinOn(pin, 'drag', calcDistance);
-    calcDistance();
+  //#region Pin management
+
+  let _lastSelected = null;
+
+  Object.defineProperty(window, 'lastSelected', {
+    get() {
+      return _lastSelected;
+    },
+    set(pin) {
+      setLastSelected(pin);
+    }
+  });
+
+  function setLastSelected(pin) {
+    _lastSelected = pin;
+    // Tee tässä mitä haluat, esim. loggaa tai muuta logiikkaa
+    const pinButtonsDiv = document.getElementById('pinButtons');
+    if (pin && pin !== myPin && pin !== hitPin) {
+      pinButtonsDiv.style.display = 'inline-block';
+    } else {
+      pinButtonsDiv.style.display = 'none';
+    }
   }
-}
 
-function getPinValues(pinLoc, defLoc=null, defLabel=null) {
-  if (!pinLoc) return [defLoc, defLabel];
-  let name = defLabel;
-  const latLongArray = pinLoc.split(/[\s,]+/);
-  let loc = getCoordinateFromText(pinLoc);
-  if (!loc) loc = defLoc;
-  if (latLongArray.length >= 3) name = latLongArray[2];
-  if ( name === undefined || name === "H" || name === "" )
-      name = defLabel;
-  return [loc, name];
-}
+  function removePin(pin = lastSelected) {
+    if (pin === myPin || pin === hitPin) return;
+    if (pin === lastSelected) lastSelected = null;
+    mapWrapper.removePin(pin);
+  }
 
+  function selectActivePin(pin, calcDist) {
+    changeSelected(pin, true);
+    mapWrapper.selectPin(pin, true);
+    if (calcDist) {
+      mapWrapper.setPinOn(pin, 'drag', calcDistance);
+      calcDistance();
+    }
+  }
 
-function addPinAt(pinLoc, label = null) {
-  /*
-  let loc = mapWrapper.getPinLocation(hitPin);
-  let name = "" + pinNr;
-  if (pinLoc) {
-    const latLongArray = (pinLoc).split(/[\s,]+/);
-    loc = getCoordinateFromText(pinLoc);
+  function getPinValues(pinLoc, defLoc = null, defLabel = null) {
+    if (!pinLoc) return [defLoc, defLabel];
+    let name = defLabel;
+    const latLongArray = pinLoc.split(/[\s,]+/);
+    let loc = getCoordinateFromText(pinLoc);
+    if (!loc) loc = defLoc;
     if (latLongArray.length >= 3) name = latLongArray[2];
-    if ( name === undefined || name === "H" || name === "" )
-      if (label) name = label; else name = ""+pinNr++;
+    if (name === undefined || name === "H" || name === "")
+      name = defLabel;
+    return [loc, name];
   }
-  else pinNr++;
-  */
-  let [loc, name] = getPinValues(pinLoc, mapWrapper.getPinLocation(hitPin), label);
-  if (!loc) return null;
-  if (!name) name = "" + pinNr++;
-
-  return createPin(loc, name, 'blue', null, options.flipPins);
-}
 
 
-function changePinData(pin = lastSelected, s = null) {
+  function addPinAt(pinLoc, label = null) {
+    /*
+    let loc = mapWrapper.getPinLocation(hitPin);
+    let name = "" + pinNr;
+    if (pinLoc) {
+      const latLongArray = (pinLoc).split(/[\s,]+/);
+      loc = getCoordinateFromText(pinLoc);
+      if (latLongArray.length >= 3) name = latLongArray[2];
+      if ( name === undefined || name === "H" || name === "" )
+        if (label) name = label; else name = ""+pinNr++;
+    }
+    else pinNr++;
+    */
+    let [loc, name] = getPinValues(pinLoc, mapWrapper.getPinLocation(hitPin), label);
+    if (!loc) return null;
+    if (!name) name = "" + pinNr++;
+
+    return createPin(loc, name, 'blue', null, options.flipPins);
+  }
+
+
+  function changePinData(pin = lastSelected, s = null) {
     if (pin === myPin || pin === hitPin) return;
     if (s == null) s = getPinInputText();
     if (isCoordinate(s)) {
@@ -1268,1200 +1360,1267 @@ function changePinData(pin = lastSelected, s = null) {
       if (loc) mapWrapper.setPinLocation(pin, loc);
       if (label) mapWrapper.setPinLabel(pin, label);
     } else {
-       mapWrapper.setPinLabel(pin, s);
+      mapWrapper.setPinLabel(pin, s);
     }
-}
+  }
 
 
+  function addPin() {
+    const s = getPinInputText();
+    if (s !== "" && !isCoordinate(s)) return search();
+    const pin = addPinAt(s);
+    mapWrapper.setPinDragging(pin, true);
+    if (options.selectNewPin) {
+      selectActivePin(pin, true);
+    }
+  }
 
-function addPin() {
-   const s = getPinInputText();
-   if ( s !== "" && !isCoordinate(s) ) return search();
-   const pin = addPinAt(s);
-   mapWrapper.setPinDragging(pin, true);
-   if (options.selectNewPin) {
-     selectActivePin(pin, true);
-   }
-}
 
+  function checkAddPinText() {
+    let text = "Lisää pinni";
+    if (window.innerWidth < 400) text = "Lisää";
+    const s = getPinInputText()
+    if (s !== "" && !isCoordinate(s)) text = "Etsi";
+    document.getElementById('buttonAddPin').innerText = text;
+  }
 
-function checkAddPinText() {
-   let text = "Lisää pinni";
-   if (window.innerWidth < 400) text = "Lisää";
-   const s = getPinInputText()
-   if ( s !== "" && !isCoordinate(s) ) text = "Etsi";
-   document.getElementById('buttonAddPin').innerText = text;
-}
+  function getPinInputText() {
+    let s = sanitizeInput(document.getElementById('editPinLoc').value.trim());
+    return s;
+  }
 
-function getPinInputText() {
-  let s = sanitizeInput(document.getElementById('editPinLoc').value.trim());
-  return s;
-}
-
-function setPinInputText(s) {
+  function setPinInputText(s) {
     document.getElementById('editPinLoc').value = s.trim();
     checkAddPinText();
-}
+  }
 
-function setHitPinLoc(loc, idx1 = -1000, idx2 = -1000) {
-  if (!hitPin) return;
-  mapWrapper.setPinLocation(hitPin, loc);
-  calcDistance(idx1, idx2);
-}
+  function setHitPinLoc(loc, idx1 = -1000, idx2 = -1000) {
+    if (!hitPin) return;
+    mapWrapper.setPinLocation(hitPin, loc);
+    calcDistance(idx1, idx2);
+  }
 
 
-function clearSearchResults() {
+  function clearSearchResults() {
     if (searchPins.length > 0) {
-        searchPins.forEach(pin => {
-            if (pin === lastSelected) lastSelected = null;
-            mapWrapper.removePin(pin);
-        });
-        searchPins = [];
+      searchPins.forEach(pin => {
+        if (pin === lastSelected) lastSelected = null;
+        mapWrapper.removePin(pin);
+      });
+      searchPins = [];
     }
     toggleDiv('searchSpan', false)
-}
-
-function displayLocPin(pin) {
-  if ( !pin ) return;
-  const pinLoc = mapWrapper.getPinLocation(pin);
-  const alt = pinLoc.altitude;
-  let alts = "";
-  if ( !(alt === undefined) ) alts = " " + (alt/3.280839895).toFixed(0) + " m";
-  setPinInputText(pinLoc[0].toFixed(5) + " " + pinLoc[1].toFixed(5) + " " + mapWrapper.getPinLabel(pin) + alts);
-  calcDistance(-1, -1);
-}
-
-function changeSelected(pin, selected=true) {
-  if (lastSelected === pin) { // Jos sama pin on jo valittu, poistetaan valinta
-    mapWrapper.selectPin(pin, false);
-    mapWrapper.setPinOn(lastSelected, 'drag', calcDistance, true);
-    window.lastSelected = null;
-    return;
   }
 
-  if (lastSelected) {
-    mapWrapper.selectPin(lastSelected, false);
-    mapWrapper.setPinOn(lastSelected, 'drag', calcDistance, true);
+  function displayLocPin(pin) {
+    if (!pin) return;
+    const pinLoc = mapWrapper.getPinLocation(pin);
+    const alt = pinLoc.altitude;
+    let alts = "";
+    if (!(alt === undefined)) alts = " " + (alt / 3.280839895).toFixed(0) + " m";
+    setPinInputText(pinLoc[0].toFixed(5) + " " + pinLoc[1].toFixed(5) + " " + mapWrapper.getPinLabel(pin) + alts);
+    calcDistance(-1, -1);
   }
-  lastSelected = pin;
-  if (pin)  {
-    mapWrapper.selectPin(pin, selected);
-  }
-  if (selected) {
-    mapWrapper.setPinOn(pin, 'drag', calcDistance);
-    displayLocPin(pin);
-  }
-}
 
-function createPin(coord, label, color, text = null, flip = false) {
-  return mapWrapper.createPin(coord, label, color, function(pin) {
-    changeSelected(pin);
-  }, text, flip);
-}
+  function changeSelected(pin, selected = true) {
+    if (lastSelected === pin) { // Jos sama pin on jo valittu, poistetaan valinta
+      mapWrapper.selectPin(pin, false);
+      mapWrapper.setPinOn(lastSelected, 'drag', calcDistance, true);
+      window.lastSelected = null;
+      return;
+    }
 
-const followPinList = {};
-const followPolylineList = {};
-
-function setPin(line) {
-  line = line.trim();
-  if ( line === "" ) return;
-  if ( line[0] !== 'D' )  return setError(line);
-  const parts = line.split(":");
-  const n = parts[1].split("=");
-  const name = n[0];
-  const d = n[1].split(",");
-  const latVal = parseFloat(d[0]);
-  const longVal = normalizeLongitude(parseFloat(d[1]));
-  const alt = parseFloat(d[3]);
-  const newLoc = [latVal, longVal, alt];
-  newLoc.altitude = alt;
-  let pin;
-  let pline;
-  if ( name in followPinList ) {
-    pin = followPinList[name];
-    pline = followPolylineList[name];
-    const len = pline.points.length;
-    if (len !== 0) {
-      const prevLoc = pline.points[len - 1];
-      const same = prevLoc[0] === newLoc[0] && prevLoc[1] === newLoc[1];
-      if (!same) {
-        if (options.drawLogLine) mapWrapper.addPolylinePoint(pline, newLoc);
-        // else pline.getLocations().length = 0;
-        mapWrapper.setPinLocation(pin, newLoc);
-        // if (lineVertices.length % 1 === 0) // To let it draw also with big zoom factors
-        //   pline.setLocations(lineVertices);
-      }
+    if (lastSelected) {
+      mapWrapper.selectPin(lastSelected, false);
+      mapWrapper.setPinOn(lastSelected, 'drag', calcDistance, true);
+    }
+    lastSelected = pin;
+    if (pin) {
+      mapWrapper.selectPin(pin, selected);
+    }
+    if (selected) {
+      mapWrapper.setPinOn(pin, 'drag', calcDistance);
+      displayLocPin(pin);
     }
   }
-  else {
-    // var pinInfobox = new Microsoft.Maps.Infobox(center, {title: name, visible: false});
-    pin = mapWrapper.createPin(newLoc, name, 'green ', function(pin) {
+
+  function createPin(coord, label, color, text = null, flip = false) {
+    return mapWrapper.createPin(coord, label, color, function (pin) {
       changeSelected(pin);
-    }, null, false);
-    pline = mapWrapper.createPolyline({color: 'green', weight: 2, opacity: 0.7});
-    if (options.drawLogLine)  mapWrapper.addPolylinePoint(pline, newLoc);
-    followPinList[name] = pin;
-    followPolylineList[name] = pline;
-    // map.entities.push(pinInfobox);
-  }
-  if ( pin === lastSelected ) mapWrapper.setView(newLoc);
-}
-
-
-function setPins(data) {
-  const lines = data.split("\n");
-  for (let i=0; i <lines.length; i++)
-     setPin(lines[i]);
-}
-//#endregion Pin management
-
-//#region Error handling
-function setErrorGen(name, s) {
-  const e = document.getElementById(name);
-  e.innerHTML += " " + s;
-  return s;
-}
-
-
-function clearErrorGen(name) {
-  const e = document.getElementById(name);
-  e.innerHTML = "";
-	return "";
-}
-
-//function setMessage(s) { return setErrorGen('searchMsg', s); }
-function setError(s) { return setErrorGen('errorMsg', s); }
-// function setErrorTrack(s) { return setErrorGen('errorMsgTrack', s); }
-// function setErrorRoute(s) { return setErrorGen('errorMsgRoute', s); }
-
-//function clearMessage() { return clearErrorGen('searchMsg'); }
-function clearError() { return clearErrorGen('errorMsg'); }
-// function clearErrorTrack() { return clearErrorGen('errorMsgTrack'); }
-// function clearErrorRoute() { return clearErrorGen('errorMsgRoute'); }
-//#endregion Error handling
-
-//#region Geolocation
-function errorCallBack() {
-    setError("getLocation error");
-}
-
-let lastGPSCoord;
-
-const geo_options = {
-  enableHighAccuracy: true,
-  maximumAge: 500,
-  timeout: 27000
-};
-
-let watcher = null;
-
-function getGeoLocation() {
-    if ( watcher ) return;
-    if (navigator.geolocation) {
-        watcher = navigator.geolocation.watchPosition(displayCurrentPosition, errorCallBack, geo_options);
-    } else {
-        setError("Geolocation is not supported by this browser.");
-    }
-}
-
-
-function startGeoLocation(enable) {
-   if ( watcher ) navigator.geolocation.clearWatch(watcher);
-   watcher = null;
-   if ( enable ) getGeoLocation();
-}
-
-
-function checkGeoLocation() {
-    startGeoLocation(document.getElementById("readGPS").checked);
-}
-
-let myPolyline = null;
-
-function displayCurrentPosition(position) {
-  if ( !position || !position.coords ) return;
-  lastGPSCoord = position;
-  const lat = position.coords.latitude;
-  const lng = position.coords.longitude;
-  const loc = [lat, lng];
-  if (options.useComps) {
-      setGeoCompsValues(position);
+    }, text, flip);
   }
 
-  if (myPin) {
-    mapWrapper.setPinLocation(myPin, loc);
-  } else {
-    myPin = createPin(loc, 'I', 'green', "Olet tässä");
-    // jos URLissa ei ole tullut paikkaa, käytä
-    if (!params.lat) mapWrapper.setView(loc);
-  }
-  if (options.followMe) {
-    if (!myPolyline) {
-      myPolyline = mapWrapper.createPolyline({color: options.followMeColor, weight: options.followMeWidth, opacity: 1});
-    }
-    mapWrapper.addPolylinePoint(myPolyline, loc);
-  }
-  if ( options.send ) postPosition(position);
-  // mapWrapper.setView(loc);
-}
+  const followPinList = {};
+  const followPolylineList = {};
 
-// noinspection JSUnusedGlobalSymbols
-function simulateGPS() {
-  for (let i = 0; i < 10; i++) {
-    const lat = 62.25 + (Math.random() - 0.5) * 0.1;
-    const lng = 25.75 + (Math.random() - 0.5) * 0.1;
-    const coords = {
-      latitude: lat,
-      longitude: lng,
-      altitude: 100 + Math.random() * 50,
-      accuracy: 5 + Math.random() * 5,
-      altitudeAccuracy: 10 + Math.random() * 10,
-      heading: Math.random() * 360,
-      speed: Math.random() * 10
-    };
-    const position = {
-      coords: coords,
-      timestamp: Date.now()
-    };
-    displayCurrentPosition(position);
-  }
-}
-
-
-//#endregion Geolocation
-
-//#region LocalStorage and URL parameters
-function getValueFromParamsOrStrore(name, def) {
-  const candidates = [params[name], localStorage[name]];
-  for (const val of candidates) {
-    if (val !== undefined && val !== null && val !== "undefined" && val !== "") {
-      return Number(val);
-    }
-  }
-  return def;
-}
-
-function getStringFromParamsOrStrore(name, def) {
-  const candidates = [params[name], localStorage[name]];
-  for (const val of candidates) {
-    if (val !== undefined && val !== null && val !== "undefined" && val !== "") {
-      return val;
-    }
-  }
-  return def;
-}
-
-//#endregion LocalStorage and URL parameters
-
-//#region Initialization
-function showVersion() {
-  const manifestLink = document.getElementById('manifest-link');
-  const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.19"
-
-  // Parsitaan query-parametri
-  const url = new URL(href, window.location.href);
-  const version = url.searchParams.get('v') || "n/a";
-
-  // Näytetään Asetukset-kohtaan
-  document.getElementById('version-display').textContent = version;
-}
-
-function initializeMapPage() {
-  showVersion()
-  checkSavedValues();
-  createCompsSettings();
-
-  const pzoom = parseInt(getValueFromParamsOrStrore("zoom", 8));
-  const lat = getValueFromParamsOrStrore("lat", 62.25); // params["lat"] || localStorage.lat || 62.25;
-  const lon = getValueFromParamsOrStrore("lon", 25.75); // params["lon"] || localStorage.lon || 25.75;
-  const mapName = getStringFromParamsOrStrore("mapName", "OpenStreet");
-  localStorage.lat = lat;
-  localStorage.lon = lon;
-  localStorage.zoom = pzoom;
-  localStorage.mapName = mapName;
-
-  mapWrapper = new MapWrapper('map', mapModes, options.useCache);
-  mapWrapper.setZoomButtons(options.showZoomButtons);
-  // Täytetään select-valikko
-  const mapSelect = document.getElementById('mapModeSelect');
-  for (const key in mapModes) {
-    const option = document.createElement('option');
-    option.value = key;
-    option.textContent = key;
-    mapSelect.appendChild(option);
-  }
-
-  // Alustetaan valinta ja kartta
-  mapSelect.value = mapName;
-  mapWrapper.setMapMode(mapSelect.value);
-  mapWrapper.setView([lat, lon], pzoom);
-
-  // Kuunnellaan valikon muutosta
-  mapSelect.addEventListener('change', (e) => {
-    const mapName = e.target.value;
-    mapWrapper.setMapMode(mapName);
-    localStorage.mapName = mapName;
-  });
-
-  checkGeoLocation();
-
-  async function getElevation(loc) {
-  // Hae korkeus OpenTopoDatasta
-    const url = cycloServerUrl + `/index.php?elev=${loc[0]},${loc[1]}`;
-    let elevation = ''
-
-    try {
-      const response = await fetch(url);
-      const data = await response.text();
-      const ndata = Number(data);
-
-      if (!isNaN(ndata)) {
-        elevation = ndata.toFixed(0) + " m";
-        // console.log("Korkeus:", elevation);
-
-        // Päivitä pinin teksti näyttämään korkeus (pyöristetty)
-        // hitPin.setIcon(customPin(`${Math.round(elevation)}m`, 'red', 'black'));
-      }
-    } catch (err) {
-      // console.error("Korkeuden haku epäonnistui:", err);
-    }
-    return elevation;
-  }
-
-
-  mapWrapper.on('click', async (e) => {
-    closeNav();
-    if (e.originalEvent && e.originalEvent.target.id === 'mapModeSelect') return;
-    const { lat, lng } = e.latlng;
-    const loc = [lat, lng];
-    if (!hitPin) {
-      // Luo hitPin ensimmäisellä klikkauksella
-      hitPin = mapWrapper.createPin(loc, 'H', 'red', function() {
-        lastHitPoint = mapWrapper.getPinLocation(hitPin);
-        calcDistance();
-        // setPinText(`${lastHitPoint[0].toFixed(5)} ${lastHitPoint[1].toFixed(5)} Hi`);
-        // calcDistance();
-        // lastHitPoint = mapWrapper.getPinLocation(hitPin);
-      }, null, options.flipPins);
-      mapWrapper.setPinDragging(hitPin, true);
-      mapWrapper.setPinOn(hitPin, 'dragend', function() {
-        // Kun hitPin on siirretty, päivitetään sen sijainti
-        calcDistance(-1, -1);
-        lastHitPoint = mapWrapper.getPinLocation(hitPin);
-        if (options.HCenter2 && options.HStationary) {
-          // preventMapMove = true;
-          mapWrapper.setView(lastHitPoint);
+  function setPin(line) {
+    line = line.trim();
+    if (line === "") return;
+    if (line[0] !== 'D') return setError(line);
+    const parts = line.split(":");
+    const n = parts[1].split("=");
+    const name = n[0];
+    const d = n[1].split(",");
+    const latVal = parseFloat(d[0]);
+    const longVal = normalizeLongitude(parseFloat(d[1]));
+    const alt = parseFloat(d[3]);
+    const newLoc = [latVal, longVal, alt];
+    newLoc.altitude = alt;
+    let pin;
+    let pline;
+    if (name in followPinList) {
+      pin = followPinList[name];
+      pline = followPolylineList[name];
+      const len = pline.points.length;
+      if (len !== 0) {
+        const prevLoc = pline.points[len - 1];
+        const same = prevLoc[0] === newLoc[0] && prevLoc[1] === newLoc[1];
+        if (!same) {
+          if (options.drawLogLine) mapWrapper.addPolylinePoint(pline, newLoc);
+          // else pline.getLocations().length = 0;
+          mapWrapper.setPinLocation(pin, newLoc);
+          // if (lineVertices.length % 1 === 0) // To let it draw also with big zoom factors
+          //   pline.setLocations(lineVertices);
         }
-        hitPinXY = mapWrapper.getCoordXY(lastHitPoint);
-      });
-      mapWrapper.setPinOn(hitPin, 'drag', function() {
-        // Kun hitPin on siirretty, päivitetään sen sijainti
-        const loc = mapWrapper.getPinLocation(hitPin);
-        setPinInputText(`${loc[0].toFixed(5)} ${loc[1].toFixed(5)} H`);
-        calcDistance(-1, -1);
-      });
-      mapWrapper.setPinOn(hitPin, 'drag', function() {
-        // Kun hitPin on siirretty, päivitetään sen sijainti
-        const loc = mapWrapper.getPinLocation(hitPin);
-        setPinInputText(`${loc[0].toFixed(5)} ${loc[1].toFixed(5)} H`);
-        calcDistance(-1, -1);
-      });
-    } else
-    // Siirrä olemassa olevaa hitPiniä uuteen paikkaan
-    if (distanceLines.length > 0) {
-      lastHitPoint = distanceLines[distanceLines.length - 1].to;
+      }
+    } else {
+      // var pinInfobox = new Microsoft.Maps.Infobox(center, {title: name, visible: false});
+      pin = mapWrapper.createPin(newLoc, name, 'green ', function (pin) {
+        changeSelected(pin);
+      }, null, false);
+      pline = mapWrapper.createPolyline({color: 'green', weight: 2, opacity: 0.7});
+      if (options.drawLogLine) mapWrapper.addPolylinePoint(pline, newLoc);
+      followPinList[name] = pin;
+      followPolylineList[name] = pline;
+      // map.entities.push(pinInfobox);
     }
-    mapWrapper.setPinLocation(hitPin, loc);
-    setHitPinLoc(loc);
-    hitPinXY = mapWrapper.getCoordXY(mapWrapper.getPinLocation(hitPin));
-    lastHitPoint = loc;
+    if (pin === lastSelected) mapWrapper.setView(newLoc);
+  }
 
-    const elevation = await getElevation(loc);
 
-    setPinInputText(`${lat.toFixed(5)} ${lng.toFixed(5)} H ${elevation}`);
-    if (options.HCenter2 && options.HStationary) {
-      mapWrapper.setView(loc);
+  function setPins(data) {
+    const lines = data.split("\n");
+    for (let i = 0; i < lines.length; i++)
+      setPin(lines[i]);
+  }
+
+  //#endregion Pin management
+
+  //#region Error handling
+  function setErrorGen(name, s) {
+    const e = document.getElementById(name);
+    e.innerHTML += " " + s;
+    return s;
+  }
+
+
+  function clearErrorGen(name) {
+    const e = document.getElementById(name);
+    e.innerHTML = "";
+    return "";
+  }
+
+  //function setMessage(s) { return setErrorGen('searchMsg', s); }
+  function setError(s) {
+    return setErrorGen('errorMsg', s);
+  }
+
+  // function setErrorTrack(s) { return setErrorGen('errorMsgTrack', s); }
+  // function setErrorRoute(s) { return setErrorGen('errorMsgRoute', s); }
+
+  //function clearMessage() { return clearErrorGen('searchMsg'); }
+  function clearError() {
+    return clearErrorGen('errorMsg');
+  }
+
+  // function clearErrorTrack() { return clearErrorGen('errorMsgTrack'); }
+  // function clearErrorRoute() { return clearErrorGen('errorMsgRoute'); }
+  //#endregion Error handling
+
+  //#region Geolocation
+  function errorCallBack() {
+    setError("getLocation error");
+  }
+
+  let lastGPSCoord;
+
+  const geo_options = {
+    enableHighAccuracy: true,
+    maximumAge: 500,
+    timeout: 27000
+  };
+
+  let watcher = null;
+
+  function getGeoLocation() {
+    if (watcher) return;
+    if (navigator.geolocation) {
+      watcher = navigator.geolocation.watchPosition(displayCurrentPosition, errorCallBack, geo_options);
+    } else {
+      setError("Geolocation is not supported by this browser.");
     }
-    // simulateGPS();
-  });  // mapWarpper.on  click end
+  }
 
-  mapWrapper.on('move', mapMove);
 
-  mapWrapper.map.on('zoomend', function() {
-    const zoom = mapWrapper.getZoom();
-    localStorage.zoom = zoom;
-  });
+  function startGeoLocation(enable) {
+    if (watcher) navigator.geolocation.clearWatch(watcher);
+    watcher = null;
+    if (enable) getGeoLocation();
+  }
 
-  prefixHelpLinks();
 
-  if ( options.id !== "" )
-	  toggleDiv("accountArea", false);
-	else
-	  toggleDiv("followArea", false);
+  function checkGeoLocation() {
+    startGeoLocation(document.getElementById("readGPS").checked);
+  }
 
-  document.getElementById('searchCombo').addEventListener('change', function() {
-    const idx = this.selectedIndex-1; // first is number of items found
-    if (idx >= 0 && idx < searchPins.length) {
-      const pin = searchPins[idx];
-      mapWrapper.setView(mapWrapper.getPinLocation(pin));
-      changeSelected(pin, true);
+  let myPolyline = null;
+
+  function displayCurrentPosition(position) {
+    if (!position || !position.coords) return;
+    lastGPSCoord = position;
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+    const loc = [lat, lng];
+    if (options.useComps) {
+      setGeoCompsValues(position);
     }
-  });
 
-  readComponents();
-  checkShowComponents();
-  adjustComponents();
+    if (myPin) {
+      mapWrapper.setPinLocation(myPin, loc);
+    } else {
+      myPin = createPin(loc, 'I', 'green', "Olet tässä");
+      // jos URLissa ei ole tullut paikkaa, käytä
+      if (!params.lat) mapWrapper.setView(loc);
+    }
+    if (options.followMe) {
+      if (!myPolyline) {
+        myPolyline = mapWrapper.createPolyline({
+          color: options.followMeColor,
+          weight: options.followMeWidth,
+          opacity: 1
+        });
+      }
+      mapWrapper.addPolylinePoint(myPolyline, loc);
+    }
+    if (options.send) postPosition(position);
+    // mapWrapper.setView(loc);
+  }
+
+  // noinspection JSUnusedGlobalSymbols
+  function simulateGPS() {
+    for (let i = 0; i < 10; i++) {
+      const lat = 62.25 + (Math.random() - 0.5) * 0.1;
+      const lng = 25.75 + (Math.random() - 0.5) * 0.1;
+      const coords = {
+        latitude: lat,
+        longitude: lng,
+        altitude: 100 + Math.random() * 50,
+        accuracy: 5 + Math.random() * 5,
+        altitudeAccuracy: 10 + Math.random() * 10,
+        heading: Math.random() * 360,
+        speed: Math.random() * 10
+      };
+      const position = {
+        coords: coords,
+        timestamp: Date.now()
+      };
+      displayCurrentPosition(position);
+    }
+  }
+
+
+  //#endregion Geolocation
+
+  //#region LocalStorage and URL parameters
+  function getValueFromParamsOrStrore(name, def) {
+    const candidates = [params[name], localStorage[name]];
+    for (const val of candidates) {
+      if (val !== undefined && val !== null && val !== "undefined" && val !== "") {
+        return Number(val);
+      }
+    }
+    return def;
+  }
+
+  function getStringFromParamsOrStrore(name, def) {
+    const candidates = [params[name], localStorage[name]];
+    for (const val of candidates) {
+      if (val !== undefined && val !== null && val !== "undefined" && val !== "") {
+        return val;
+      }
+    }
+    return def;
+  }
+
+  //#endregion LocalStorage and URL parameters
+
+  //#region Initialization
+  function showVersion() {
+    const manifestLink = document.getElementById('manifest-link');
+    const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.20"
+
+    // Parsitaan query-parametri
+    const url = new URL(href, window.location.href);
+    const version = url.searchParams.get('v') || "n/a";
+
+    // Näytetään Asetukset-kohtaan
+    document.getElementById('version-display').textContent = version;
+  }
+
+  function initializeMapPage() {
+    showVersion()
+    checkSavedValues();
+    createCompsSettings();
+
+    const pzoom = parseInt(getValueFromParamsOrStrore("zoom", 8));
+    const lat = getValueFromParamsOrStrore("lat", 62.25); // params["lat"] || localStorage.lat || 62.25;
+    const lon = getValueFromParamsOrStrore("lon", 25.75); // params["lon"] || localStorage.lon || 25.75;
+    const mapName = getStringFromParamsOrStrore("mapName", "OpenStreet");
+    localStorage.lat = lat;
+    localStorage.lon = lon;
+    localStorage.zoom = pzoom;
+    localStorage.mapName = mapName;
+
+    mapWrapper = new MapWrapper('map', mapModes, options.useCache);
+    mapWrapper.setZoomButtons(options.showZoomButtons);
+    // Täytetään select-valikko
+    const mapSelect = document.getElementById('mapModeSelect');
+    for (const key in mapModes) {
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = key;
+      mapSelect.appendChild(option);
+    }
+
+    // Alustetaan valinta ja kartta
+    mapSelect.value = mapName;
+    mapWrapper.setMapMode(mapSelect.value);
+    mapWrapper.setView([lat, lon], pzoom);
+
+    // Kuunnellaan valikon muutosta
+    mapSelect.addEventListener('change', (e) => {
+      const mapName = e.target.value;
+      mapWrapper.setMapMode(mapName);
+      localStorage.mapName = mapName;
+    });
+
+    checkGeoLocation();
+
+    async function getElevation(loc) {
+      // Hae korkeus OpenTopoDatasta
+      const url = cycloServerUrl + `/index.php?elev=${loc[0]},${loc[1]}`;
+      let elevation = ''
+
+      try {
+        const response = await fetch(url);
+        const data = await response.text();
+        const ndata = Number(data);
+
+        if (!isNaN(ndata)) {
+          elevation = ndata.toFixed(0) + " m";
+          // console.log("Korkeus:", elevation);
+
+          // Päivitä pinin teksti näyttämään korkeus (pyöristetty)
+          // hitPin.setIcon(customPin(`${Math.round(elevation)}m`, 'red', 'black'));
+        }
+      } catch (err) {
+        // console.error("Korkeuden haku epäonnistui:", err);
+      }
+      return elevation;
+    }
+
+
+    mapWrapper.on('click', async (e) => {
+      closeNav();
+      if (e.originalEvent && e.originalEvent.target.id === 'mapModeSelect') return;
+      const {lat, lng} = e.latlng;
+      const loc = [lat, lng];
+      if (!hitPin) {
+        // Luo hitPin ensimmäisellä klikkauksella
+        hitPin = mapWrapper.createPin(loc, 'H', 'red', function () {
+          lastHitPoint = mapWrapper.getPinLocation(hitPin);
+          calcDistance();
+          // setPinText(`${lastHitPoint[0].toFixed(5)} ${lastHitPoint[1].toFixed(5)} Hi`);
+          // calcDistance();
+          // lastHitPoint = mapWrapper.getPinLocation(hitPin);
+        }, null, options.flipPins);
+        mapWrapper.setPinDragging(hitPin, true);
+        mapWrapper.setPinOn(hitPin, 'dragend', function () {
+          // Kun hitPin on siirretty, päivitetään sen sijainti
+          calcDistance(-1, -1);
+          lastHitPoint = mapWrapper.getPinLocation(hitPin);
+          if (options.HCenter2 && options.HStationary) {
+            // preventMapMove = true;
+            mapWrapper.setView(lastHitPoint);
+          }
+          hitPinXY = mapWrapper.getCoordXY(lastHitPoint);
+        });
+        mapWrapper.setPinOn(hitPin, 'drag', function () {
+          // Kun hitPin on siirretty, päivitetään sen sijainti
+          const loc = mapWrapper.getPinLocation(hitPin);
+          setPinInputText(`${loc[0].toFixed(5)} ${loc[1].toFixed(5)} H`);
+          calcDistance(-1, -1);
+        });
+        mapWrapper.setPinOn(hitPin, 'drag', function () {
+          // Kun hitPin on siirretty, päivitetään sen sijainti
+          const loc = mapWrapper.getPinLocation(hitPin);
+          setPinInputText(`${loc[0].toFixed(5)} ${loc[1].toFixed(5)} H`);
+          calcDistance(-1, -1);
+        });
+      } else
+        // Siirrä olemassa olevaa hitPiniä uuteen paikkaan
+      if (distanceLines.length > 0) {
+        lastHitPoint = distanceLines[distanceLines.length - 1].to;
+      }
+      mapWrapper.setPinLocation(hitPin, loc);
+      setHitPinLoc(loc);
+      hitPinXY = mapWrapper.getCoordXY(mapWrapper.getPinLocation(hitPin));
+      lastHitPoint = loc;
+
+      const elevation = await getElevation(loc);
+
+      setPinInputText(`${lat.toFixed(5)} ${lng.toFixed(5)} H ${elevation}`);
+      if (options.HCenter2 && options.HStationary) {
+        mapWrapper.setView(loc);
+      }
+      // simulateGPS();
+    });  // mapWarpper.on  click end
+
+    mapWrapper.on('move', mapMove);
+
+    mapWrapper.map.on('zoomend', function () {
+      const zoom = mapWrapper.getZoom();
+      localStorage.zoom = zoom;
+    });
+
+    prefixHelpLinks();
+
+    if (options.id !== "")
+      toggleDiv("accountArea", false);
+    else
+      toggleDiv("followArea", false);
+
+    document.getElementById('searchCombo').addEventListener('change', function () {
+      const idx = this.selectedIndex - 1; // first is number of items found
+      if (idx >= 0 && idx < searchPins.length) {
+        const pin = searchPins[idx];
+        mapWrapper.setView(mapWrapper.getPinLocation(pin));
+        changeSelected(pin, true);
+      }
+    });
+
+    readComponents();
+    checkShowComponents();
+    adjustComponents();
 
 //if ('serviceWorker' in navigator) {
 //  navigator.serviceWorker.register('sw.js');
 //}
-  const opens = params["open"] || "";
+    const opens = params["open"] || "";
 
-  if ( opens ) {
-    const ops = opens.split(",");
-    for (let i in ops) {
-            openDiv(ops[i].trim());
-    }
-  }
-
-
-} // initializeMapPage ends
-
-//#endregion Initialization
-
-
-function closeParent(element) {
-  if (element.parentElement) {
-    element.parentElement.style.display = 'none';
-  }
-}
-
-let mySidenavElem = null;
-let menuElem = null;
-
-function checkMenuElements() {
-  if (menuElem === null) {
-    menuElem = document.getElementById("menu");
-    mySidenavElem = document.getElementById("mySidenav");
-  }
-}
-
-function isMenuOpen() {
-  checkMenuElements()
-  let s = menuElem.style;
-  return s.visibility === "visible";
-}
-
-function openNav() {
-  if ( isMenuOpen() ) { closeNav(); return; }
-  let s = menuElem.style;
-  // s.width = "300px";
-  // s.height = "350px";
-  s.visibility = "visible";
-  s = mySidenavElem.style;
-  s.visibility = "visible";
-}
-
-
-function closeNav() {
-  checkMenuElements()
-  let s = mySidenavElem.style;
-  s.visibility = "hidden";
-  s = menuElem.style;
-  s.visibility = "hidden";
-}
-
-function toggleDiv(divId, force = null) {
-  const div = document.getElementById(divId);
-  let show = div.style.display !== 'block';
-  if (force !== null) {
-    show = force;
-  }
-  if (show) {
-    div.style.display = 'block';
-    div.style.visibility = 'visible';
-  } else {
-    div.style.display = 'none';
-    div.style.visibility = 'hidden';
-  }
-}
-
-
-function findMyPlace() {
-  if (!myPin) return;
-  // Siirretään kartta käyttäjän sijaintiin
-  const center = mapWrapper.getPinLocation(myPin);
-  mapWrapper.setView(center);
-}
-
-function toggleFullscreen() {
-  const elem = document.documentElement; // Käytetään koko sivua
-
-  // noinspection JSUnresolvedReference
-  if (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
-    // Poistetaan fullscreen-tila
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else { // noinspection JSUnresolvedReference
-      if (document.mozCancelFullScreen) { // Firefox
-            document.mozCancelFullScreen();
-      } else { // noinspection JSUnresolvedReference
-        if (document.webkitExitFullscreen) { // Chrome, Safari ja Opera
-                    document.webkitExitFullscreen();
-              } else { // noinspection JSUnresolvedReference
-          if (document.msExitFullscreen) { // IE/Edge
-                              document.msExitFullscreen();
-                        }
-        }
+    if (opens) {
+      const ops = opens.split(",");
+      for (let i in ops) {
+        openDiv(ops[i].trim());
       }
     }
-  } else {
-    openFullscreen(elem);
-  }
-}
 
-function openFullscreen(elem) {
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen();
-  } else { // noinspection JSUnresolvedReference
-    if (elem.mozRequestFullScreen) { // Firefox
-        elem.mozRequestFullScreen();
-      } else { // noinspection JSUnresolvedReference
-      if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
-              elem.webkitRequestFullscreen();
-            } else { // noinspection JSUnresolvedReference
-        if (elem.msRequestFullscreen) { // IE/Edge
-                      elem.msRequestFullscreen();
-                    }
-      }
+
+  } // initializeMapPage ends
+
+  //#endregion Initialization
+
+
+  function closeParent(element) {
+    if (element.parentElement) {
+      element.parentElement.style.display = 'none';
     }
   }
-}
 
+  let mySidenavElem = null;
+  let menuElem = null;
 
-window.addEventListener('DOMContentLoaded', initializeMapPage)
-
-function setOption(name,value) {
-  options[name] = value;
-  localStorage.setItem(name,value);
-}
-
-
-function setOptionInt(name,value,def) {
-  const val = parseInt(value) || def;
-  options[name] = val;
-  localStorage.setItem(name, ""+val);
-}
-
-
-function getOptionValue(name) {
-  return localStorage[name];
-}
-
-
-function getOption(name,editName) {
-  if ( !editName ) editName = name;
-  const edit = document.getElementById(editName);
-  if (!edit) return;
-  options[name] = params[name] || localStorage.getItem(name) || "";
-	if (options[name] !== "")
-	  edit.value = options[name]; //document.getElementById(edit).value = options[name];
-	// noinspection JSUnusedLocalSymbols
-  edit.addEventListener("change", function(event) {
-    setOption(name, this.value);
-  });
-  setOption(name,edit.value);
-}
-
-
-function getOptionInt(name,editName, def) {
-  const edit = document.getElementById(editName);
-  if (!edit) return;
-  const val = parseInt(localStorage.getItem(name)) || def;
-  options[name] = params[name] || val || def;
-  if (options[name] !== "")
-    edit.vallue = options[name];
-  // noinspection JSUnusedLocalSymbols
-  edit.addEventListener("change", function(event) {
-    setOptionInt(name,this.value, def);
-  });
-  setOptionInt(name,edit.value,def);
-}
-
-
-function getBoolean(s) {
-   if (typeof(s) === typeof true) return s;
-   if ( s === '1') return true;
-   s = s.toUpperCase();
-   if ( s === "TRUE") return true;
-   return s === "YES";
-
-}
-
-
-function setCBOption(name,value) {
-  if ( value === undefined ) return;
-  value = getBoolean(value);
-  options[name] = value;
-  localStorage.setItem(name,value);
-}
-
-
-function getCBOption(name,f) {
-  const cb = document.getElementById(name);
-  if (!cb)
-    return;
-  let value = params[name];
-  if ( value === undefined ) value = getBoolean(localStorage.getItem(name) || options[name] || false);
-  else value = getBoolean(value);
-  options[name]= value;
-  if (options[name]) {
-     cb.checked = true;
-     options[name] = true; // ??? ei kai tarviisi
-  } else options[name] = false;
-
-  // noinspection JSUnusedLocalSymbols
-  cb.addEventListener("click", function(event) {
-    setCBOption(name, this.checked);
-    if (typeof f !== "undefined") f(this.checked);
-  });
-  setCBOption(name,cb.checked);
-}
-
-function changeRaportView() {
-  // TODO: korjaa raportin näkymä
-  /*
-  const sb = document.getElementById("editRaport").style;
-  const ss = document.getElementById("editSmallRaport").style;
-  if ( options.smallRaport ) {
-  //      closeDiv("editRaport");
-  //      openDiv("editSmallRaport");
-    sb.height = "0px";
-    sb.visibility = "hidden";
-    ss.height = "auto";
-    ss.visibility = "inherit";
-  } else {
-    //      openDiv("editRaport");
-    //      closeDiv("editSmallRaport");
-    ss.height = "0px";
-    ss.visibility = "hidden";
-    sb.height = "auto";
-    sb.visibility = "inherit";
+  function checkMenuElements() {
+    if (menuElem === null) {
+      menuElem = document.getElementById("menu");
+      mySidenavElem = document.getElementById("mySidenav");
+    }
   }
-  */
-}
 
-
-  // Ks: https://github.com/richtr/NoSleep.js/blob/master/src/index.js
-// The wake lock sentinel.
-if ('wakeLock' in navigator) { options.hasWakeLock = true; }
-let wakeLock = null;
-
-// Function that attempts to request a screen wake lock.
-// async // IE11 does not like async, but we manage without it using then and teh fact that this is never called in ie
-function requestWakeLock()  {
-  // alert('Start Wake Lock 2');
-  endWakeLock();
-  if (document.visibilityState === "hidden") return;
-  try {
-    // noinspection JSUnresolvedVariable
-    // wakeLock = await navigator.wakeLock.request('screen'); // does not work on ie
-    // wakeLock.addEventListener('release', function() {/* alert('Screen Wake Lock was released'); */ });
-    // alert('Screen Wake Lock is active');
-    navigator.wakeLock.request('screen').then(function(wl) {
-      wakeLock = wl;
-      wakeLock.addEventListener('release', function() {
-        // alert('Screen Wake Lock was released'); */
-        });
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      // alert('Screen Wake Lock is active');
-    });
-  } catch (err) {
-    alert(err.name + err.message);
+  function isMenuOpen() {
+    checkMenuElements()
+    let s = menuElem.style;
+    return s.visibility === "visible";
   }
-}
 
-if ('wakeLock' in navigator) {
-  options.hasWakeLock = true;
-}
-
-function handleVisibilityChange() {
-  if (wakeLock !== null && document.visibilityState === 'visible') {
-    requestWakeLock();
+  function openNav() {
+    if (isMenuOpen()) {
+      closeNav();
+      return;
+    }
+    let s = menuElem.style;
+    // s.width = "300px";
+    // s.height = "350px";
+    s.visibility = "visible";
+    s = mySidenavElem.style;
+    s.visibility = "visible";
   }
-}
 
 
-function startWakeLock() {
-  // alert('Start Wake Lock 1');
-	requestWakeLock();
-}
-
-
-
-function endWakeLock() {
-   if ( !wakeLock ) return;
-   wakeLock.release();
-   document.removeEventListener('visibilitychange', handleVisibilityChange);
-   wakeLock = null;
-   // alert('Wake Lock released');
-}
-
-
-function checkSleep() {
-   if ( options.preventSleep && options.hasWakeLock ) { startWakeLock(); }
-   if ( !options.preventSleep ) { endWakeLock(); }
-}
-
-
-function removeDistance() {
-    mapWrapper.removeLines(distanceLines);
-    lastHitPoint = mapWrapper.getPinLocation(hitPin);
-}
-
-function checkSavedValues() {
-  if ( !options.hasWakeLock ) {
-    const s = document.getElementById("preventSleepSpan").style;
+  function closeNav() {
+    checkMenuElements()
+    let s = mySidenavElem.style;
+    s.visibility = "hidden";
+    s = menuElem.style;
     s.visibility = "hidden";
   }
 
-  getOption("followMeColor","editFollowMeColor");
-  getOptionInt("followMeWidth","editFollowMeWidth", 3);
-
-  getOption("email","editEmail");
-  getOption("id","editId");
-  getOption("usersTofollow","editUsersTofollow");
-  getOption("to","editTo");
-  getOption("from","editFrom");
-  getOption("tpR","editTPR");
-  getOption("hereApiKey");
-
-  getOption("tag","editTag");
-  getOption("logname","editLog");
-  getOption("interval","editInterval");
-  getOption("trackColors","editTrackColors");
-  getOption("routeColors","editRouteColors");
-
-  getCBOption("follow",function(checked) { checkTimer("follow", !checked); } );
-  getCBOption("followMe",function() { /*checkTimer("followMe");*/ } );
-  getCBOption("selectNewPin",function() { /*checkTimer("followMe");*/ } );
-  // getCBOption("useDummyRect",function() { /*checkTimer("followMe");*/ } );
-  getCBOption("flipPins");
-  getCBOption("preventSleep",function() { checkSleep(); } );
-  getCBOption("smallRaport",function() { changeRaportView(); } );
-  // getCBOption("showAccuracy");
-  getCBOption("useCache",function() { if (mapWrapper) mapWrapper.setUseCache(options.useCache); });
-  getCBOption("HStationary");
-  getCBOption("HCenter2");
-  getCBOption("send"); // ,sendPosition);
-  getCBOption("drawLogLine");
-  // getCBOption("readGPS",function() { checkTimer("readGPS"); });
-  getCBOption("readGPS",function() { checkGeoLocation(); });
-  getCBOption("useComps",function() { checkShowComponents(); });
-  getCBOption("useCompsWindow");
-  getCBOption("drawDistanceLine");
-  getCBOption("calcDistanceSum");
-  getCBOption("showZoomButtons", function() { if (mapWrapper) mapWrapper.setZoomButtons(options.showZoomButtons); } );
-
-  const cb1 = document.getElementById('area1cb');
-  const cb2 = document.getElementById('area1cbCopy');
-
-  for (let area of areaDatas) {
-    getCBOption(area.cb, function() { checkArea(area);});
-    getCBOption(area.cb+ "Own", function() { checkAreaColor(area);});
-    getOption(area.cb + "Opt", area.cb + "Opt")
+  function toggleDiv(divId, force = null) {
+    const div = document.getElementById(divId);
+    let show = div.style.display !== 'block';
+    if (force !== null) {
+      show = force;
+    }
+    if (show) {
+      div.style.display = 'block';
+      div.style.visibility = 'visible';
+    } else {
+      div.style.display = 'none';
+      div.style.visibility = 'hidden';
+    }
   }
 
-  // Sync the two checkboxes
-  cb1.addEventListener('change', syncCheckboxes);
-  cb2.addEventListener('change', syncCheckboxes);
-  function syncCheckboxes(e) {
+
+  function findMyPlace() {
+    if (!myPin) return;
+    // Siirretään kartta käyttäjän sijaintiin
+    const center = mapWrapper.getPinLocation(myPin);
+    mapWrapper.setView(center);
+  }
+
+  function toggleFullscreen() {
+    const elem = document.documentElement; // Käytetään koko sivua
+
+    // noinspection JSUnresolvedReference
+    if (document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+      // Poistetaan fullscreen-tila
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else { // noinspection JSUnresolvedReference
+        if (document.mozCancelFullScreen) { // Firefox
+          document.mozCancelFullScreen();
+        } else { // noinspection JSUnresolvedReference
+          if (document.webkitExitFullscreen) { // Chrome, Safari ja Opera
+            document.webkitExitFullscreen();
+          } else { // noinspection JSUnresolvedReference
+            if (document.msExitFullscreen) { // IE/Edge
+              document.msExitFullscreen();
+            }
+          }
+        }
+      }
+    } else {
+      openFullscreen(elem);
+    }
+  }
+
+  function openFullscreen(elem) {
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else { // noinspection JSUnresolvedReference
+      if (elem.mozRequestFullScreen) { // Firefox
+        elem.mozRequestFullScreen();
+      } else { // noinspection JSUnresolvedReference
+        if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
+          elem.webkitRequestFullscreen();
+        } else { // noinspection JSUnresolvedReference
+          if (elem.msRequestFullscreen) { // IE/Edge
+            elem.msRequestFullscreen();
+          }
+        }
+      }
+    }
+  }
+
+
+  window.addEventListener('DOMContentLoaded', initializeMapPage)
+
+  function setOption(name, value) {
+    options[name] = value;
+    localStorage.setItem(name, value);
+  }
+
+
+  function setOptionInt(name, value, def) {
+    const val = parseInt(value) || def;
+    options[name] = val;
+    localStorage.setItem(name, "" + val);
+  }
+
+
+  function getOptionValue(name) {
+    return localStorage[name];
+  }
+
+
+  function getOption(name, editName) {
+    if (!editName) editName = name;
+    const edit = document.getElementById(editName);
+    if (!edit) return;
+    options[name] = params[name] || localStorage.getItem(name) || "";
+    if (options[name] !== "")
+      edit.value = options[name]; //document.getElementById(edit).value = options[name];
+    // noinspection JSUnusedLocalSymbols
+    edit.addEventListener("change", function (event) {
+      setOption(name, this.value);
+    });
+    setOption(name, edit.value);
+  }
+
+
+  function getOptionInt(name, editName, def) {
+    const edit = document.getElementById(editName);
+    if (!edit) return;
+    const val = parseInt(localStorage.getItem(name)) || def;
+    options[name] = params[name] || val || def;
+    if (options[name] !== "")
+      edit.vallue = options[name];
+    // noinspection JSUnusedLocalSymbols
+    edit.addEventListener("change", function (event) {
+      setOptionInt(name, this.value, def);
+    });
+    setOptionInt(name, edit.value, def);
+  }
+
+
+  function getBoolean(s) {
+    if (typeof (s) === typeof true) return s;
+    if (s === '1') return true;
+    s = s.toUpperCase();
+    if (s === "TRUE") return true;
+    return s === "YES";
+
+  }
+
+
+  function setCBOption(name, value) {
+    if (value === undefined) return;
+    value = getBoolean(value);
+    options[name] = value;
+    localStorage.setItem(name, value);
+  }
+
+
+  function getCBOption(name, f) {
+    const cb = document.getElementById(name);
+    if (!cb)
+      return;
+    let value = params[name];
+    if (value === undefined) value = getBoolean(localStorage.getItem(name) || options[name] || false);
+    else value = getBoolean(value);
+    options[name] = value;
+    if (options[name]) {
+      cb.checked = true;
+      options[name] = true; // ??? ei kai tarviisi
+    } else options[name] = false;
+
+    // noinspection JSUnusedLocalSymbols
+    cb.addEventListener("click", function (event) {
+      setCBOption(name, this.checked);
+      if (typeof f !== "undefined") f(this.checked);
+    });
+    setCBOption(name, cb.checked);
+  }
+
+  function changeRaportView() {
+    // TODO: korjaa raportin näkymä
+    /*
+    const sb = document.getElementById("editRaport").style;
+    const ss = document.getElementById("editSmallRaport").style;
+    if ( options.smallRaport ) {
+    //      closeDiv("editRaport");
+    //      openDiv("editSmallRaport");
+      sb.height = "0px";
+      sb.visibility = "hidden";
+      ss.height = "auto";
+      ss.visibility = "inherit";
+    } else {
+      //      openDiv("editRaport");
+      //      closeDiv("editSmallRaport");
+      ss.height = "0px";
+      ss.visibility = "hidden";
+      sb.height = "auto";
+      sb.visibility = "inherit";
+    }
+    */
+  }
+
+
+  // Ks: https://github.com/richtr/NoSleep.js/blob/master/src/index.js
+  // The wake lock sentinel.
+  if ('wakeLock' in navigator) {
+    options.hasWakeLock = true;
+  }
+  let wakeLock = null;
+
+  // Function that attempts to request a screen wake lock.
+  // async // IE11 does not like async, but we manage without it using then and teh fact that this is never called in ie
+  function requestWakeLock() {
+    // alert('Start Wake Lock 2');
+    endWakeLock();
+    if (document.visibilityState === "hidden") return;
+    try {
+      // noinspection JSUnresolvedVariable
+      // wakeLock = await navigator.wakeLock.request('screen'); // does not work on ie
+      // wakeLock.addEventListener('release', function() {/* alert('Screen Wake Lock was released'); */ });
+      // alert('Screen Wake Lock is active');
+      navigator.wakeLock.request('screen').then(function (wl) {
+        wakeLock = wl;
+        wakeLock.addEventListener('release', function () {
+          // alert('Screen Wake Lock was released'); */
+        });
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        // alert('Screen Wake Lock is active');
+      });
+    } catch (err) {
+      alert(err.name + err.message);
+    }
+  }
+
+  if ('wakeLock' in navigator) {
+    options.hasWakeLock = true;
+  }
+
+  function handleVisibilityChange() {
+    if (wakeLock !== null && document.visibilityState === 'visible') {
+      requestWakeLock();
+    }
+  }
+
+
+  function startWakeLock() {
+    // alert('Start Wake Lock 1');
+    requestWakeLock();
+  }
+
+
+  function endWakeLock() {
+    if (!wakeLock) return;
+    wakeLock.release();
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+    wakeLock = null;
+    // alert('Wake Lock released');
+  }
+
+
+  function checkSleep() {
+    if (options.preventSleep && options.hasWakeLock) {
+      startWakeLock();
+    }
+    if (!options.preventSleep) {
+      endWakeLock();
+    }
+  }
+
+
+  function removeDistance() {
+    mapWrapper.removeLines(distanceLines);
+    lastHitPoint = mapWrapper.getPinLocation(hitPin);
+  }
+
+  function checkSavedValues() {
+    if (!options.hasWakeLock) {
+      const s = document.getElementById("preventSleepSpan").style;
+      s.visibility = "hidden";
+    }
+
+    getOption("followMeColor", "editFollowMeColor");
+    getOptionInt("followMeWidth", "editFollowMeWidth", 3);
+
+    getOption("email", "editEmail");
+    getOption("id", "editId");
+    getOption("usersTofollow", "editUsersTofollow");
+    getOption("to", "editTo");
+    getOption("from", "editFrom");
+    getOption("tpR", "editTPR");
+    getOption("hereApiKey");
+
+    getOption("tag", "editTag");
+    getOption("logname", "editLog");
+    getOption("interval", "editInterval");
+    getOption("trackColors", "editTrackColors");
+    getOption("routeColors", "editRouteColors");
+
+    getCBOption("follow", function (checked) {
+      checkTimer("follow", !checked);
+    });
+    getCBOption("followMe", function () { /*checkTimer("followMe");*/
+    });
+    getCBOption("selectNewPin", function () { /*checkTimer("followMe");*/
+    });
+    // getCBOption("useDummyRect",function() { /*checkTimer("followMe");*/ } );
+    getCBOption("flipPins");
+    getCBOption("preventSleep", function () {
+      checkSleep();
+    });
+    getCBOption("smallRaport", function () {
+      changeRaportView();
+    });
+    // getCBOption("showAccuracy");
+    getCBOption("useCache", function () {
+      if (mapWrapper) mapWrapper.setUseCache(options.useCache);
+    });
+    getCBOption("HStationary");
+    getCBOption("HCenter2");
+    getCBOption("send"); // ,sendPosition);
+    getCBOption("drawLogLine");
+    // getCBOption("readGPS",function() { checkTimer("readGPS"); });
+    getCBOption("readGPS", function () {
+      checkGeoLocation();
+    });
+    getCBOption("useComps", function () {
+      checkShowComponents();
+    });
+    getCBOption("useCompsWindow");
+    getCBOption("drawDistanceLine");
+    getCBOption("calcDistanceSum");
+    getCBOption("showZoomButtons", function () {
+      if (mapWrapper) mapWrapper.setZoomButtons(options.showZoomButtons);
+    });
+
+    const cb1 = document.getElementById('area1cb');
+    const cb2 = document.getElementById('area1cbCopy');
+
+    for (let area of areaDatas) {
+      getCBOption(area.cb, function () {
+        checkArea(area);
+      });
+      getCBOption(area.cb + "Own", function () {
+        checkAreaColor(area);
+      });
+      getOption(area.cb + "Opt", area.cb + "Opt")
+    }
+
+    // Sync the two checkboxes
+    cb1.addEventListener('change', syncCheckboxes);
+    cb2.addEventListener('change', syncCheckboxes);
+
+    function syncCheckboxes(e) {
       cb1.checked = cb2.checked = e.target.checked;
       if (e.target === cb2) {
         // Trigger cb1's change event so all logic runs
-        cb1.dispatchEvent(new Event('click', { bubbles: true }));
-      }
-  }
-  cb2.checked = cb1.checked;
-
-  checkTimer("follow", !options.follow);
-  // checkTimer("readGPS");
-  changeRaportView();
-
-  checkSleep(); // check if use wake lock or not
-}
-
-
-async function clearServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    // Unregister all service workers for this origin
-    const regs = await navigator.serviceWorker.getRegistrations();
-    for (let reg of regs) {
-      await reg.unregister();
-    }
-    // Optionally, clear caches
-    if ('caches' in window) {
-      const names = await caches.keys();
-      for (let name of names) {
-        await caches.delete(name);
+        cb1.dispatchEvent(new Event('click', {bubbles: true}));
       }
     }
-    location.reload(); // Reload the page to ensure everything is reset
-  }
-}
 
-function checkMemoryUsage() {
-  if ('storage' in navigator && 'estimate' in navigator.storage) {
-    navigator.storage.estimate().then(estimate => {
-      document.getElementById('memoryUsage').textContent =
-        `Käytetty: ${(estimate.usage / 1e6).toFixed(2)} MB
+    cb2.checked = cb1.checked;
+
+    checkTimer("follow", !options.follow);
+    // checkTimer("readGPS");
+    changeRaportView();
+
+    checkSleep(); // check if use wake lock or not
+  }
+
+
+  async function clearServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      // Unregister all service workers for this origin
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (let reg of regs) {
+        await reg.unregister();
+      }
+      // Optionally, clear caches
+      if ('caches' in window) {
+        const names = await caches.keys();
+        for (let name of names) {
+          await caches.delete(name);
+        }
+      }
+      location.reload(); // Reload the page to ensure everything is reset
+    }
+  }
+
+  function checkMemoryUsage() {
+    if ('storage' in navigator && 'estimate' in navigator.storage) {
+      navigator.storage.estimate().then(estimate => {
+        document.getElementById('memoryUsage').textContent =
+          `Käytetty: ${(estimate.usage / 1e6).toFixed(2)} MB
 Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
-    });
-  } else {
-    document.getElementById('memoryUsage').textContent =
-      "Muistin käyttöä ei voi arvioida tässä ympäristössä.";
+      });
+    } else {
+      document.getElementById('memoryUsage').textContent =
+        "Muistin käyttöä ei voi arvioida tässä ympäristössä.";
+    }
   }
-}
 
-//#region Meter Components
-//=================================================================
-// Functions to handle components:
-//=================================================================
-//#region meter components helppers
-function setAutoComp(comp, name, value) {
-  comp[name] = value;
-  localStorage.setItem("acomp." + comp.name +"." + name, JSON.stringify(value));
-}
-
-function getAutoComp(comp, name, def, f) {
-  const s = localStorage.getItem("acomp." + comp.name +"." + name);
-  if (s===null) {
-     setAutoComp(comp, name, def);
-     return def;
+  //#region Meter Components
+  //=================================================================
+  // Functions to handle components:
+  //=================================================================
+  //#region meter components helppers
+  function setAutoComp(comp, name, value) {
+    comp[name] = value;
+    localStorage.setItem("acomp." + comp.name + "." + name, JSON.stringify(value));
   }
-  let value = JSON.parse(s);
-  if (f) value = f(value);
-  return value
-}
 
-const getSpeed = function(comp, position) {
-  return position.coords.speed * 3.6;
-}
+  function getAutoComp(comp, name, def, f) {
+    const s = localStorage.getItem("acomp." + comp.name + "." + name);
+    if (s === null) {
+      setAutoComp(comp, name, def);
+      return def;
+    }
+    let value = JSON.parse(s);
+    if (f) value = f(value);
+    return value
+  }
 
-const getAlt = function(comp, position) {
-   return position.coords.altitude;
-}
+  const getSpeed = function (comp, position) {
+    return position.coords.speed * 3.6;
+  }
 
-const getDir = function(comp, position) {
-   return position.coords.heading;
-}
+  const getAlt = function (comp, position) {
+    return position.coords.altitude;
+  }
 
-const clearTrip = function (comp) {
-   setAutoComp(comp, "distSum", 0);
-   comp.lastPos = undefined;
-   localStorage.removeItem("acomp.Trip.lastPos");
-   comp.value = 0;
-   comp.span.innerText = "0.000";
-}
+  const getDir = function (comp, position) {
+    return position.coords.heading;
+  }
 
-const getTrip = function(comp, position) {
-   let coord = {latitude: position.coords.latitude, longitude: position.coords.longitude};
-   if (!startstop.checked) {
-     setAutoComp(comp, "lastPos", coord);
-     if ( comp.temp === undefined ) {
+  const clearTrip = function (comp) {
+    setAutoComp(comp, "distSum", 0);
+    comp.lastPos = undefined;
+    localStorage.removeItem("acomp.Trip.lastPos");
+    comp.value = 0;
+    comp.span.innerText = "0.000";
+  }
+
+  const getTrip = function (comp, position) {
+    let coord = {latitude: position.coords.latitude, longitude: position.coords.longitude};
+    if (!startstop.checked) {
+      setAutoComp(comp, "lastPos", coord);
+      if (comp.temp === undefined) {
         comp.temp = getAutoComp(comp, "distSum", 0);
         return comp.temp;
-     }
-     return null;
-   }
-   let old = comp.lastPos;
-   if (old === undefined) {
+      }
+      return null;
+    }
+    let old = comp.lastPos;
+    if (old === undefined) {
       old = getAutoComp(comp, "lastPos", coord);
-   }
-   const d = WGS84_distance(coord, old);
-   // componentsList["Temp"].span.innerText = d + " " +  JSON.stringify(old);
-   let distSum = comp["distSum"];
-   if (distSum === undefined) {
+    }
+    const d = WGS84_distance(coord, old);
+    // componentsList["Temp"].span.innerText = d + " " +  JSON.stringify(old);
+    let distSum = comp["distSum"];
+    if (distSum === undefined) {
       distSum = getAutoComp(comp, "distSum", 0);
-   }
-   if (d < 0.005) return distSum;
-   distSum += d;
-   setAutoComp(comp, "distSum", distSum);
-   setAutoComp(comp, "lastPos", coord);
-   return distSum;
-}
+    }
+    if (d < 0.005) return distSum;
+    distSum += d;
+    setAutoComp(comp, "distSum", distSum);
+    setAutoComp(comp, "lastPos", coord);
+    return distSum;
+  }
 
-const clearElap = function(comp) {
-   setAutoComp(comp, "elapZero", (new Date()).getTime());
-   setAutoComp(comp, "elapSum", 0);
-}
+  const clearElap = function (comp) {
+    setAutoComp(comp, "elapZero", (new Date()).getTime());
+    setAutoComp(comp, "elapSum", 0);
+  }
 
-const startCounters = function(start) {
-   // let trip = namedComponents["Trip"];
-   let elap = namedComponents["Elap"];
-   if (elap) {
-       if (start) setAutoComp(elap, "elapZero", (new Date()).getTime());
-       else setAutoComp(elap, "elapSum", elap.sum);
-   }
-}
+  const startCounters = function (start) {
+    // let trip = namedComponents["Trip"];
+    let elap = namedComponents["Elap"];
+    if (elap) {
+      if (start) setAutoComp(elap, "elapZero", (new Date()).getTime());
+      else setAutoComp(elap, "elapSum", elap.sum);
+    }
+  }
 
-const msToHMS = function(ms) {
-   const h = Math.floor(ms / 1000 / 60 / 60);
-   ms -= h* 1000 * 60 *60;
-   const m = Math.floor(ms / 1000 / 60);
-   ms -= m* 1000 * 60;
-   const s = Math.floor(ms / 1000);
-   return h + ":" + d2(m) + ":" + d2(s);
-}
+  const msToHMS = function (ms) {
+    const h = Math.floor(ms / 1000 / 60 / 60);
+    ms -= h * 1000 * 60 * 60;
+    const m = Math.floor(ms / 1000 / 60);
+    ms -= m * 1000 * 60;
+    const s = Math.floor(ms / 1000);
+    return h + ":" + d2(m) + ":" + d2(s);
+  }
 
-const getElap = function(comp, now) {
-   if (!startstop.checked) {
-      if ( comp.temp !== undefined) return null;
+  const getElap = function (comp, now) {
+    if (!startstop.checked) {
+      if (comp.temp !== undefined) return null;
       comp.temp = getAutoComp(comp, "elapSum", 0);
       return msToHMS(comp.temp);
-   }
-   let old = comp["elapZero"];
-   if (old === undefined) {
+    }
+    let old = comp["elapZero"];
+    if (old === undefined) {
       // old = getAutoComp(comp, "elapZero", now, value => new Date(value));
       old = getAutoComp(comp, "elapZero", now.getTime());
-   }
-   // let diff = now.getTime() - old.getTime();
-   let nowt = now.getTime();
-   let diff = nowt - old;
-   const elapSum = getAutoComp(comp, "elapSum", 0);
-   diff += elapSum;
-   comp.sum = diff;
-   return msToHMS(diff);
-}
+    }
+    // let diff = now.getTime() - old.getTime();
+    let nowt = now.getTime();
+    let diff = nowt - old;
+    const elapSum = getAutoComp(comp, "elapSum", 0);
+    diff += elapSum;
+    comp.sum = diff;
+    return msToHMS(diff);
+  }
 
-const getTime = function(comp, now) {
-   const time = now.getHours() + ":" + d2(now.getMinutes()) + ":" + d2(now.getSeconds());
-   return time;
-}
+  const getTime = function (comp, now) {
+    const time = now.getHours() + ":" + d2(now.getMinutes()) + ":" + d2(now.getSeconds());
+    return time;
+  }
 
 
-
-const componentsList = {
-  "Speed": {inUse: true,  label: "Nopeus",  unit: "km/h", font: "50px", back: "", len: 5, des: 1,  f: getSpeed, type: 0},
-  "Trip":  {inUse: true,  label: "Matka",   unit: "km",   font: "40px", back: "", len:-4, des: 3,  f: getTrip,  type: 0, click: clearTrip},
-  "Alt":   {inUse: true,  label: "Korkeus", unit: "m",    font: "30px", back: "", len: 4, des: 0,  f: getAlt,   type: 0},
-  "Dir":   {inUse: true,  label: "Suunta",  unit: "deg",  font: "20px", back: "", len: 3, des: 0,  f: getDir,   type: 0},
-  "Elap":  {inUse: true,  label: "Aika",    unit: "aika", font: "20px", back: "", len: 3, des: -1, f: getElap,  type: 1, click: clearElap},
-  "Time":  {inUse: false, label: "Kello",   unit: "",     font: "20px", back: "", len: 3, des: -1, f: getTime,  type: 1},
+  const componentsList = {
+    "Speed": {inUse: true, label: "Nopeus", unit: "km/h", font: "50px", back: "", len: 5, des: 1, f: getSpeed, type: 0},
+    "Trip": {
+      inUse: true,
+      label: "Matka",
+      unit: "km",
+      font: "40px",
+      back: "",
+      len: -4,
+      des: 3,
+      f: getTrip,
+      type: 0,
+      click: clearTrip
+    },
+    "Alt": {inUse: true, label: "Korkeus", unit: "m", font: "30px", back: "", len: 4, des: 0, f: getAlt, type: 0},
+    "Dir": {inUse: true, label: "Suunta", unit: "deg", font: "20px", back: "", len: 3, des: 0, f: getDir, type: 0},
+    "Elap": {
+      inUse: true,
+      label: "Aika",
+      unit: "aika",
+      font: "20px",
+      back: "",
+      len: 3,
+      des: -1,
+      f: getElap,
+      type: 1,
+      click: clearElap
+    },
+    "Time": {inUse: false, label: "Kello", unit: "", font: "20px", back: "", len: 3, des: -1, f: getTime, type: 1},
 //  "Temp":  {inUse: true,  label: "Temp",    unit: "temp", font: "10px", back: "rgba(255, 255, 255, 0.6)", len: 3, des: -1, f: null,     type: 2},
-}
-//#endregion meter components helppers
+  }
+  //#endregion meter components helppers
 
 
-let compsdiv = null;
-let startstop = {checked: false};  // Matki checkboxia jos ei luotu
-const namedComponents = {};
+  let compsdiv = null;
+  let startstop = {checked: false};  // Matki checkboxia jos ei luotu
+  const namedComponents = {};
 
-function checkShowComponents() {
-   let cb = options.useComps;
-   let setDiv = document.getElementById("showCompsSettings");
-   let useDiv = document.getElementById("showComps");
-   if (!cb) {
+  function checkShowComponents() {
+    let cb = options.useComps;
+    let setDiv = document.getElementById("showCompsSettings");
+    let useDiv = document.getElementById("showComps");
+    if (!cb) {
       setDiv.style.display = "none";
       useDiv.style.display = "none";
-   } else {
+    } else {
       setDiv.style.display = "block";
       useDiv.style.display = "block";
-   }
-}
-
-function adjustComponents() {
-   saveComponents();
-   const compsdiv = document.getElementById("showComps");
-   compsdiv.style.backgroundColor = document.getElementById("editCompsBackground").value;
-   compsdiv.style.color = document.getElementById("editCompsColor").value;
-   createComps();
-   checkTimer("showTime", timecomponents.length === 0 || !options.useComps);
-}
-
-function readComponents() {
-  let bs = localStorage.getItem("editCompsBackground");
-  if (bs) document.getElementById("editCompsBackground").value = bs;
-
-  bs = localStorage.getItem("editCompsColor");
-  if (bs) document.getElementById("editCompsColor").value = bs;
-
-  for (const name in componentsList) {
-     const comp = componentsList[name];
-     let s = localStorage.getItem(name);
-     if ( s ) comp.editFont.value = s;
-     s = localStorage.getItem(name + "Col");
-     if ( s !== null ) comp.editCol.value = s;
-     s = localStorage.getItem(name + "Cb");
-     if ( s !== null) {
-       comp.cbUse.checked = s === "1";
-       comp.inUse = comp.cbUse.checked;
-     }
-   }
-}
-
-function saveComponents() {
-  localStorage.setItem("editCompsBackground", document.getElementById("editCompsBackground").value);
-  localStorage.setItem("editCompsColor", document.getElementById("editCompsColor").value);
-  for (const name in componentsList) {
-     const comp = componentsList[name];
-     localStorage.setItem(name, comp.editFont.value);
-     localStorage.setItem(name + "Col", comp.editCol.value);
-     localStorage.setItem(name + "Cb",  comp.cbUse.checked ? "1" : "0");
-     comp.inUse = comp.cbUse.checked;
-   }
-}
-
-function addTD(tr, text) {
-     const td = document.createElement("td");
-     td.innerText = text;
-     tr.appendChild(td);
-}
-
-function addTDInput(tr) {
-  const td = document.createElement("td");
-  tr.appendChild(td);
-  // <input type="text" id="editSpeed" value="50px" size="3" /></td><td><input type="text" id="editSpeedCol" value="rgba(255, 255, 255, 0.6)" size="20" />
-  const input = document.createElement("input");
-  td.appendChild(input);
-  return input;
-}
-
-function addTDCB(tr) {
-     const cb = addTDInput(tr);
-     cb.setAttribute("type", "checkbox");
-     return cb;
-}
-
-function addTDEdit(tr, name, size, text) {
-     // <input type="text" id="editSpeed" value="50px" size="3" /></td><td><input type="text" id="editSpeedCol" value="rgba(255, 255, 255, 0.6)" size="20" />
-     const edit = addTDInput(tr);
-     edit.setAttribute("id", "edit"+name);
-     edit.setAttribute("size", size);
-     edit.setAttribute("value", text);
-     edit.innerHTML = text;
-     return edit;
-}
-
-function createCompsSettings() {
-
-  compsdiv = document.getElementById("showComps");
-  const table = document.getElementById("tableCompsSettings");
-  table.innerHTML = "<tr><td></td><td>Mittari</td><td>Fontti</td><td>Taustan väri</td></tr>";
-
-  for (const name in componentsList) {
-     const comp = componentsList[name];
-     const tr = document.createElement("tr");
-     const cbUse = addTDCB(tr);
-     cbUse.checked = comp.inUse;
-     addTD(tr, comp.label);
-     const editFont = addTDEdit(tr, name, 3, comp.font);
-     const editCol = addTDEdit(tr, name + "Col", 20, comp.back);
-     comp.cbUse = cbUse;
-     comp.editFont = editFont;
-     comp.editCol = editCol;
-     comp.div = null;
-     comp.span = null;
-     comp.name = name;
-     comp.value = 0;
-     table.appendChild(tr);
+    }
   }
-  createComps();
-}
 
-function showCompsDiv(show) {
-   if (show) {
-     compsdiv.style.display = "inherit";
-     if (compsWindow) compsWindow.show();
-   } else {
-     compsdiv.style.display = "none";
-     if (compsWindow) compsWindow.hide();
-   }
-}
+  function adjustComponents() {
+    saveComponents();
+    const compsdiv = document.getElementById("showComps");
+    compsdiv.style.backgroundColor = document.getElementById("editCompsBackground").value;
+    compsdiv.style.color = document.getElementById("editCompsColor").value;
+    createComps();
+    checkTimer("showTime", timecomponents.length === 0 || !options.useComps);
+  }
+
+  function readComponents() {
+    let bs = localStorage.getItem("editCompsBackground");
+    if (bs) document.getElementById("editCompsBackground").value = bs;
+
+    bs = localStorage.getItem("editCompsColor");
+    if (bs) document.getElementById("editCompsColor").value = bs;
+
+    for (const name in componentsList) {
+      const comp = componentsList[name];
+      let s = localStorage.getItem(name);
+      if (s) comp.editFont.value = s;
+      s = localStorage.getItem(name + "Col");
+      if (s !== null) comp.editCol.value = s;
+      s = localStorage.getItem(name + "Cb");
+      if (s !== null) {
+        comp.cbUse.checked = s === "1";
+        comp.inUse = comp.cbUse.checked;
+      }
+    }
+  }
+
+  function saveComponents() {
+    localStorage.setItem("editCompsBackground", document.getElementById("editCompsBackground").value);
+    localStorage.setItem("editCompsColor", document.getElementById("editCompsColor").value);
+    for (const name in componentsList) {
+      const comp = componentsList[name];
+      localStorage.setItem(name, comp.editFont.value);
+      localStorage.setItem(name + "Col", comp.editCol.value);
+      localStorage.setItem(name + "Cb", comp.cbUse.checked ? "1" : "0");
+      comp.inUse = comp.cbUse.checked;
+    }
+  }
+
+  function addTD(tr, text) {
+    const td = document.createElement("td");
+    td.innerText = text;
+    tr.appendChild(td);
+  }
+
+  function addTDInput(tr) {
+    const td = document.createElement("td");
+    tr.appendChild(td);
+    // <input type="text" id="editSpeed" value="50px" size="3" /></td><td><input type="text" id="editSpeedCol" value="rgba(255, 255, 255, 0.6)" size="20" />
+    const input = document.createElement("input");
+    td.appendChild(input);
+    return input;
+  }
+
+  function addTDCB(tr) {
+    const cb = addTDInput(tr);
+    cb.setAttribute("type", "checkbox");
+    return cb;
+  }
+
+  function addTDEdit(tr, name, size, text) {
+    // <input type="text" id="editSpeed" value="50px" size="3" /></td><td><input type="text" id="editSpeedCol" value="rgba(255, 255, 255, 0.6)" size="20" />
+    const edit = addTDInput(tr);
+    edit.setAttribute("id", "edit" + name);
+    edit.setAttribute("size", size);
+    edit.setAttribute("value", text);
+    edit.innerHTML = text;
+    return edit;
+  }
+
+  function createCompsSettings() {
+
+    compsdiv = document.getElementById("showComps");
+    const table = document.getElementById("tableCompsSettings");
+    table.innerHTML = "<tr><td></td><td>Mittari</td><td>Fontti</td><td>Taustan väri</td></tr>";
+
+    for (const name in componentsList) {
+      const comp = componentsList[name];
+      const tr = document.createElement("tr");
+      const cbUse = addTDCB(tr);
+      cbUse.checked = comp.inUse;
+      addTD(tr, comp.label);
+      const editFont = addTDEdit(tr, name, 3, comp.font);
+      const editCol = addTDEdit(tr, name + "Col", 20, comp.back);
+      comp.cbUse = cbUse;
+      comp.editFont = editFont;
+      comp.editCol = editCol;
+      comp.div = null;
+      comp.span = null;
+      comp.name = name;
+      comp.value = 0;
+      table.appendChild(tr);
+    }
+    createComps();
+  }
+
+  function showCompsDiv(show) {
+    if (show) {
+      compsdiv.style.display = "inherit";
+      if (compsWindow) compsWindow.show();
+    } else {
+      compsdiv.style.display = "none";
+      if (compsWindow) compsWindow.hide();
+    }
+  }
 
 
-let compsWindow = null;
+  let compsWindow = null;
 
-function readWindowPos(w) {
-   if (w === null ) return;
-   const s = localStorage.getItem(w.id + 'Pos');
-   if ( s === null ) return;
-   let xywh = s.split(";");
-   w.x = parseInt(xywh[0]);
-   w.y = parseInt(xywh[1]);
-   w.width = parseInt(xywh[2]);
-   w.height = parseInt(xywh[3]);
-   w.move(w.x, w.y);
-   w.resize(w.width, w.height);
-}
+  function readWindowPos(w) {
+    if (w === null) return;
+    const s = localStorage.getItem(w.id + 'Pos');
+    if (s === null) return;
+    let xywh = s.split(";");
+    w.x = parseInt(xywh[0]);
+    w.y = parseInt(xywh[1]);
+    w.width = parseInt(xywh[2]);
+    w.height = parseInt(xywh[3]);
+    w.move(w.x, w.y);
+    w.resize(w.width, w.height);
+  }
 
-function saveWindowPos(w) {
-   if (w === null ) return;
-   const s = `${w.x};${w.y};${w.width};${w.height}`;
-   localStorage.setItem(w.id + 'Pos', s);
-}
+  function saveWindowPos(w) {
+    if (w === null) return;
+    const s = `${w.x};${w.y};${w.width};${w.height}`;
+    localStorage.setItem(w.id + 'Pos', s);
+  }
 
 
-function createComps() {
-  readComponents();
-  // noinspection JSUnresolvedReference
-  if (options.useCompsWindow && compsWindow === null && typeof WinBox === "function") {
+  function createComps() {
+    readComponents();
     // noinspection JSUnresolvedReference
-    compsWindow = new WinBox("Mittarit", {
-      id: "compsWindow",
-      mount: document.getElementById("showComps"),
-      height: 69,
-      width: 410,
-      header: 16,
-      y: "bottom",
-      onresize: function() { saveWindowPos(compsWindow); },
-      onmove: function() { saveWindowPos(compsWindow); },
-      onclose: function() { compsWindow = null; return false; },
-      // background: document.getElementById("editCompsBackground").value,
-    });
-    readWindowPos(compsWindow);
-    // compsWindow.onmove = function(x,y) { saveWindowPos(compsWindow); };
-    // compsWindow.onresize = function(w,h) { saveWindowPos(compsWindow); };
-  }
-  if (!options.useCompsWindow && compsWindow !== null) {
+    if (options.useCompsWindow && compsWindow === null && typeof WinBox === "function") {
+      // noinspection JSUnresolvedReference
+      compsWindow = new WinBox("Mittarit", {
+        id: "compsWindow",
+        mount: document.getElementById("showComps"),
+        height: 69,
+        width: 410,
+        header: 16,
+        y: "bottom",
+        onresize: function () {
+          saveWindowPos(compsWindow);
+        },
+        onmove: function () {
+          saveWindowPos(compsWindow);
+        },
+        onclose: function () {
+          compsWindow = null;
+          return false;
+        },
+        // background: document.getElementById("editCompsBackground").value,
+      });
+      readWindowPos(compsWindow);
+      // compsWindow.onmove = function(x,y) { saveWindowPos(compsWindow); };
+      // compsWindow.onresize = function(w,h) { saveWindowPos(compsWindow); };
+    }
+    if (!options.useCompsWindow && compsWindow !== null) {
       compsWindow.close(true);
       compsWindow = null;
-  }
+    }
 
-  if ( compsWindow !== null ) {
-     const sheet = document.styleSheets[4]; // TODO: keksi oikea tapa löytää
-     let bc = document.getElementById("editCompsBackground").value;
-     if (bc.startsWith("rgba(") || bc.startsWith("hsla(") ) {
-         bc = bc.replace(/,[^,]*\)/, ",1)");
-     }
-     if (sheet && sheet.cssRules) {
-       if (sheet.cssRules[0].cssText.startsWith("#compsWindow .wb-body")) sheet.deleteRule(0);
-       sheet.insertRule(`#compsWindow .wb-body {background: ${bc}}`, 0);
-     }
-  }
+    if (compsWindow !== null) {
+      const sheet = document.styleSheets[4]; // TODO: keksi oikea tapa löytää
+      let bc = document.getElementById("editCompsBackground").value;
+      if (bc.startsWith("rgba(") || bc.startsWith("hsla(")) {
+        bc = bc.replace(/,[^,]*\)/, ",1)");
+      }
+      if (sheet && sheet.cssRules) {
+        if (sheet.cssRules[0].cssText.startsWith("#compsWindow .wb-body")) sheet.deleteRule(0);
+        sheet.insertRule(`#compsWindow .wb-body {background: ${bc}}`, 0);
+      }
+    }
 
-  geocomponents = [];
-  timecomponents = [];
-  compsdiv.innerHTML = '<span style="top: 0;  position: absolute" onclick="showCompsDiv(false)"><</span>'+
-          ''  ; //'<br />';
+    geocomponents = [];
+    timecomponents = [];
+    compsdiv.innerHTML = '<span style="top: 0;  position: absolute" onclick="showCompsDiv(false)"><</span>' +
+      ''; //'<br />';
 
-  startstop = document.createElement("input");
-  startstop.setAttribute("type", "checkbox");
-  startstop.onclick = function() {
-    localStorage.setItem("startstop", startstop.checked ? "1": "0");
-    startCounters(startstop.checked);
-  }
-  startstop.checked = localStorage.getItem("startstop") !== "0"; // oletus päällä
-  compsdiv.appendChild(startstop);
+    startstop = document.createElement("input");
+    startstop.setAttribute("type", "checkbox");
+    startstop.onclick = function () {
+      localStorage.setItem("startstop", startstop.checked ? "1" : "0");
+      startCounters(startstop.checked);
+    }
+    startstop.checked = localStorage.getItem("startstop") !== "0"; // oletus päällä
+    compsdiv.appendChild(startstop);
 
-  for (const name in componentsList) {
-    const comp = componentsList[name];
-    comp.div = null;
-    comp.span = null;
-  }
+    for (const name in componentsList) {
+      const comp = componentsList[name];
+      comp.div = null;
+      comp.span = null;
+    }
 
 
-  for (const name in componentsList) {
+    for (const name in componentsList) {
       const comp = componentsList[name];
       if (!comp.inUse) continue;
       const compdiv = document.createElement("div");
@@ -2485,237 +2644,254 @@ function createComps() {
       if (comp.click) compspan.onclick = () => comp.click(comp);
       compdiv.appendChild(compspan);
       comp.span = compspan;
-      if ( comp.type === 0)  geocomponents.push(comp);
-      if ( comp.type === 1)  timecomponents.push(comp);
+      if (comp.type === 0) geocomponents.push(comp);
+      if (comp.type === 1) timecomponents.push(comp);
       namedComponents[name] = comp;
       // const space = document.createElement("span");
       // space.innerHTML = "&nbsp;&nbsp;"
       // compsdiv.appendChild(space);
+    }
   }
-}
 
-function setTimeCompsValues() {
+  function setTimeCompsValues() {
     const now = new Date();
     for (let comp of timecomponents) {
-        let v = comp.f(comp, now);
-        if (v === null) continue;
-        comp.span.innerText = v;
-        comp.value = v;
+      let v = comp.f(comp, now);
+      if (v === null) continue;
+      comp.span.innerText = v;
+      comp.value = v;
     }
-}
+  }
 
 
-function setGeoCompsValues(position) {
+  function setGeoCompsValues(position) {
     // componentsList["Speed"].span.innerHTML = Math.round(position.coords.speed * 3.6 * 10) / 10;
     // componentsList["Alt"].span.innerHTML = Math.round(position.coords.altitude);
     // componentsList["Dir"].span.innerHTML = Math.round(position.coords.heading);
     for (let comp of geocomponents) {
-        let v = comp.f(comp, position);
-        if (v === null) continue;
-        let d = comp.len;
-        if (d < 0) {
-           let s = v.toPrecision(-d).slice(0,-d+1);
-           comp.span.innerText = s;
-           comp.value = s;
-           continue;
-        }
-        let des = comp.des;
-        if (des < 0) {
-           comp.span.innerText = v;
-           comp.value = v;
-           continue;
-        }
-        let s = v.toFixed(des);
-        while (s.length < d) s = "\u2000" + s;
-        // s = s.replace(/ /g, "&nbsp;")
+      let v = comp.f(comp, position);
+      if (v === null) continue;
+      let d = comp.len;
+      if (d < 0) {
+        let s = v.toPrecision(-d).slice(0, -d + 1);
         comp.span.innerText = s;
         comp.value = s;
-    }
-}
-
-
-let voicesInitialized = false;
-
-function speakText(text) {
-  if (!('speechSynthesis' in window)) {
-    setError("ei puhetta!")
-    return;
-  }
-  if (!voicesInitialized) {
-    speechSynthesis.getVoices();
-    speechSynthesis.onvoiceschanged = () => {
-      // console.log(speechSynthesis.getVoices());
-      voicesInitialized = true;
-      speakText(text); // Retry speaking after voices are loaded
-    };
-    return;
-  }
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'fi-FI'; // Aseta haluttu kieli, esimerkiksi suomeksi
-  window.speechSynthesis.speak(utterance);
-}
-
-function numberToFinnishWords(n) {
-  if (n < 20) {
-    const ones = ["nolla","yksi","kaksi","kolme","neljä","viisi","kuusi","seitsemän","kahdeksan","yhdeksän",
-      "kymmenen","yksitoista","kaksitoista","kolmetoista","neljätoista","viisitoista","kuusitoista","seitsemäntoista","kahdeksantoista","yhdeksäntoista"];
-    return ones[n];
-  }
-  if (n < 100) {
-    const tens = ["", "", "kaksikymmentä", "kolmekymmentä", "neljäkymmentä", "viisikymmentä", "kuusikymmentä", "seitsemänkymmentä", "kahdeksankymmentä", "yhdeksänkymmentä"];
-    if (n % 10 === 0) return tens[Math.floor(n/10)];
-    return tens[Math.floor(n/10)] + " " + numberToFinnishWords(n % 10);
-  }
-  if (n < 1000) {
-    if (n === 100) return "sata";
-    if (n < 200) return "sata " + numberToFinnishWords(n % 100);
-    if (n % 100 === 0) return numberToFinnishWords(Math.floor(n/100)) + " sataa";
-    return numberToFinnishWords(Math.floor(n/100)) + " sataa " + numberToFinnishWords(n % 100);
-  }
-  if (n < 10000) {
-    if (n === 1000) return "tuhat";
-    if (n % 1000 === 0) return numberToFinnishWords(Math.floor(n/1000)) + " tuhatta";
-    return numberToFinnishWords(Math.floor(n/1000)) + " tuhatta " + numberToFinnishWords(n % 1000);
-  }
-  return n.toString(); // fallback
-}
-
-function numberToFinnishDistance(n) {
-  if (n === 0) return "";
-  if (n >= 1000) {
-    const km = Math.floor(n / 1000);
-    const m = n % 1000;
-    let result = (km === 1 ? "kilometri" : numberToFinnishWords(km) + " kilometriä");
-    if (m > 0) {
-      result += " " + numberToFinnishWords(m) + " metriä";
-    }
-    return result;
-  }
-  return numberToFinnishWords(n) + " metriä";
-}
-
-function showRoutePane(routerType=0) {
-  let fromPin = lastSelected;
-  if (!fromPin) fromPin = myPin;
-  const from = mapWrapper.getPinLocation(fromPin);
-  const to = mapWrapper.getPinLocation(hitPin);
-  loadRoutingMachine(function() {
-    let routingControl = null;
-    switch (routerType) {
-      case 0:
-        routingControl = findRouteHERE(from, to, options.hereApiKey);
-        break;
-      case 1:
-        routingControl = findRouteHERE(from, to, options.hereApiKey, true);
-        break;
-      case 2:
-        routingControl = findRouteOSRM(from, to, options.hereApiKey);
-        break;
-      default:
-        return;
-    }
-    // routingControl = mapWrapper.routingControl;
-    routingControl.on('routeselected', function (e) {
-      const container = document.querySelector('.leaflet-routing-container');
-      if (!container) return;
-      const selectedRouteSection = container.querySelector('.leaflet-routing-alt:not(.leaflet-routing-alt-minimized)');
-      const instructions = selectedRouteSection ? selectedRouteSection.querySelectorAll('tr') : [];
-      const routeInstructions = e.route.instructions;
-
-      for (let idx = 0; idx < instructions.length; idx++) {
-        const row = instructions[idx];
-        if (row._clickHandler) {
-          row.removeEventListener('click', row._clickHandler);
-        }
-
-        row._clickHandler = function () {
-          instructions.forEach(r => r.classList.remove('routing-selected'));
-          row.classList.add('routing-selected');
-          // Get the corresponding instruction
-          const instr = routeInstructions[idx];
-          if (instr) {
-            const meters = routingStyleRound(instr.distance);
-            const smeters = numberToFinnishDistance(meters);
-            let nextInstr = "";
-            if (smeters !== "") nextInstr = `, sitten aja ${smeters}.`;
-            const text = `${instr.text}${nextInstr}`;
-            speakText(text);
-          } else {
-            speakText(row.innerText);
-          }
-        };
-        row.addEventListener('click', row._clickHandler);
+        continue;
       }
+      let des = comp.des;
+      if (des < 0) {
+        comp.span.innerText = v;
+        comp.value = v;
+        continue;
+      }
+      let s = v.toFixed(des);
+      while (s.length < d) s = "\u2000" + s;
+      // s = s.replace(/ /g, "&nbsp;")
+      comp.span.innerText = s;
+      comp.value = s;
+    }
+  }
+
+
+  let voicesInitialized = false;
+
+  function speakText(text) {
+    if (!('speechSynthesis' in window)) {
+      setError("ei puhetta!")
+      return;
+    }
+    if (!voicesInitialized) {
+      const voices = speechSynthesis.getVoices();
+      if (voices.length === 0) {
+        speechSynthesis.onvoiceschanged = () => {
+          // console.log(speechSynthesis.getVoices());
+          voicesInitialized = true;
+          speakText(text); // Retry speaking after voices are loaded
+        };
+        return;
+      }
+    }
+    voicesInitialized = true;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'fi-FI'; // Aseta haluttu kieli, esimerkiksi suomeksi
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function numberToFinnishWords(n) {
+    if (n < 20) {
+      const ones = ["nolla", "yksi", "kaksi", "kolme", "neljä", "viisi", "kuusi", "seitsemän", "kahdeksan", "yhdeksän",
+        "kymmenen", "yksitoista", "kaksitoista", "kolmetoista", "neljätoista", "viisitoista", "kuusitoista", "seitsemäntoista", "kahdeksantoista", "yhdeksäntoista"];
+      return ones[n];
+    }
+    if (n < 100) {
+      const tens = ["", "", "kaksikymmentä", "kolmekymmentä", "neljäkymmentä", "viisikymmentä", "kuusikymmentä", "seitsemänkymmentä", "kahdeksankymmentä", "yhdeksänkymmentä"];
+      if (n % 10 === 0) return tens[Math.floor(n / 10)];
+      return tens[Math.floor(n / 10)] + " " + numberToFinnishWords(n % 10);
+    }
+    if (n < 1000) {
+      if (n === 100) return "sata";
+      if (n < 200) return "sata " + numberToFinnishWords(n % 100);
+      if (n % 100 === 0) return numberToFinnishWords(Math.floor(n / 100)) + " sataa";
+      return numberToFinnishWords(Math.floor(n / 100)) + " sataa " + numberToFinnishWords(n % 100);
+    }
+    if (n < 10000) {
+      if (n === 1000) return "tuhat";
+      if (n % 1000 === 0) return numberToFinnishWords(Math.floor(n / 1000)) + " tuhatta";
+      return numberToFinnishWords(Math.floor(n / 1000)) + " tuhatta " + numberToFinnishWords(n % 1000);
+    }
+    return n.toString(); // fallback
+  }
+
+  function numberToFinnishDistance(n) {
+    if (n === 0) return "";
+    if (n >= 1000) {
+      const km = Math.floor(n / 1000);
+      const m = n % 1000;
+      let result = (km === 1 ? "kilometri" : numberToFinnishWords(km) + " kilometriä");
+      if (m > 0) {
+        result += " " + numberToFinnishWords(m) + " metriä";
+      }
+      return result;
+    }
+    return numberToFinnishWords(n) + " metriä";
+  }
+
+  function showRoutePane(routerType = 0) {
+    let fromPin = lastSelected;
+    if (!fromPin) fromPin = myPin;
+    const from = mapWrapper.getPinLocation(fromPin);
+    const to = mapWrapper.getPinLocation(hitPin);
+    loadRoutingMachine(function () {
+      let routingControl = null;
+      switch (routerType) {
+        case 0:
+          routingControl = findRouteHERE(from, to, options.hereApiKey);
+          break;
+        case 1:
+          routingControl = findRouteHERE(from, to, options.hereApiKey, true);
+          break;
+        case 2:
+          routingControl = findRouteOSRM(from, to, options.hereApiKey);
+          break;
+        default:
+          return;
+      }
+      // routingControl = mapWrapper.routingControl;
+      routingControl.on('routeselected', function (e) {
+        const container = document.querySelector('.leaflet-routing-container');
+        if (!container) return;
+        const selectedRouteSection = container.querySelector('.leaflet-routing-alt:not(.leaflet-routing-alt-minimized)');
+        const instructions = selectedRouteSection ? selectedRouteSection.querySelectorAll('tr') : [];
+        const routeInstructions = e.route.instructions;
+
+        for (let idx = 0; idx < instructions.length; idx++) {
+          const row = instructions[idx];
+          if (row._clickHandler) {
+            row.removeEventListener('click', row._clickHandler);
+          }
+
+          row._clickHandler = function () {
+            instructions.forEach(r => r.classList.remove('routing-selected'));
+            row.classList.add('routing-selected');
+            // Get the corresponding instruction
+            const instr = routeInstructions[idx];
+            if (instr) {
+              const meters = routingStyleRound(instr.distance);
+              const smeters = numberToFinnishDistance(meters);
+              let nextInstr = "";
+              if (smeters !== "") nextInstr = `, sitten aja ${smeters}.`;
+              const text = `${instr.text}${nextInstr}`;
+              speakText(text);
+            } else {
+              speakText(row.innerText);
+            }
+          };
+          row.addEventListener('click', row._clickHandler);
+        }
+      });
+      // const pl = decodeFlexPolyline("BG6lv62D-pyixBxtCi3DvlBjxD_OnpB7GjNzU_TjI_OjDjIjXw0BvCoGzjBosCrO4c3NwWrOoV_EoGrEAjXwWvbkcjDkDrEoL_EvRrJjhB_pF36QrE3NrO7uBrJriBnL_sBrErOrErTnBnQ8BvHUnGT7L");
+      // console.log(pl);
     });
-    // const pl = decodeFlexPolyline("BG6lv62D-pyixBxtCi3DvlBjxD_OnpB7GjNzU_TjI_OjDjIjXw0BvCoGzjBosCrO4c3NwWrOoV_EoGrEAjXwWvbkcjDkDrEoL_EvRrJjhB_pF36QrE3NrO7uBrJriBnL_sBrErOrErTnBnQ8BvHUnGT7L");
-    // console.log(pl);
-  });
-}
+  }
 
-function routingStyleRound(meters) {
-  if (meters < 20) return Math.ceil(meters);
-  if (meters < 500) return Math.ceil(meters / 10) * 10;
-  if (meters < 1000) return Math.ceil(meters / 50) * 50;
-  // For 1000 or more, round up to nearest 100 and convert to km if needed
-  return Math.ceil(meters / 100) * 100;
-}
+  function routingStyleRound(meters) {
+    if (meters < 20) return Math.ceil(meters);
+    if (meters < 500) return Math.ceil(meters / 10) * 10;
+    if (meters < 1000) return Math.ceil(meters / 50) * 50;
+    // For 1000 or more, round up to nearest 100 and convert to km if needed
+    return Math.ceil(meters / 100) * 100;
+  }
 
-//=================================================================
-// Functions to handle components ends
-//=================================================================
-//#endregion Meter Components
+  //=================================================================
+  // Functions to handle components ends
+  //=================================================================
+  //#endregion Meter Components
 
 
 </script>
-<div id="mySidenavHamburger" style="top: 0; left: 0; width: 30px; height: 35px; position: absolute; z-index:1050;  background-color: lightgray;">
+<div id="mySidenavHamburger"
+     style="top: 0; left: 0; width: 30px; height: 35px; position: absolute; z-index:1050;  background-color: lightgray;">
   <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;<br></span>
   <span style="font-size:30px;cursor:pointer" onclick="findMyPlace()">&#9737;</span>
 </div>
 
-<div id="mySidenav" style="top: 45px; left: 0;  visibility: hidden; position: absolute; z-index:1040;  background-color: lightgray;" onclick="closeNav()">
+<div id="mySidenav"
+     style="top: 45px; left: 0;  visibility: hidden; position: absolute; z-index:1040;  background-color: lightgray;"
+     onclick="closeNav()">
   <label class="closebtn" style="visibility: hidden" onclick="closeNav()">&times;</label>
 
   <ul class="ui-menu" id="menu" style="visibility: hidden">
-  <li><span onclick="toggleDiv('settings');">Asetukset...</span> <a class="help" data-href="#settings"></a></li>
-  <li><span onclick="toggleDiv('findDiv'); closeNav();">Pinnien lisääminen...</span> <a class="help" data-href="#addpins"></a></li>
-  <li><span onclick="showRoutePane(); closeNav()">Ajo-ohjeet...</span> <a class="help" data-href="#directions"></a></li>
-  <li><span onclick="showRoutePane(1); closeNav()">Ajo-ohjeet sample</span> <a class="help" data-href="#directions"></a></li>
-  <li><span onclick="showRoutePane(2); closeNav()">Ajo-ohjeet OSRM</span> <a class="help" data-href="#directions"></a></li>
-  <li><span onclick="toggleDiv('loadTrack'); ">Lataa track-tiedosto...</span> <a class="help" data-href="#loadtrack"></a></li>
-  <li><span onclick="toggleDiv('trackDiv'); ">Näytä track-tiedot</span> <a class="help" data-href="#showtrackdetails"></a></li>
-  <li><span onclick="toggleDiv('loadRoute'); ">Lataa reittitiedosto...</span>  <a class="help" data-href="#loadroute"></a></li>
-  <li><span onclick="toggleDiv('routeDiv'); ">Reitin suunnittelu...</span> <a class="help" data-href="#routeplan"></a></li>
-  <li><span onclick="toggleDiv('routeRaport'); ">Reittiraportti...</span> <a class="help" data-href="#routeraport"></a></li>
-  <li><span onclick="toggleDiv('loadAreas'); ">Alueet...</span>  <a class="help" data-href="#areas"></a></li>
-  <li><span onclick="googleDirections();">Ajo-ohjeet Google Mapsillä</span> <a class="help" data-href="#googledirections"></a></li>
-  <li><span onclick="toggleFullscreen()">Fullscreen</span></li>
-  <li><span onclick="checkMemoryUsage(); toggleDiv('about'); ">Pika-apu/Versio...</span></li>
+    <li><span onclick="toggleDiv('settings');">Asetukset...</span> <a class="help" data-href="#settings"></a></li>
+    <li><span onclick="toggleDiv('findDiv'); closeNav();">Pinnien lisääminen...</span> <a class="help"
+                                                                                          data-href="#addpins"></a></li>
+    <li><span onclick="showRoutePane(); closeNav()">Ajo-ohjeet...</span> <a class="help" data-href="#directions"></a>
+    </li>
+    <li><span onclick="showRoutePane(1); closeNav()">Ajo-ohjeet sample</span> <a class="help"
+                                                                                 data-href="#directions"></a></li>
+    <li><span onclick="showRoutePane(2); closeNav()">Ajo-ohjeet OSRM</span> <a class="help" data-href="#directions"></a>
+    </li>
+    <li><span onclick="toggleDiv('loadTrack'); ">Lataa track-tiedosto...</span> <a class="help"
+                                                                                   data-href="#loadtrack"></a></li>
+    <li><span onclick="toggleDiv('trackDiv'); ">Näytä track-tiedot</span> <a class="help"
+                                                                             data-href="#showtrackdetails"></a></li>
+    <li><span onclick="toggleDiv('loadRoute'); ">Lataa reittitiedosto...</span> <a class="help"
+                                                                                   data-href="#loadroute"></a></li>
+    <li><span onclick="toggleDiv('routeDiv'); ">Reitin suunnittelu...</span> <a class="help" data-href="#routeplan"></a>
+    </li>
+    <li><span onclick="toggleDiv('routeRaport'); ">Reittiraportti...</span> <a class="help"
+                                                                               data-href="#routeraport"></a></li>
+    <li><span onclick="toggleDiv('loadAreas'); ">Alueet...</span> <a class="help" data-href="#areas"></a></li>
+    <li><span onclick="googleDirections();">Ajo-ohjeet Google Mapsillä</span> <a class="help"
+                                                                                 data-href="#googledirections"></a></li>
+    <li><span onclick="toggleFullscreen()">Fullscreen</span></li>
+    <li><span onclick="checkMemoryUsage(); toggleDiv('about'); ">Pika-apu/Versio...</span></li>
   </ul>
   <!--Muista muuttaa korkeus openNav  (tai tee tähän tyyli automaattiseksi) -->
 </div>
 
 
 <div class="layout-container">
-<!--suppress HtmlFormInputWithoutLabel -->
-<div id="findDiv" class="ui-layout-north">
-  <label class="closebtn" style="top: -10px" onclick=closeParent(this)>&times;</label>
-  <div id="pinDiv" style="margin-left: 35px">
-    <!-- <label class="hamburgerSpace"> </label> -->
-    <label><!--suppress JSDeprecatedSymbols -->
-      <input type="text" name="editPinLoc" id="editPinLoc" value="Tontuntie"
-           onkeyup="checkAddPinText()"
-           onkeydown="if(event.key === 'Enter') { addPin(); event.preventDefault(); }" /></label>
-    <span class ="clearButton" id="buttonClearText" onclick="setPinInputText('')">x</span>
-    <button type="button" id="buttonAddPin" onclick="addPin()">Etsi</button>
-    <span id="pinButtons" style="display: none;">
+  <!--suppress HtmlFormInputWithoutLabel -->
+  <div id="findDiv" class="ui-layout-north">
+    <label class="closebtn" style="top: -10px" onclick=closeParent(this)>&times;</label>
+    <div id="pinDiv" style="margin-left: 35px">
+      <!-- <label class="hamburgerSpace"> </label> -->
+      <label><!--suppress JSDeprecatedSymbols -->
+        <input type="text" name="editPinLoc" id="editPinLoc" value="Tontuntie"
+               onkeyup="checkAddPinText()"
+               onkeydown="if(event.key === 'Enter') { addPin(); event.preventDefault(); }"/></label>
+      <span class="clearButton" id="buttonClearText" onclick="setPinInputText('')">x</span>
+      <button type="button" id="buttonAddPin" onclick="addPin()">Etsi</button>
+      <span id="pinButtons" style="display: none;">
       <button title="Vaihda pinnin tiedot" class="icon-btn" onclick="changePinData()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2">
           <path d="M3 17.25V21h3.75l11.06-11.06-3.75-3.75L3 17.25z"/>
           <path d="M20.71 7.04a1 1 0 0 0 0-1.42l-2.34-2.34a1 1 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
         </svg>
       </button>
-      <button title="Poista pinni" class="icon-btn"  onclick="removePin()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button title="Poista pinni" class="icon-btn" onclick="removePin()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="6" width="18" height="15" rx="2"/>
           <line x1="9" y1="10" x2="9" y2="19"/>
           <line x1="15" y1="10" x2="15" y2="19"/>
@@ -2725,78 +2901,96 @@ function routingStyleRound(meters) {
         </svg>
       </button>
     </span>
-    <a class="help" data-href="#find"></a>
-    <div style="display: inline-block; margin-left: 10px; white-space: nowrap;">
+      <a class="help" data-href="#find"></a>
+      <div style="display: inline-block; margin-left: 10px; white-space: nowrap;">
       <span id="searchSpan" style="visibility: hidden; display: none;">
-        <label><select id="searchCombo" ></select></label>
+        <label><select id="searchCombo"></select></label>
         <span class="searchClass" id="searchMsg"></span>
         <label class="closebtn2" style="margin-top: 10px;" onclick="clearSearchResults()">&times;</label>
       </span>
+      </div>
+      <span class="errorClass" id="errorMsg"></span>
     </div>
-    <span class="errorClass" id="errorMsg"></span>
   </div>
-</div>
 
-<div class="ui-layout-center">
-  <div id='map'></div>
-  <div class="logo"></div>
-  <div class="mapType">
+  <div class="ui-layout-center">
+    <div id='map'></div>
+    <div class="logo"></div>
+    <div class="mapType">
       <div class="ui-widget" style="z-index: 10;">
         <label class="hamburgerSpace"><select id="mapModeSelect"></select></label>&nbsp;
-        <span  id="distance" onclick="removeDistance()">0 km</span>
+        <span id="distance" onclick="removeDistance()">0 km</span>
       </div>
     </div>
     <div class="area1CBcopy">
-      <label for="area1cbCopy">✈️</label><br><input type="checkbox" title="Ilmatilat" id="area1cbCopy" name="area1cbCopy" value="area1cbCopy" />
+      <label for="area1cbCopy">✈️</label><br><input type="checkbox" title="Ilmatilat" id="area1cbCopy"
+                                                    name="area1cbCopy" value="area1cbCopy"/>
     </div>
-</div>
+  </div>
 </div>
 
 <div class="popup" id="settings" style="">
   <label class="closebtn" onclick="toggleDiv('settings'); adjustComponents()">&times;</label>
   <div class="popupIn">
     <h2>Asetukset</h2>
-    <label><input type="checkbox" id="HStationary" value="HStationary"  />Pidä H paikallaan</label>
-    <label><input type="checkbox" id="HCenter2" value="HCenter2"  />Pidä H keskellä <a class="help" data-href="#othersettings"></a></label><br>
+    <label><input type="checkbox" id="HStationary" value="HStationary"/>Pidä H paikallaan</label>
+    <label><input type="checkbox" id="HCenter2" value="HCenter2"/>Pidä H keskellä <a class="help"
+                                                                                     data-href="#othersettings"></a></label><br>
     <!-- <input type="checkbox" id="showAccuracy" value="showAccuray"  />Näytä tarkkuusympyrä<br> -->
-    <label><input type="checkbox" id="readGPS" value="readGPS"  />Lue GPS:ää</label><br>
-    <label><input type="checkbox" name="followMe" id="followMe" value="followMe"  />Piirrä oma jälki</label>
-    <label><input type="text" name="editFollowMeColor" id="editFollowMeColor" value="orange" size="8" /></label>
-    <label><input type="text" name="editFollowMeWidth" id="editFollowMeWidth" value="3" size="1" /> pt</label><br>
-    <label><input type="checkbox" name="selectNewPin" id="selectNewPin" value="selectNewPin"  />Valitse uusi pin aktiiviseksi</label><br>
-    <label><input type="checkbox" name="flipPins" id="flipPins" value="flipPins" title="Kosketusnäytöllä parempi, vaikuttaa uusiin pinneihin." />Käännä pinnit</label><br>
+    <label><input type="checkbox" id="readGPS" value="readGPS"/>Lue GPS:ää</label><br>
+    <label><input type="checkbox" name="followMe" id="followMe" value="followMe"/>Piirrä oma jälki</label>
+    <label><input type="text" name="editFollowMeColor" id="editFollowMeColor" value="orange" size="8"/></label>
+    <label><input type="text" name="editFollowMeWidth" id="editFollowMeWidth" value="3" size="1"/> pt</label><br>
+    <label><input type="checkbox" name="selectNewPin" id="selectNewPin" value="selectNewPin"/>Valitse uusi pin
+      aktiiviseksi</label><br>
+    <label><input type="checkbox" name="flipPins" id="flipPins" value="flipPins"
+                  title="Kosketusnäytöllä parempi, vaikuttaa uusiin pinneihin."/>Käännä pinnit</label><br>
     <!-- <input type="checkbox" name="useDummyRect" id="useDummyRect" value="useDummyRect"  />Käytä tyhjää hakualuetta (jos ei osaa hakea)<br> -->
-    <span id="preventSleepSpan"><label><input type="checkbox" name="preventSleep" id="preventSleep" value="preventSleep"  />Estä näytön sammuminen</label></span><br>
-    <span id="spanUseCache"><label><input type="checkbox" name="useCache" id="useCache" value="useCache"  />Käytä paikallista muistia <a class="help" data-href="#usecache"></a></label></span><br>
-    <label><input type="checkbox" id="drawDistanceLine" value="drawDistanceLine"  />Piirrä mittaviivaa</label>
-    <label><input type="checkbox" id="calcDistanceSum" value="calcDistanceSum"  />Laske summaa <a class="help" data-href="#addpins"></a></label><br>
-    <label><input type="checkbox" id="showZoomButtons" value="showZoomButtons"  />Näytä Zoom-painikkeet (+/-)</label><br>
+    <span id="preventSleepSpan"><label><input type="checkbox" name="preventSleep" id="preventSleep"
+                                              value="preventSleep"/>Estä näytön sammuminen</label></span><br>
+    <span id="spanUseCache"><label><input type="checkbox" name="useCache" id="useCache" value="useCache"/>Käytä paikallista muistia <a
+      class="help" data-href="#usecache"></a></label></span><br>
+    <label><input type="checkbox" id="drawDistanceLine" value="drawDistanceLine"/>Piirrä mittaviivaa</label>
+    <label><input type="checkbox" id="calcDistanceSum" value="calcDistanceSum"/>Laske summaa <a class="help"
+                                                                                                data-href="#addpins"></a></label><br>
+    <label><input type="checkbox" id="showZoomButtons" value="showZoomButtons"/>Näytä Zoom-painikkeet (+/-)</label><br>
     <br><br>
 
 
     <div class="ui-widget" id="followDiv">
       <div id="followArea">
-        <button type="button" onclick="toggleDiv('followArea', false); toggleDiv('accountArea', true);" >Tilaa käyttäjätunnus (ID)...</button><a class="help" data-href="#userid"></a>
+        <button type="button" onclick="toggleDiv('followArea', false); toggleDiv('accountArea', true);">Tilaa
+          käyttäjätunnus (ID)...
+        </button>
+        <a class="help" data-href="#userid"></a>
         <hr>
-        <div id="accountArea2"><p><b>Oman paikan lähettäminen ja muiden seuraaminen:</b><a class="help" data-href="#followsettings"></a></p>
-          <label for="editTag">Kartalla näkyvä tunnus: </label><input type="text" name="editTag" id="editTag" value="" size="5" /><br>
-          <label for="editLog">logname: </label><input type="text" name="editLog" id="editLog" value="" size="12" /><br>
-          <label for="editInterval">interval/ms: </label><input type="text" name="editInterval" id="editInterval" value="5000" size="8" /><br>
-          <label for="editUsersTofollow">Seurattavat käyttäjät: </label><input type="text" name="editUsersTofollow" id="editUsersTofollow" value="" size="15" /><br>
+        <div id="accountArea2"><p><b>Oman paikan lähettäminen ja muiden seuraaminen:</b><a class="help"
+                                                                                           data-href="#followsettings"></a>
+        </p>
+          <label for="editTag">Kartalla näkyvä tunnus: </label><input type="text" name="editTag" id="editTag" value=""
+                                                                      size="5"/><br>
+          <label for="editLog">logname: </label><input type="text" name="editLog" id="editLog" value="" size="12"/><br>
+          <label for="editInterval">interval/ms: </label><input type="text" name="editInterval" id="editInterval"
+                                                                value="5000" size="8"/><br>
+          <label for="editUsersTofollow">Seurattavat käyttäjät: </label><input type="text" name="editUsersTofollow"
+                                                                               id="editUsersTofollow" value=""
+                                                                               size="15"/><br>
         </div>
         <br>
-        <button type="button" onclick="getfollow(); toggleDiv('settings', false);">Hae muiden paikka</button> (jos automaatti ei ole päällä)<br>
+        <button type="button" onclick="getfollow(); toggleDiv('settings', false);">Hae muiden paikka</button>
+        (jos automaatti ei ole päällä)<br>
         <br>
-        <label><input type="checkbox" name="follow" id="follow" value="follow"  />Seuraa muita automaattisesti</label><br>
-        <label><input type="checkbox" name="drawLogLine" id="drawLogLine" value="drawLogLine"  />Piirrä viivaa seurattavista</label><br>
-        <label><input type="checkbox" id="send" value="send"  />Lähetä omaa paikkaa</label><br>
+        <label><input type="checkbox" name="follow" id="follow" value="follow"/>Seuraa muita automaattisesti</label><br>
+        <label><input type="checkbox" name="drawLogLine" id="drawLogLine" value="drawLogLine"/>Piirrä viivaa
+          seurattavista</label><br>
+        <label><input type="checkbox" id="send" value="send"/>Lähetä omaa paikkaa</label><br>
         <hr>
         <div id="compArea"><p><b>Mittareiden arvot</b> <a class="help" data-href="#gauges"></a></p>
-          <label><input type="checkbox" name="useComps" id="useComps" value="useComps"  />Näytä mittarit</label><br>
+          <label><input type="checkbox" name="useComps" id="useComps" value="useComps"/>Näytä mittarit</label><br>
           <div id="showCompsSettings">
-            <label><input type="checkbox" id="useCompsWindow" value="useCompsWindow"  />Näytä ikkunassa</label><br>
-            <span><br>Taustan väri: </span> <label><input type="text" id="editCompsBackground" value="rgba(0,0,0,1.0)"  /></label><br>
-            <span><br>Fontin väri: </span> <label><input type="text" id="editCompsColor" value="white"  /></label><br>
+            <label><input type="checkbox" id="useCompsWindow" value="useCompsWindow"/>Näytä ikkunassa</label><br>
+            <span><br>Taustan väri: </span> <label><input type="text" id="editCompsBackground" value="rgba(0,0,0,1.0)"/></label><br>
+            <span><br>Fontin väri: </span> <label><input type="text" id="editCompsColor" value="white"/></label><br>
             <span style="font-size: 10px">Ruksi mittarit joita haluat käyttää</span>
             <table id="tableCompsSettings">
             </table>
@@ -2807,15 +3001,19 @@ function routingStyleRound(meters) {
       <div id="accountArea">
         <br>
 
-        <label for="editEmail">Email: </label><input type="text" name="editEmail" id="editEmail" value="" size="25" /><a class="help" data-href="#userid"></a><br>
-        <label for="editId">id: </label><input type="text" name="editId" id="editId" value="" size="15" /><br>
+        <label for="editEmail">Email: </label><input type="text" name="editEmail" id="editEmail" value="" size="25"/><a
+        class="help" data-href="#userid"></a><br>
+        <label for="editId">id: </label><input type="text" name="editId" id="editId" value="" size="15"/><br>
         <br>
-        <button id="getId">Hae uusi ID</button><a class="help" data-href="#userid"></a>
+        <button id="getId">Hae uusi ID</button>
+        <a class="help" data-href="#userid"></a>
         <br>
         <br>
-        <span class="idMsg" id = "idMsg"></span>
+        <span class="idMsg" id="idMsg"></span>
         <br>
-        <button type="button" onclick="toggleDiv('followArea', true); toggleDiv('accountArea', false);" >Palaa seuranta-asetuksiin...</button>
+        <button type="button" onclick="toggleDiv('followArea', true); toggleDiv('accountArea', false);">Palaa
+          seuranta-asetuksiin...
+        </button>
         <p>Eri reitityspalvelujen API-avaimia</p>
         <label>HERE API-key<input type="text" id="hereApiKey"></label>
       </div>
@@ -2826,23 +3024,25 @@ function routingStyleRound(meters) {
 <div class="popup" id="about" style=" ">
   <label class="closebtn" onclick="toggleDiv('about')">&times;</label>
   <div class="popupIn">
-  <p>Kartta versio: <span id="version-display">?</span>&nbsp;&nbsp;
-  <button id="clear-worker" onclick="clearServiceWorker()">Tarkista uusi versio</button><br>
-  </p>
-  <p id="memoryUsage">Muistin käyttö: ?</p>
-  <h2>Pika-ohjeet</h2>
+    <p>Kartta versio: <span id="version-display">?</span>&nbsp;&nbsp;
+      <button id="clear-worker" onclick="clearServiceWorker()">Tarkista uusi versio</button>
+      <br>
+    </p>
+    <p id="memoryUsage">Muistin käyttö: ?</p>
+    <h2>Pika-ohjeet</h2>
 
-  <p>Dataa tähän karttaan voit lähettää <a href="https://trac.cc.jyu.fi/projects/dotnet/wiki/CycloLite">CycloLite</a>llä,
-  <a href="https://play.google.com/store/apps/details?id=jyu.sendpos&hl=en_IE">SendPos Androidilla</a>
-    tai <a href="s.html">Lähetys-sivulla</a>.</p>
-  <p>
-    Tunnukset voit tehdä <a href="javascript:void(0)" onclick="toggleDiv('about'); toggleDiv('settings')">asetuksista</a> tai
-  <a href="account.html">tilien hallinta</a>-sivulla.
-  </p>
-  <p>
-  <a href="https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta" target="blank">Ohjeet</a>.
-  </p>
-   <button class="close" onclick="toggleDiv('about')">Sulje</button>
+    <p>Dataa tähän karttaan voit lähettää <a href="https://trac.cc.jyu.fi/projects/dotnet/wiki/CycloLite">CycloLite</a>llä,
+      <a href="https://play.google.com/store/apps/details?id=jyu.sendpos&hl=en_IE">SendPos Androidilla</a>
+      tai <a href="s.html">Lähetys-sivulla</a>.</p>
+    <p>
+      Tunnukset voit tehdä <a href="javascript:void(0)"
+                              onclick="toggleDiv('about'); toggleDiv('settings')">asetuksista</a> tai
+      <a href="account.html">tilien hallinta</a>-sivulla.
+    </p>
+    <p>
+      <a href="https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta" target="blank">Ohjeet</a>.
+    </p>
+    <button class="close" onclick="toggleDiv('about')">Sulje</button>
   </div>
 </div>
 
@@ -2853,42 +3053,51 @@ function routingStyleRound(meters) {
     <p>Valitse mitä alueita haluat käyttää</p>
     <div id="loadAreasIn">
       <table>
-        <tr><th>Alue</th><th>Oma väritys</th><th>Optiot</th></tr>
-        <tr><td><label><input type="checkbox" name="area1cb" id="area1cb" value="area1" />Alue 1</label></td>
-            <td><label><input type="checkbox" name="area1cbOwn" id="area1cbOwn" value="area1" /></label></td>
-            <td><label><input type="text" name="area1cbOpt" id="area1cbOpt" value="c:gray/60,w:8,f:" /></label></td>
+        <tr>
+          <th>Alue</th>
+          <th>Oma väritys</th>
+          <th>Optiot</th>
         </tr>
-        <tr><td><label><input type="checkbox" name="area2cb" id="area2cb" value="area2" />Alue 1</label></td>
-            <td><label><input type="checkbox" name="area2cbOwn" id="area2cbOwn" value="area2" /></label></td>
-            <td><label><input type="text" name="area2cbOpt" id="area2cbOpt" value="c:red/60,w:8,f:red/30" /></label></td>
+        <tr>
+          <td><label><input type="checkbox" name="area1cb" id="area1cb" value="area1"/>Alue 1</label></td>
+          <td><label><input type="checkbox" name="area1cbOwn" id="area1cbOwn" value="area1"/></label></td>
+          <td><label><input type="text" name="area1cbOpt" id="area1cbOpt" value="c:gray/60,w:8,f:"/></label></td>
         </tr>
-        <tr><td><label><input type="checkbox" name="area3cb" id="area3cb" value="area3" />Alue 1</label></td>
-            <td><label><input type="checkbox" name="area3cbOwn" id="area3cbOwn" value="area3" /></label></td>
-            <td><label><input type="text" name="area3cbOpt" id="area3cbOpt" value="c:red/80,w:8,f:red/30" /></label></td>
+        <tr>
+          <td><label><input type="checkbox" name="area2cb" id="area2cb" value="area2"/>Alue 1</label></td>
+          <td><label><input type="checkbox" name="area2cbOwn" id="area2cbOwn" value="area2"/></label></td>
+          <td><label><input type="text" name="area2cbOpt" id="area2cbOpt" value="c:red/60,w:8,f:red/30"/></label></td>
+        </tr>
+        <tr>
+          <td><label><input type="checkbox" name="area3cb" id="area3cb" value="area3"/>Alue 1</label></td>
+          <td><label><input type="checkbox" name="area3cbOwn" id="area3cbOwn" value="area3"/></label></td>
+          <td><label><input type="text" name="area3cbOpt" id="area3cbOpt" value="c:red/80,w:8,f:red/30"/></label></td>
         </tr>
       </table>
       <br>
-      <p>Tarkista kuitenkin alueiden korkeudet ja voimassaoloajat <a id="flykLink" href="https://flyk.com/map?lang=fi&pilot#p=7.11/60.837/27.172" target="flyk">FLYK-kartasta</a>!</p>
+      <p>Tarkista kuitenkin alueiden korkeudet ja voimassaoloajat <a id="flykLink"
+                                                                     href="https://flyk.com/map?lang=fi&pilot#p=7.11/60.837/27.172"
+                                                                     target="flyk">FLYK-kartasta</a>!</p>
       <!--
       <p>Muut alueet: (kirjoita URL-osoiteet, joista saadaan ladattua alueiden JSONit)</p>
       <textarea  name="editRaport" id="editLoadAreas" class="loadAreasTextArea"  rows="10">
       </textarea>
       -->
-   </div>
+    </div>
   </div>
 </div>
 
- <div id="openShowComps"  style="bottom: 3em; left: 0; position: absolute; z-index:1011" onclick="showCompsDiv(true)">
-   <span style="font-size: 30px;">></span>
- </div>
- <div id="showComps" class="showComps" style="bottom: 0; left: 0; position: absolute; z-index:1012">
- </div>
+<div id="openShowComps" style="bottom: 3em; left: 0; position: absolute; z-index:1011" onclick="showCompsDiv(true)">
+  <span style="font-size: 30px;">></span>
+</div>
+<div id="showComps" class="showComps" style="bottom: 0; left: 0; position: absolute; z-index:1012">
+</div>
 
 
 <div style="bottom: 0; right: 0; position: absolute; z-index:1013; background-color: white;">
-   	<span class="coord" id="coord"></span>
-   <a class="link" onclick="copyToUrl()">Laita&nbsp;URLiin</a>
- </div>
+  <span class="coord" id="coord"></span>
+  <a class="link" onclick="copyToUrl()">Laita&nbsp;URLiin</a>
+</div>
 
 </body>
 </html>
