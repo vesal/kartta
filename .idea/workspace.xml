@@ -9,8 +9,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MapWrapperLeafLet.js" beforeDir="false" afterPath="$PROJECT_DIR$/MapWrapperLeafLet.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/offline-worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/offline-worker.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routersLeaflet.js" beforeDir="false" afterPath="$PROJECT_DIR$/routersLeaflet.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -63,7 +67,7 @@
     "JavaScript Debug.k.html.executor": "Debug",
     "JavaScript Debug.k3.html.executor": "Debug",
     "JavaScript Debug.meribrowser.html.executor": "Debug",
-    "Python.IncrementVersion.executor": "Run",
+    "Python.IncrementVersion.executor": "Debug",
     "Python.convertFlykKartta.executor": "Debug",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -88,7 +92,7 @@
       <recent name="E:\riippu\kartta\src" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.IncrementVersion">
+  <component name="RunManager" selected="JavaScript Debug.k3.html">
     <configuration name="dr" type="JavascriptDebugType" uri="http://localhost:63342/kartta/src/dr.html">
       <method v="2" />
     </configuration>
@@ -162,8 +166,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.IncrementVersion" />
         <item itemvalue="JavaScript Debug.k3.html" />
+        <item itemvalue="Python.IncrementVersion" />
         <item itemvalue="JavaScript Debug.meribrowser.html" />
         <item itemvalue="JavaScript Debug.k.html" />
         <item itemvalue="Python.convertFlykKartta" />
@@ -208,7 +212,7 @@
       <workItem from="1754836285386" duration="11554000" />
       <workItem from="1754904718618" duration="251000" />
       <workItem from="1754904988042" duration="228616000" />
-      <workItem from="1756132556973" duration="126002000" />
+      <workItem from="1756132556973" duration="155658000" />
     </task>
     <servers />
   </component>
@@ -239,10 +243,22 @@
           <option name="timeStamp" value="89" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/routersLeaflet.js</url>
-          <line>192</line>
+          <url>https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js</url>
+          <line>18003</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="303" />
+          <option name="timeStamp" value="316" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/routersLeaflet.js</url>
+          <line>256</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="329" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/routersLeaflet.js</url>
+          <line>377</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="338" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -256,13 +272,13 @@
     <watches-manager>
       <configuration name="JavascriptDebugType">
         <watch expression="url.pathname" language="JavaScript" />
-        <watch expression="!Localization[this._langs[i]]" />
+        <watch expression="window.osrmTextInstructions" language="JavaScript" />
         <watch expression="Localization" language="JavaScript" />
       </configuration>
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/kartta$convertFlykKartta.coverage" NAME="convertFlykKartta Coverage Results" MODIFIED="1750688971217" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/kartta$IncrementVersion.coverage" NAME="IncrementVersion Coverage Results" MODIFIED="1756497663756" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/kartta$IncrementVersion.coverage" NAME="IncrementVersion Coverage Results" MODIFIED="1756542592369" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

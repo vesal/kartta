@@ -448,7 +448,19 @@ function loadRoutingMachine(callback) {
     });
   }
 
-  Promise.all([loadCSS(), loadJS(), loadRouter()]).then(() => {
+  // Load osrm-text-instructions from CDN
+  function loadOsrmTextInstructions() {
+    return new Promise(resolve => {
+      if (window.osrmTextInstructions) return resolve();
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/osrm-text-instructions@latest/dist/osrm-text-instructions.js';
+      script.onload = resolve;
+      script.onerror = resolve;
+      document.head.appendChild(script);
+    });
+  }
+
+  Promise.all([loadCSS(), loadJS(), loadRouter(), loadOsrmTextInstructions()]).then(() => {
     if (callback) callback();
   });
 }

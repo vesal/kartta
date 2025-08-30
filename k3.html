@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.23">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.25">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -1657,7 +1657,7 @@
   //#region Initialization
   function showVersion() {
     const manifestLink = document.getElementById('manifest-link');
-    const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.21"
+    const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.23"
 
     // Parsitaan query-parametri
     const url = new URL(href, window.location.href);
@@ -2772,7 +2772,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
           findRouteHERE(from, to, options.hereApiKey, initRoutingEvents, true);
           break;
         case 2:
-          findRouteOSRM(from, to, options.hereApiKey, initRoutingEvents);
+          findRouteOSRM(from, to, initRoutingEvents);
           break;
         default:
           return;
@@ -2873,6 +2873,8 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
                                                                                  data-href="#googledirections"></a></li>
     <li><span onclick="toggleFullscreen()">Fullscreen</span></li>
     <li><span onclick="checkMemoryUsage(); toggleDiv('about'); ">Pika-apu/Versio...</span></li>
+    <li><span onclick="clearServiceWorker()">Tarkista uusi versio</span></li>
+
   </ul>
   <!--Muista muuttaa korkeus openNav  (tai tee tähän tyyli automaattiseksi) -->
 </div>
