@@ -83,29 +83,31 @@ function processRouteData(text, waypoints) {
           let road = a.roadName;
           let distance = a.length;
 
+          const m = {};
+          const step = {maneuver: m};
+          step.name = roadName;
+          m.type = a.action;
+          m.mode = mode;
+          m.modifier = a.direction;
+
           switch (type) {
             case "turn":
               // text = `Käänny ${direction} tielle ${roadName}`;
-              text = `Suaatatko kiäntyä ${direction} tiellepä ${roadName}`;
               modifier = a.direction;
               if (a.direction === "left" || a.direction === "slight left" || a.direction === "sharp left") {
                 type = "Left"; // LRM tyyppi
-                mode = "driving"
                 modifier = "Left"
               } else {
                 type = "Right"; // LRM tyyppi
-                mode = "driving"
                 modifier = "Right"
               }
               break;
             case "depart":
-              text = `Lähde tieltä ${roadName}`;
               type = "Head"; // LRM tyyppi
               mode = "driving"
               break;
             case "arrive":
               type = "DestinationReached"
-              text = "Saavut perille";
               break;
             case "roundaboutEnter":
               if (i < actions.length - 1 && actions[i + 1].action === "roundaboutExit") {
@@ -113,12 +115,13 @@ function processRouteData(text, waypoints) {
                 exit = nexta.exit || 1;
               }
               type = "Roundabout";
+              m.type = "roundabout";
               distance = 0;
               modifier = "SlightRight"; // aina oikea
-              text = `Aja liikenneympyrään ja poistu liittymästä ${exit}`;
               break;
             case "roundaboutExit":
               type = "SlightRight";
+              m.type = "exit roundabout";
               modifier = "SlightRight"; // aina oikea
               let exitTo = "";
               if (roadName !== "") exitTo = " tielle " + roadName;
@@ -126,18 +129,18 @@ function processRouteData(text, waypoints) {
               break;
             case "merge":
               type = "Merge";
-              text = `Liity tielle ${roadName}`;
               break;
             case "continue":
               type = "Continue";
-              text = `Jatka suoraan tielle ${roadName}`;
               break;
             case "enterHighway":
               type = "Motorway";
               text = `Liity moottoritielle ${roadName}`;
+              m.type = "merge"
               break;
             case "keep":
               type = "Continue";
+              m.type = "continue";
               modifier = a.direction;
               if (a.direction === "right") {
                 text = `Ryhmity oikealle tielle ${roadName}`;
@@ -151,10 +154,13 @@ function processRouteData(text, waypoints) {
               type = "Exit";
               modifier = "SlightRight"; // aina oikea
               text = `Poistu tieltä ${roadName} kohti ${a.signpost?.labels?.[0]?.routeNumber?.value ?? "oikea"}`;
+              step.name = `${a.signpost?.labels?.[0]?.routeNumber?.value ?? "oikea"}`;
               break;
             default:
               text = a.action; // fallback
           }
+          m.exit = exit;
+          text = routeStepToText(step, i); // käytä OSRM-tyyliä
           instructions.push(
             {
               text: text,
@@ -343,7 +349,7 @@ function findRouteOSRM2(from, to, callback) {
   return mapWrapper.routingControl;
 }
 
-function osrmStepToText(step, index) {
+function routeStepToTextSavo(step, index) {
   const m = step.maneuver;
   let suunta = "";
   switch (m.modifier) {
@@ -361,7 +367,7 @@ function osrmStepToText(step, index) {
     case "roundabout":
       return `Meehhä ympyrää ja luikaha pihalle kolosta ${m.exit}`;
     case "exit roundabout":
-      return `Kurvoo pihalle paekasta ${m.exit}`;
+      return `Kurvoo pihalle paekasta ${m.exit}, suuntoo ${step.name}`;
     case "roundabout turn":
       return `Tee jottai ympyrässä`;
     case "merge":
@@ -371,14 +377,30 @@ function osrmStepToText(step, index) {
     case "new name":
       return `Tuuppoo ${suunta} tielle ${step.name}`;
     case "end of road":
-      return `viennä ${suunta} tielle ${step.name}`;
+      return `Viennä ${suunta} tielle ${step.name}`;
+    case "continue":
+      return `Hurrauta sammaan suuntaa ${suunta} tielle ${step.name}`;
+    case "exit rotary":
+      return `Tempasehan syrjöö ${suunta}, suuntoo ${step.name}`;
+    case "exit":
+      return `Tempasehan syrjöö ${suunta}, suuntoo ${step.name}`;
     case "arrive":
-      return "Kahh siinähä o";
+      return "Kahh siinähä oot!";
   }
-  return "No höh"; // fallback if not found
+  return `No höh! ${m.type} ${suunta} ${step.name}`; // fallback if not found
+}
+
+function routeStepToText(step, index) {
+  return routeStepToTextSavo(step, index);
 }
 
 function findRouteOSRM(from, to, callback) {
+
+    const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    const osrmServer = isLocalhost
+      ? "http://localhost:5000"
+      : "https://router.project-osrm.org";
+
 
    if (mapWrapper.routingControl) {
     mapWrapper.map.removeControl(mapWrapper.routingControl);
@@ -386,7 +408,7 @@ function findRouteOSRM(from, to, callback) {
 
   if (!mapWrapper.L.Routing) {
     // fetch(`https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`)
-    fetch(`http://localhost:5000/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`)
+    fetch(`${osrmServer}/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`)
       .then(res => res.json())
       .then(data => {
         const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
@@ -401,7 +423,10 @@ function findRouteOSRM(from, to, callback) {
       mapWrapper.L.latLng(from[0], from[1]),
       mapWrapper.L.latLng(to[0], to[1])
     ],
-    router: new mapWrapper.L.Routing.OSRMv1({stepToText: osrmStepToText}),
+    router: new mapWrapper.L.Routing.OSRMv1({
+      stepToText: routeStepToText,
+      serviceUrl: osrmServer + '/route/v1'
+    }),
     routeWhileDragging: true,
     showAlternatives: true,
     lineOptions: {
