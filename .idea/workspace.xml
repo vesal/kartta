@@ -10,6 +10,7 @@
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routersLeaflet.js" beforeDir="false" afterPath="$PROJECT_DIR$/routersLeaflet.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -207,7 +208,7 @@
       <workItem from="1754836285386" duration="11554000" />
       <workItem from="1754904718618" duration="251000" />
       <workItem from="1754904988042" duration="228616000" />
-      <workItem from="1756132556973" duration="159933000" />
+      <workItem from="1756132556973" duration="165384000" />
     </task>
     <servers />
   </component>
@@ -245,16 +246,9 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/routersLeaflet.js</url>
-          <line>262</line>
+          <line>384</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="329" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <condition expression="text === &quot;No höh&quot;" language="JavaScript" />
-          <url>file://$PROJECT_DIR$/routersLeaflet.js</url>
-          <line>163</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="342" />
+          <option name="timeStamp" value="347" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

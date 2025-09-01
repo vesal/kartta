@@ -80,7 +80,6 @@ function processRouteData(text, waypoints) {
           let text;
           let modifier = null;
           let mode = "driving";
-          let road = a.roadName;
           let distance = a.length;
 
           const m = {};
@@ -230,57 +229,6 @@ function createHereRouter() {
   return hereRouter;
 } // createHereRouter
 
-let OSMRRouter = null;
-
-function createOSMRRouter() {
-  if (OSMRRouter) return OSMRRouter;
-  // noinspection JSUnresolvedReference,TypeScriptUMDGlobal
-  const osmrRouter = L.Routing.OSRMv1.extend({
-    options: {
-      serviceUrl: 'http://localhost:5000/route/v1/driving',
-      // apiKey: apikey // <-- korvaa omalla avaimellasi
-    },
-    route: function (waypoints, callback, context, options) {
-      if (this.options.useSample) {
-        // Paikallinen JSON (cache)
-        const routeObjs = processRouteData(sampleRouteData, waypoints);
-        setTimeout(() => {
-          callback.call(context, null, routeObjs);
-        }, 0);
-      } else {  // hae oikeasti netistä
-        const coords = waypoints.map(wp => `${wp.latLng.lng},${wp.latLng.lat}`);
-        const serverUrl = `${this.options.serviceUrl}/${coords[0]};${coords[coords.length-1]}?overview=full&alternatives=3&steps=true&geometries=geojson`;
-
-        // Käytä PHP-proxya
-        const proxyUrl = serverUrl;
-        const convertRoute = this._convertRoute;
-
-        // Hae HERE API:sta
-        fetch(proxyUrl)
-          .then(res => res.text())
-          .then(text => {
-            // const routeObjs = processRouteData(text, waypoints);
-            const routes =  JSON.parse(text);
-            const routeObjs = [];
-            const rs = routes.routes || [];
-            for (let i = 0; i < rs.length; i++) {
-              const routeObj = convertRoute(rs[i], waypoints);
-              routeObj.name = `Reitti ${i+1}/${routes.length} = ${(routeObj.summary.totalDistance / 1000).toFixed(1)} km`;
-              routeObjs.push(routeObj);
-            }
-            callback.call(context, null, routeObjs);
-          })
-          .catch(err => {
-            console.error("Routing fetch error:", err);
-            callback.call(context, err, []);
-          });
-      }
-    }
-  });
-  OSMRRouter = osmrRouter;
-  return osmrRouter;
-} // createOSMRRouter
-
 
 function findRouteHERE(from, to, apiKey, callback, useSample = false) {
   // Poista vanha reitti, jos se on olemassa
@@ -315,39 +263,53 @@ function findRouteHERE(from, to, apiKey, callback, useSample = false) {
 }
 
 
-function findRouteOSRM2(from, to, callback) {
-
-   if (mapWrapper.routingControl) {
-    mapWrapper.map.removeControl(mapWrapper.routingControl);
-  }
-
-  createOSMRRouter();
-
-  mapWrapper.routingControl = mapWrapper.L.Routing.control({
-    // language: 'fi',  // ei toimi
-    waypoints: [
-      mapWrapper.L.latLng(from[0], from[1]),
-      mapWrapper.L.latLng(to[0], to[1])
-    ],
-    router: new OSMRRouter(),
-    routeWhileDragging: true,
-    showAlternatives: true,
-    lineOptions: {
-      styles: [{color: 'blue', opacity: 0.8, weight: 6}]
-    },
-    altLineOptions: {
-      styles: [{color: 'gray', opacity: 0.5, weight: 5}]
-    }
-  });
-
-  mapWrapper.routingControl.addTo(mapWrapper.map);
-
-  mapWrapper.routingControl.on('routesfound', function (e) {
-    mapWrapper.routingControl.currentRoutes = e.routes; // talletetaan kaikki reitit
-    if (callback) callback(mapWrapper.routingControl);
-  });
-  return mapWrapper.routingControl;
+let selectedDialect = "savo"; // "suomi", "savo"
+const stepToTextFunctions = {
+  "suomi": routeStepToTextSuomi,
+  "savo": routeStepToTextSavo
 }
+
+function routeStepToTextSuomi(step, index) {
+  const m = step.maneuver;
+  let suunta = "";
+  switch (m.modifier) {
+    case "left": suunta = "vasemmalle"; break;
+    case "right": suunta = "oikealle"; break;
+    case "straight": suunta = "suoraan"; break;
+    case "slight right": suunta = "loivasti oikealle"; break;
+    case "slight left": suunta = "loivasti vasemmalle"; break;
+  }
+  switch (m.type) {
+    case "depart":
+      return `Aja tielle ${step.name} suuntaan ${m.bearing_after} astetta`;
+    case "turn":
+      return `Käänny ${suunta} tielle ${step.name}`;
+    case "roundabout":
+      return `Aja liikenneympyrään ja posti liittymästä ${m.exit}`;
+    case "exit roundabout":
+      return `Poistu liittymästä ${m.exit}, suuntaan ${step.name}`;
+    case "roundabout turn":
+      return `Tee jotakin ympyrässä`;
+    case "merge":
+      return `Liity tielle ${step.name}`;
+    case "off ramp":
+      return `Postu tieltä ${step.name}`;
+    case "new name":
+      return `Aja ${suunta} tielle ${step.name}`;
+    case "end of road":
+      return `Käänny ${suunta} tielle ${step.name}`;
+    case "continue":
+      return `Jatka samaan suuntaan ${suunta} tielle ${step.name}`;
+    case "exit rotary":
+      return `Postu ${suunta}, suuntaan ${step.name}`;
+    case "exit":
+      return `Postu ${suunta}, suuntaan ${step.name}`;
+    case "arrive":
+      return "Olet perillä!";
+  }
+  return `No höh! ${m.type} ${suunta} ${step.name}`; // fallback if not found
+}
+
 
 function routeStepToTextSavo(step, index) {
   const m = step.maneuver;
@@ -390,13 +352,54 @@ function routeStepToTextSavo(step, index) {
   return `No höh! ${m.type} ${suunta} ${step.name}`; // fallback if not found
 }
 
+const textsForNumbersSuomi = {
+  ones: ["nolla", "yksi", "kaksi", "kolme", "neljä", "viisi", "kuusi", "seitsemän", "kahdeksan", "yhdeksän",
+    "kymmenen", "yksitoista", "kaksitoista", "kolmetoista", "neljätoista", "viisitoista", "kuusitoista", "seitsemäntoista", "kahdeksantoista", "yhdeksäntoista"],
+  tens: ["", "", "kaksikymmentä", "kolmekymmentä", "neljäkymmentä", "viisikymmentä", "kuusikymmentä", "seitsemänkymmentä", "kahdeksankymmentä", "yhdeksänkymmentä"],
+  hundreds: ["", "sata", "sataa"],
+  thousands: ["", "tuhat", "tuhatta"],
+  km: ["", "kilometri", "kilometriä"],
+  m: ["", "metri", "metriä"],
+}
+
+const textsForNumbersSavo = {
+  ones: ["nolla", "yks", "kaks", "kolome", "nelejä", "viis", "kuus", "seihtemän", "kaheksan", "yheksän",
+    "kymmene", "ykstoesta", "kakstoesta", "kolmetoesta", "neljätoesta", "viistoesta", "kuusitoesta", "seihtemäntoesta", "kaheksantoesta", "yheksäntoesta"],
+  tens: ["", "", "kakskymment", "kolmekymment", "neljäkymment", "viiskymment", "kuuskymment", "seihtemänkymment", "kaheksankymment", "yheksänkymment"],
+  hundreds: ["", "satta", "sattoo"],
+  thousands: ["", "tuhat", "tuhattoo"],
+  km: ["", "kilomeetri", "kilomeetrii"],
+  m: ["", "metri", "metrii"],
+}
+
+const textsForNumbers = {
+  suomi: textsForNumbersSuomi,
+  savo: textsForNumbersSavo
+}
+
+function numberToText(num, order) {
+  try {
+    return textsForNumbers[selectedDialect][order][num];
+  }
+  catch (e) {
+    return num.toString();
+  }
+}
+
 function routeStepToText(step, index) {
-  return routeStepToTextSavo(step, index);
+  return stepToTextFunctions[selectedDialect](step, index);
 }
 
 function findRouteOSRM(from, to, callback) {
 
     const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    // Lokaalia ORSM palvelinta varten asenna:
+    // ks: https://github.com/project-osrm/osrm-backend/pkgs/container/osrm-backend#using-docker
+    //  docker pull ghcr.io/project-osrm/osrm-backend:v6.0.0
+    //  Hae finland-latest.osm.pbf
+    //  docker run -t -v "${PWD}:/data" ghcr.io/project-osrm/osrm-backend osrm-extract -p /opt/car.lua /data/finland-latest.osm.pbf || echo "osrm-extract failed"
+    //  docker run -t -v "${PWD}:/data" ghcr.io/project-osrm/osrm-backend osrm-partition /data/finland-latest.osrm || echo "osrm-partition failed"
+    //  docker run -t -i -p 5000:5000 -v "${PWD}:/data" ghcr.io/project-osrm/osrm-backend osrm-routed --algorithm mld /data/finland-latest.osrm
     const osrmServer = isLocalhost
       ? "http://localhost:5000"
       : "https://router.project-osrm.org";
@@ -455,3 +458,118 @@ const sampleRouteData = `{"notices":[{"title":"The provided parameter '' is unkn
 // https://router.project-osrm.org/route/v1/driving/25.732646,62.299957250000006;25.777101516723633,62.255518627960456?overview=false&alternatives=true&steps=true&hints=;
 // http://localhost:5000/route/v1/driving/25.732741652606464,62.29987315843354;25.776157379150394,62.256577461867785?overview=full&geometries=geojson
 // https://router.project-osrm.org/route/v1/driving/25.732741652606464,62.29987315843354;25.77529907226563,62.25665737235106?overview=false&alternatives=true&steps=true&hints=;
+
+//#region Routing UI
+  let voicesInitialized = false;
+
+  function speakText(text) {
+    if (!('speechSynthesis' in window)) {
+      setError("ei puhetta!")
+      return;
+    }
+    if (!voicesInitialized) {
+      const voices = speechSynthesis.getVoices();
+      if (voices.length === 0) {
+        speechSynthesis.onvoiceschanged = () => {
+          // console.log(speechSynthesis.getVoices());
+          voicesInitialized = true;
+          speakText(text); // Retry speaking after voices are loaded
+        };
+        return;
+      }
+    }
+    voicesInitialized = true;
+    window.speechSynthesis.cancel(); // Stop any ongoing speech
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'fi-FI'; // Aseta haluttu kieli, esimerkiksi suomeksi
+    utterance.rate = 1.3;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function numberToFinnishWords(n) {
+    if (n < 20) {
+      return numberToText(n, "ones");
+    }
+    if (n < 100) {
+      if (n % 10 === 0) return numberToText(Math.floor(n / 10), "tens");
+      return numberToText(Math.floor(n / 10), "tens") + " " + numberToFinnishWords(n % 10);
+    }
+    if (n < 1000) {
+      if (n === 100) return numberToText(1, "hundreds");
+      if (n < 200) return numberToText(1, "hundreds") + " " + numberToFinnishWords(n % 100);
+      if (n % 100 === 0) return numberToFinnishWords(Math.floor(n / 100)) + " " + numberToText(2, "hundreds")
+      return numberToFinnishWords(Math.floor(n / 100)) + " " + numberToText(2, "hundreds") + " " + numberToFinnishWords(n % 100);
+    }
+    if (n < 10000) {
+      if (n === 1000) return numberToText(1, "thousands");
+      if (n % 1000 === 0) return numberToFinnishWords(Math.floor(n / 1000)) + " " + numberToText(2, "thousands");
+      return numberToFinnishWords(Math.floor(n / 1000)) + " " + numberToText(2, "thousands") + " " + numberToFinnishWords(n % 1000);
+    }
+    return n.toString(); // fallback
+  }
+
+  function numberToFinnishDistance(n) {
+    if (n === 0) return "";
+    if (n >= 1000) {
+      const km = Math.floor(n / 1000);
+      const m = n % 1000;
+      let result = (km === 1 ? numberToText(1, "km") : numberToFinnishWords(km) + " " + numberToText(2, "km"));
+      if (m > 0) {
+        result += " " + numberToFinnishWords(m) + " " + numberToText(2, "m");
+      }
+      return result;
+    }
+    return numberToFinnishWords(n) + " metriä";
+  }
+
+
+  function initRoutingEvents(routingControl) {
+    // routingControl = mapWrapper.routingControl;
+    routingControl.on('routeselected', function (e) {
+      const routeIndex = routingControl.currentRoutes.findIndex(r => r === e.route);
+      if (routeIndex < 0) return;
+      const container = document.querySelector('.leaflet-routing-container');
+      if (!container) return;
+      const elements = document.querySelectorAll('.leaflet-routing-alt');
+      const selectedRouteSection = elements[routeIndex];
+      const instructions = selectedRouteSection ? selectedRouteSection.querySelectorAll('tr') : [];
+      const routeInstructions = e.route.instructions;
+
+      for (let idx = 0; idx < instructions.length; idx++) {
+        const row = instructions[idx];
+        if (row._clickHandler) {
+          row.removeEventListener('click', row._clickHandler);
+        }
+
+        const instr = routeInstructions[idx];
+        if (instr) {
+          const meters = routingStyleRound(instr.distance);
+          const smeters = numberToFinnishDistance(meters);
+          let nextInstr = "";
+          if (smeters !== "") nextInstr = `, sitten aja ${smeters}.`;
+          const text = `${instr.text}${nextInstr}`;
+          row.speakText = text;
+        } else {
+          row.speakText = row.innerText;
+        }
+
+        row._clickHandler = function () {
+          instructions.forEach(r => r.classList.remove('routing-selected'));
+          row.classList.add('routing-selected');
+          speakText(row.speakText);
+        };
+        row.addEventListener('click', row._clickHandler);
+      }
+    });
+    // const pl = decodeFlexPolyline("BG6lv62D-pyixBxtCi3DvlBjxD_OnpB7GjNzU_TjI_OjDjIjXw0BvCoGzjBosCrO4c3NwWrOoV_EoGrEAjXwWvbkcjDkDrEoL_EvRrJjhB_pF36QrE3NrO7uBrJriBnL_sBrErOrErTnBnQ8BvHUnGT7L");
+    // console.log(pl);
+  }
+
+  function routingStyleRound(meters) {
+    if (meters < 20) return Math.ceil(meters);
+    if (meters < 500) return Math.ceil(meters / 10) * 10;
+    if (meters < 1000) return Math.ceil(meters / 50) * 50;
+    // For 1000 or more, round up to nearest 100 and convert to km if needed
+    return Math.ceil(meters / 100) * 100;
+  }
+//#endregion Routing UI
