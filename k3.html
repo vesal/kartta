@@ -2932,6 +2932,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
       header: 16,
       class: ["no-full"],
       y: "25px",
+      x: "right",
       onresize: function () {
         saveWindowPos(routingWindow);
       },
@@ -2940,6 +2941,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
       },
       onclose: function () {
         routingWindow = null;
+        removeOldRoutingControl();
         return false;
       },
       // background: document.getElementById("editCompsBackground").value,
