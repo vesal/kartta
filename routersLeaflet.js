@@ -36,154 +36,154 @@ function processRouteData(text, waypoints) {
   return routeObjs;
 }
 
-      function processSection(section, waypoints) {
-        if (!section.polyline || !section.turnByTurnActions) {
-          return null;
-        }
-        const polylineStr = section.polyline;
-        const decoded = decodeFlexPolyline(polylineStr);
-        const actions = section.turnByTurnActions;
+function processSection(section, waypoints) {
+  if (!section.polyline || !section.turnByTurnActions) {
+    return null;
+  }
+  const polylineStr = section.polyline;
+  const decoded = decodeFlexPolyline(polylineStr);
+  const actions = section.turnByTurnActions;
 
-        let totalDistance = 0;
-        let totalTime = 0;
+  let totalDistance = 0;
+  let totalTime = 0;
 
-        const instructions = [];
-        for (let i = 0; i < actions.length; i++) {
-          const a = actions[i];
-          totalDistance += a.length;  // lisää segmentin pituus kokonaismatkaan
-          totalTime += a.duration;    // lisää segmentin kesto kokonaisaikaan
-          // Haetaan suomenkielinen tien nimi
-          let roadName = "";
-          if (a.nextRoad && a.nextRoad.name) {
-            const fiName = a.nextRoad.name.find(n => n.language === "fi");
-            roadName = fiName ? fiName.value : a.nextRoad.name[0].value;
-          }
+  const instructions = [];
+  for (let i = 0; i < actions.length; i++) {
+    const a = actions[i];
+    totalDistance += a.length;  // lisää segmentin pituus kokonaismatkaan
+    totalTime += a.duration;    // lisää segmentin kesto kokonaisaikaan
+    // Haetaan suomenkielinen tien nimi
+    let roadName = "";
+    if (a.nextRoad && a.nextRoad.name) {
+      const fiName = a.nextRoad.name.find(n => n.language === "fi");
+      roadName = fiName ? fiName.value : a.nextRoad.name[0].value;
+    }
 
-          // Määritellään tyyppi LRM:lle
-          let type = a.action;  // "turn", "depart", "arrive"
-          let direction = a.direction || null;
-          let exit = a.exit || 1; // vain roundaboutissa
-          if (type === "turn") {
-            if (direction === "left" || direction === "slight left" || direction === "sharp left") {
-              direction = "vasemmalle";
-            } else if (direction === "right" || direction === "slight right" || direction === "sharp right") {
-              // direction = "oikealle";
-              direction = "oikeelle"
-            } else if (direction === "straight") {
-              direction = "suoraan";
-            } else {
-              direction = ""; // muut
-            }
-          } else {
-            direction = ""; // muille tyypeille ei suuntaa
-          }
-          let text;
-          let modifier = null;
-          let mode = "driving";
-          let distance = a.length;
-
-          const m = {};
-          const step = {maneuver: m};
-          step.name = roadName;
-          m.type = a.action;
-          m.mode = mode;
-          m.modifier = a.direction;
-
-          switch (type) {
-            case "turn":
-              // text = `Käänny ${direction} tielle ${roadName}`;
-              modifier = a.direction;
-              if (a.direction === "left" || a.direction === "slight left" || a.direction === "sharp left") {
-                type = "Left"; // LRM tyyppi
-                modifier = "Left"
-              } else {
-                type = "Right"; // LRM tyyppi
-                modifier = "Right"
-              }
-              break;
-            case "depart":
-              type = "Head"; // LRM tyyppi
-              mode = "driving"
-              break;
-            case "arrive":
-              type = "DestinationReached"
-              break;
-            case "roundaboutEnter":
-              if (i < actions.length - 1 && actions[i + 1].action === "roundaboutExit") {
-                const nexta = actions[i + 1];
-                exit = nexta.exit || 1;
-              }
-              type = "Roundabout";
-              m.type = "roundabout";
-              distance = 0;
-              modifier = "SlightRight"; // aina oikea
-              break;
-            case "roundaboutExit":
-              type = "SlightRight";
-              m.type = "exit roundabout";
-              modifier = "SlightRight"; // aina oikea
-              let exitTo = "";
-              if (roadName !== "") exitTo = " tielle " + roadName;
-              text = `Poistu liittymästä ${exit},${exitTo}`;
-              break;
-            case "merge":
-              type = "Merge";
-              break;
-            case "continue":
-              type = "Continue";
-              break;
-            case "enterHighway":
-              type = "Motorway";
-              text = `Liity moottoritielle ${roadName}`;
-              m.type = "merge"
-              break;
-            case "keep":
-              type = "Continue";
-              m.type = "continue";
-              modifier = a.direction;
-              if (a.direction === "right") {
-                text = `Ryhmity oikealle tielle ${roadName}`;
-              } else if (a.direction === "left") {
-                text = `Ryhmity vasemmalle tielle ${roadName}`;
-              } else {
-                text = `Pysy tiellä ${roadName}`;
-              }
-              break;
-            case "exit":
-              type = "Exit";
-              modifier = "SlightRight"; // aina oikea
-              text = `Poistu tieltä ${roadName} kohti ${a.signpost?.labels?.[0]?.routeNumber?.value ?? "oikea"}`;
-              step.name = `${a.signpost?.labels?.[0]?.routeNumber?.value ?? "oikea"}`;
-              break;
-            default:
-              text = a.action; // fallback
-          }
-          m.exit = exit;
-          text = routeStepToText(step, i); // käytä OSRM-tyyliä
-          instructions.push(
-            {
-              text: text,
-              distance: distance,
-              // time: a.duration,
-              index: a.offset,
-              type: type,
-              modifier: modifier,
-              // mode: mode,
-            });
-        }
-        const routeObj = {
-          coordinates: decoded,
-          name: "Reitti",
-          instructions: instructions, // Voit halutessasi lisätä reittiohjeet
-          summary: {
-            totalDistance: totalDistance, // halutessasi voit laskea todellisen etäisyyden
-            totalTime: totalTime      // tai arvioida ajassa
-          },
-          inputWaypoints: waypoints,
-          properties: {isSimplified: false}
-        };
-        return routeObj;
+    // Määritellään tyyppi LRM:lle
+    let type = a.action;  // "turn", "depart", "arrive"
+    let direction = a.direction || null;
+    let exit = a.exit || 1; // vain roundaboutissa
+    if (type === "turn") {
+      if (direction === "left" || direction === "slight left" || direction === "sharp left") {
+        direction = "vasemmalle";
+      } else if (direction === "right" || direction === "slight right" || direction === "sharp right") {
+        // direction = "oikealle";
+        direction = "oikeelle"
+      } else if (direction === "straight") {
+        direction = "suoraan";
+      } else {
+        direction = ""; // muut
       }
+    } else {
+      direction = ""; // muille tyypeille ei suuntaa
+    }
+    let text;
+    let modifier = null;
+    let mode = "driving";
+    let distance = a.length;
+
+    const m = {};
+    const step = {maneuver: m};
+    step.name = roadName;
+    m.type = a.action;
+    m.mode = mode;
+    m.modifier = a.direction;
+
+    switch (type) {
+      case "turn":
+        // text = `Käänny ${direction} tielle ${roadName}`;
+        modifier = a.direction;
+        if (a.direction === "left" || a.direction === "slight left" || a.direction === "sharp left") {
+          type = "Left"; // LRM tyyppi
+          modifier = "Left"
+        } else {
+          type = "Right"; // LRM tyyppi
+          modifier = "Right"
+        }
+        break;
+      case "depart":
+        type = "Head"; // LRM tyyppi
+        mode = "driving"
+        break;
+      case "arrive":
+        type = "DestinationReached"
+        break;
+      case "roundaboutEnter":
+        if (i < actions.length - 1 && actions[i + 1].action === "roundaboutExit") {
+          const nexta = actions[i + 1];
+          exit = nexta.exit || 1;
+        }
+        type = "Roundabout";
+        m.type = "roundabout";
+        distance = 0;
+        modifier = "SlightRight"; // aina oikea
+        break;
+      case "roundaboutExit":
+        type = "SlightRight";
+        m.type = "exit roundabout";
+        modifier = "SlightRight"; // aina oikea
+        let exitTo = "";
+        if (roadName !== "") exitTo = " tielle " + roadName;
+        text = `Poistu liittymästä ${exit},${exitTo}`;
+        break;
+      case "merge":
+        type = "Merge";
+        break;
+      case "continue":
+        type = "Continue";
+        break;
+      case "enterHighway":
+        type = "Motorway";
+        text = `Liity moottoritielle ${roadName}`;
+        m.type = "merge"
+        break;
+      case "keep":
+        type = "Continue";
+        m.type = "continue";
+        modifier = a.direction;
+        if (a.direction === "right") {
+          text = `Ryhmity oikealle tielle ${roadName}`;
+        } else if (a.direction === "left") {
+          text = `Ryhmity vasemmalle tielle ${roadName}`;
+        } else {
+          text = `Pysy tiellä ${roadName}`;
+        }
+        break;
+      case "exit":
+        type = "Exit";
+        modifier = "SlightRight"; // aina oikea
+        text = `Poistu tieltä ${roadName} kohti ${a.signpost?.labels?.[0]?.routeNumber?.value ?? "oikea"}`;
+        step.name = `${a.signpost?.labels?.[0]?.routeNumber?.value ?? "oikea"}`;
+        break;
+      default:
+        text = a.action; // fallback
+    }
+    m.exit = exit;
+    text = routeStepToText(step, i); // käytä OSRM-tyyliä
+    instructions.push(
+      {
+        text: text,
+        distance: distance,
+        // time: a.duration,
+        index: a.offset,
+        type: type,
+        modifier: modifier,
+        // mode: mode,
+      });
+  }
+  const routeObj = {
+    coordinates: decoded,
+    name: "Reitti",
+    instructions: instructions, // Voit halutessasi lisätä reittiohjeet
+    summary: {
+      totalDistance: totalDistance, // halutessasi voit laskea todellisen etäisyyden
+      totalTime: totalTime      // tai arvioida ajassa
+    },
+    inputWaypoints: waypoints,
+    properties: {isSimplified: false}
+  };
+  return routeObj;
+}
 
 
 // Custom HERE-router
@@ -233,9 +233,7 @@ function createHereRouter() {
 function findRouteHERE(from, to, apiKey, callback, useSample = false) {
   // Poista vanha reitti, jos se on olemassa
   createHereRouter();
-  if (mapWrapper.routingControl) {
-    mapWrapper.map.removeControl(mapWrapper.routingControl);
-  }
+  removeOldRoutingControl();
 
   const router = new HereRouter({apiKey: apiKey, useSample: useSample});
 
@@ -246,6 +244,7 @@ function findRouteHERE(from, to, apiKey, callback, useSample = false) {
       mapWrapper.L.latLng(to[0], to[1])
     ],
     router: router,
+    container: document.getElementById('itineraryDiv'),
     routeWhileDragging: true,
     showAlternatives: true,
     lineOptions: {
@@ -257,7 +256,11 @@ function findRouteHERE(from, to, apiKey, callback, useSample = false) {
   }).addTo(mapWrapper.map);
   mapWrapper.routingControl.on('routesfound', function (e) {
     mapWrapper.routingControl.currentRoutes = e.routes; // talletetaan kaikki reitit
-    if (callback) callback(mapWrapper.routingControl);
+    if (callback) {
+      setTimeout(() => {
+        callback(mapWrapper.routingControl)
+      }, 0);
+    }
   });
   return mapWrapper.routingControl;
 }
@@ -271,17 +274,32 @@ const stepToTextFunctions = {
 
 function routeStepToTextSuomi(step, index) {
   const m = step.maneuver;
+  let dirtext = "";
+  if (m.bearing_after) dirtext = ` kohti ${Math.ceil(m.bearing_after/10)*10}, astetta`;
   let suunta = "";
   switch (m.modifier) {
-    case "left": suunta = "vasemmalle"; break;
-    case "right": suunta = "oikealle"; break;
-    case "straight": suunta = "suoraan"; break;
-    case "slight right": suunta = "loivasti oikealle"; break;
-    case "slight left": suunta = "loivasti vasemmalle"; break;
+    case "left":
+      suunta = "vasemmalle";
+      break;
+    case "right":
+      suunta = "oikealle";
+      break;
+    case "straight":
+      suunta = "suoraan";
+      break;
+    case "slight right":
+      suunta = "loivasti oikealle";
+      break;
+    case "slight left":
+      suunta = "loivasti vasemmalle";
+      break;
+    case "uturn":
+      suunta = "tee U-käännös";
+      break;
   }
   switch (m.type) {
     case "depart":
-      return `Aja tielle ${step.name} suuntaan ${m.bearing_after} astetta`;
+      return `Aja tielle ${step.name}${dirtext}`;
     case "turn":
       return `Käänny ${suunta} tielle ${step.name}`;
     case "roundabout":
@@ -314,16 +332,32 @@ function routeStepToTextSuomi(step, index) {
 function routeStepToTextSavo(step, index) {
   const m = step.maneuver;
   let suunta = "";
+  let dirtext = "";
+  if (m.bearing_after) dirtext = ` suuntoo ${Math.ceil(m.bearing_after/10)*10}, astetta`;
+
   switch (m.modifier) {
-    case "left": suunta = "vasemmallee"; break;
-    case "right": suunta = "oikeelle"; break;
-    case "straight": suunta = "suoroo"; break;
-    case "slight right": suunta = "hitusen oikeelle"; break;
-    case "slight left": suunta = "ätväse vasemmallee"; break;
+    case "left":
+      suunta = "vasemmallee";
+      break;
+    case "right":
+      suunta = "oikeelle";
+      break;
+    case "straight":
+      suunta = "suoroo";
+      break;
+    case "slight right":
+      suunta = "hitusen oikeelle";
+      break;
+    case "slight left":
+      suunta = "ätväse vasemmallee";
+      break;
+    case "uturn":
+      suunta = "tee U-kiännös";
+      break;
   }
   switch (m.type) {
     case "depart":
-      return `Pörräytä tiellee ${step.name} suntoo ${m.bearing_after} astetta`;
+      return `Pörräytä tiellee ${step.name}${dirtext}`;
     case "turn":
       return `Kiänny ${suunta} tielle ${step.name}`;
     case "roundabout":
@@ -380,8 +414,7 @@ const textsForNumbers = {
 function numberToText(num, order) {
   try {
     return textsForNumbers[selectedDialect][order][num];
-  }
-  catch (e) {
+  } catch (e) {
     return num.toString();
   }
 }
@@ -390,24 +423,28 @@ function routeStepToText(step, index) {
   return stepToTextFunctions[selectedDialect](step, index);
 }
 
+function removeOldRoutingControl() {
+  if (mapWrapper.routingControl == null) return;
+  mapWrapper.map.removeControl(mapWrapper.routingControl);
+  mapWrapper.routingControl = null;
+}
+
 function findRouteOSRM(from, to, callback) {
 
-    const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    // Lokaalia ORSM palvelinta varten asenna:
-    // ks: https://github.com/project-osrm/osrm-backend/pkgs/container/osrm-backend#using-docker
-    //  docker pull ghcr.io/project-osrm/osrm-backend:v6.0.0
-    //  Hae finland-latest.osm.pbf
-    //  docker run -t -v "${PWD}:/data" ghcr.io/project-osrm/osrm-backend osrm-extract -p /opt/car.lua /data/finland-latest.osm.pbf || echo "osrm-extract failed"
-    //  docker run -t -v "${PWD}:/data" ghcr.io/project-osrm/osrm-backend osrm-partition /data/finland-latest.osrm || echo "osrm-partition failed"
-    //  docker run -t -i -p 5000:5000 -v "${PWD}:/data" ghcr.io/project-osrm/osrm-backend osrm-routed --algorithm mld /data/finland-latest.osrm
-    const osrmServer = isLocalhost
-      ? "http://localhost:5000"
-      : "https://router.project-osrm.org";
+  const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  // Lokaalia ORSM palvelinta varten asenna:
+  // ks: https://github.com/project-osrm/osrm-backend/pkgs/container/osrm-backend#using-docker
+  //  docker pull ghcr.io/project-osrm/osrm-backend:v6.0.0
+  //  Hae finland-latest.osm.pbf
+  //  docker run -t -v "${PWD}:/data" ghcr.io/project-osrm/osrm-backend osrm-extract -p /opt/car.lua /data/finland-latest.osm.pbf || echo "osrm-extract failed"
+  //  docker run -t -v "${PWD}:/data" ghcr.io/project-osrm/osrm-backend osrm-partition /data/finland-latest.osrm || echo "osrm-partition failed"
+  //  docker run -t -i -p 5000:5000 -v "${PWD}:/data" ghcr.io/project-osrm/osrm-backend osrm-routed --algorithm mld /data/finland-latest.osrm
+  const osrmServer = isLocalhost
+    ? "http://localhost:5000"
+    : "https://router.project-osrm.org";
 
 
-   if (mapWrapper.routingControl) {
-    mapWrapper.map.removeControl(mapWrapper.routingControl);
-  }
+  removeOldRoutingControl();
 
   if (!mapWrapper.L.Routing) {
     // fetch(`https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`)
@@ -430,6 +467,7 @@ function findRouteOSRM(from, to, callback) {
       stepToText: routeStepToText,
       serviceUrl: osrmServer + '/route/v1'
     }),
+    container: document.getElementById('itineraryDiv'),
     routeWhileDragging: true,
     showAlternatives: true,
     lineOptions: {
@@ -444,7 +482,11 @@ function findRouteOSRM(from, to, callback) {
 
   mapWrapper.routingControl.on('routesfound', function (e) {
     mapWrapper.routingControl.currentRoutes = e.routes; // talletetaan kaikki reitit
-    if (callback) callback(mapWrapper.routingControl);
+    if (callback) {
+      setTimeout(() => {
+        callback(mapWrapper.routingControl)
+      }, 0);
+    }
   });
   return mapWrapper.routingControl;
 }
@@ -460,116 +502,161 @@ const sampleRouteData = `{"notices":[{"title":"The provided parameter '' is unkn
 // https://router.project-osrm.org/route/v1/driving/25.732741652606464,62.29987315843354;25.77529907226563,62.25665737235106?overview=false&alternatives=true&steps=true&hints=;
 
 //#region Routing UI
-  let voicesInitialized = false;
+let voicesInitialized = false;
 
-  function speakText(text) {
-    if (!('speechSynthesis' in window)) {
-      setError("ei puhetta!")
+function speakText(text) {
+  if (!('speechSynthesis' in window)) {
+    setError("ei puhetta!")
+    return;
+  }
+  if (!voicesInitialized) {
+    const voices = speechSynthesis.getVoices();
+    if (voices.length === 0) {
+      speechSynthesis.onvoiceschanged = () => {
+        // console.log(speechSynthesis.getVoices());
+        voicesInitialized = true;
+        speakText(text); // Retry speaking after voices are loaded
+      };
       return;
     }
-    if (!voicesInitialized) {
-      const voices = speechSynthesis.getVoices();
-      if (voices.length === 0) {
-        speechSynthesis.onvoiceschanged = () => {
-          // console.log(speechSynthesis.getVoices());
-          voicesInitialized = true;
-          speakText(text); // Retry speaking after voices are loaded
-        };
-        return;
+  }
+  voicesInitialized = true;
+  window.speechSynthesis.cancel(); // Stop any ongoing speech
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'fi-FI'; // Aseta haluttu kieli, esimerkiksi suomeksi
+  utterance.rate = 1.3;
+  window.speechSynthesis.speak(utterance);
+}
+
+function numberToFinnishWords(n) {
+  if (n < 20) {
+    return numberToText(n, "ones");
+  }
+  if (n < 100) {
+    if (n % 10 === 0) return numberToText(Math.floor(n / 10), "tens");
+    return numberToText(Math.floor(n / 10), "tens") + " " + numberToFinnishWords(n % 10);
+  }
+  if (n < 1000) {
+    if (n === 100) return numberToText(1, "hundreds");
+    if (n < 200) return numberToText(1, "hundreds") + " " + numberToFinnishWords(n % 100);
+    if (n % 100 === 0) return numberToFinnishWords(Math.floor(n / 100)) + " " + numberToText(2, "hundreds")
+    return numberToFinnishWords(Math.floor(n / 100)) + " " + numberToText(2, "hundreds") + " " + numberToFinnishWords(n % 100);
+  }
+  if (n < 10000) {
+    if (n === 1000) return numberToText(1, "thousands");
+    if (n % 1000 === 0) return numberToFinnishWords(Math.floor(n / 1000)) + " " + numberToText(2, "thousands");
+    return numberToFinnishWords(Math.floor(n / 1000)) + " " + numberToText(2, "thousands") + " " + numberToFinnishWords(n % 1000);
+  }
+  return n.toString(); // fallback
+}
+
+function numberToFinnishDistance(n) {
+  if (n === 0) return "";
+  if (n >= 1000) {
+    const km = Math.floor(n / 1000);
+    const m = n % 1000;
+    let result = (km === 1 ? numberToText(1, "km") : numberToFinnishWords(km) + " " + numberToText(2, "km"));
+    if (m > 0) {
+      result += " " + numberToFinnishWords(m) + " " + numberToText(2, "m");
+    }
+    return result;
+  }
+  return numberToFinnishWords(n) + " metriä";
+}
+
+
+function initRoutingEvents(routingControl) {
+  const itineraryDiv = document.getElementById('itineraryDiv');
+  const routingContainer = document.querySelector('.leaflet-routing-container');
+  itineraryDiv.innerHTML = '';
+  if (itineraryDiv && routingContainer) {
+    itineraryDiv.appendChild(routingContainer);
+  }
+  const elements = document.querySelectorAll('.leaflet-routing-alt');
+
+  // List all routes
+  const routeAltsDiv = document.getElementById('routeAlts');
+  routeAltsDiv.innerHTML = ''
+
+  const routeSelectElements = [];
+
+  function updateSelectedRoute(ri) {
+    const elements = document.querySelectorAll('.route-alt');
+    elements.forEach(e => e.classList.remove('route-alt-selected'));
+    routeSelectElements[ri].classList.add('route-alt-selected');
+  }
+
+  const routes = routingControl.currentRoutes;
+  const routeElements = [];
+
+  for (let ri = 0; ri < routes.length; ri++) {
+    const route = routingControl.currentRoutes[ri];
+    const routeElam = elements[ri];
+    routeElements.push(routeElam);
+    let h3Content = routeElam.querySelector('h3')?.textContent;
+    if (!h3Content) h3Content = `${fixed(route.summary.totalDistance/1000,1)} km, ${Math.round(route.summary.totalTime / 60)} min`;
+    const li = document.createElement('p');
+    routeSelectElements.push(li);
+    li.className = 'route-alt';
+    if (ri === 0) li.classList.add('route-alt-selected');
+    li.innerText = `${ri+1}: ${h3Content} ${route.name}`;
+    li._clickHandler = function () {
+      // updateSelectedRoute(ri);
+      routeElements[ri].click();
+    };
+    li.addEventListener('click', li._clickHandler);
+    routeAltsDiv.appendChild(li);
+  }
+
+  routingControl.on('routeselected', function (e) {
+    const routeIndex = routingControl.currentRoutes.findIndex(r => r === e.route);
+    if (routeIndex < 0) return;
+    updateSelectedRoute(routeIndex);
+    const container = document.querySelector('.leaflet-routing-container');
+    if (!container) return;
+    const elements = document.querySelectorAll('.leaflet-routing-alt');
+    const selectedRouteSection = elements[routeIndex];
+    const instructions = selectedRouteSection ? selectedRouteSection.querySelectorAll('tr') : [];
+    const routeInstructions = e.route.instructions;
+
+    for (let idx = 0; idx < instructions.length; idx++) {
+      const row = instructions[idx];
+      if (row._clickHandler) {
+        row.removeEventListener('click', row._clickHandler);
       }
-    }
-    voicesInitialized = true;
-    window.speechSynthesis.cancel(); // Stop any ongoing speech
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'fi-FI'; // Aseta haluttu kieli, esimerkiksi suomeksi
-    utterance.rate = 1.3;
-    window.speechSynthesis.speak(utterance);
-  }
 
-  function numberToFinnishWords(n) {
-    if (n < 20) {
-      return numberToText(n, "ones");
-    }
-    if (n < 100) {
-      if (n % 10 === 0) return numberToText(Math.floor(n / 10), "tens");
-      return numberToText(Math.floor(n / 10), "tens") + " " + numberToFinnishWords(n % 10);
-    }
-    if (n < 1000) {
-      if (n === 100) return numberToText(1, "hundreds");
-      if (n < 200) return numberToText(1, "hundreds") + " " + numberToFinnishWords(n % 100);
-      if (n % 100 === 0) return numberToFinnishWords(Math.floor(n / 100)) + " " + numberToText(2, "hundreds")
-      return numberToFinnishWords(Math.floor(n / 100)) + " " + numberToText(2, "hundreds") + " " + numberToFinnishWords(n % 100);
-    }
-    if (n < 10000) {
-      if (n === 1000) return numberToText(1, "thousands");
-      if (n % 1000 === 0) return numberToFinnishWords(Math.floor(n / 1000)) + " " + numberToText(2, "thousands");
-      return numberToFinnishWords(Math.floor(n / 1000)) + " " + numberToText(2, "thousands") + " " + numberToFinnishWords(n % 1000);
-    }
-    return n.toString(); // fallback
-  }
-
-  function numberToFinnishDistance(n) {
-    if (n === 0) return "";
-    if (n >= 1000) {
-      const km = Math.floor(n / 1000);
-      const m = n % 1000;
-      let result = (km === 1 ? numberToText(1, "km") : numberToFinnishWords(km) + " " + numberToText(2, "km"));
-      if (m > 0) {
-        result += " " + numberToFinnishWords(m) + " " + numberToText(2, "m");
+      const instr = routeInstructions[idx];
+      if (instr) {
+        const meters = routingStyleRound(instr.distance);
+        const smeters = numberToFinnishDistance(meters);
+        let nextInstr = "";
+        if (smeters !== "") nextInstr = `, sitten aja ${smeters}.`;
+        const text = `${instr.text}${nextInstr}`;
+        row.speakText = text;
+      } else {
+        row.speakText = row.innerText;
       }
-      return result;
+
+      row._clickHandler = function () {
+        instructions.forEach(r => r.classList.remove('routing-selected'));
+        row.classList.add('routing-selected');
+        speakText(row.speakText);
+      };
+      row.addEventListener('click', row._clickHandler);
     }
-    return numberToFinnishWords(n) + " metriä";
-  }
+  });
+  // const pl = decodeFlexPolyline("BG6lv62D-pyixBxtCi3DvlBjxD_OnpB7GjNzU_TjI_OjDjIjXw0BvCoGzjBosCrO4c3NwWrOoV_EoGrEAjXwWvbkcjDkDrEoL_EvRrJjhB_pF36QrE3NrO7uBrJriBnL_sBrErOrErTnBnQ8BvHUnGT7L");
+  // console.log(pl);
+}
 
+function routingStyleRound(meters) {
+  if (meters < 20) return Math.ceil(meters);
+  if (meters < 500) return Math.ceil(meters / 50) * 50;
+  if (meters < 1000) return Math.ceil(meters / 100) * 100;
+  if (meters < 3000) return Math.ceil(meters / 500) * 500;
+  // For 1000 or more, round up to nearest 100 and convert to km if needed
+  if (meters < 10000) return Math.round(meters / 1000) * 1000;
+  return Math.ceil(meters / 1000) * 1000;
+}
 
-  function initRoutingEvents(routingControl) {
-    // routingControl = mapWrapper.routingControl;
-    routingControl.on('routeselected', function (e) {
-      const routeIndex = routingControl.currentRoutes.findIndex(r => r === e.route);
-      if (routeIndex < 0) return;
-      const container = document.querySelector('.leaflet-routing-container');
-      if (!container) return;
-      const elements = document.querySelectorAll('.leaflet-routing-alt');
-      const selectedRouteSection = elements[routeIndex];
-      const instructions = selectedRouteSection ? selectedRouteSection.querySelectorAll('tr') : [];
-      const routeInstructions = e.route.instructions;
-
-      for (let idx = 0; idx < instructions.length; idx++) {
-        const row = instructions[idx];
-        if (row._clickHandler) {
-          row.removeEventListener('click', row._clickHandler);
-        }
-
-        const instr = routeInstructions[idx];
-        if (instr) {
-          const meters = routingStyleRound(instr.distance);
-          const smeters = numberToFinnishDistance(meters);
-          let nextInstr = "";
-          if (smeters !== "") nextInstr = `, sitten aja ${smeters}.`;
-          const text = `${instr.text}${nextInstr}`;
-          row.speakText = text;
-        } else {
-          row.speakText = row.innerText;
-        }
-
-        row._clickHandler = function () {
-          instructions.forEach(r => r.classList.remove('routing-selected'));
-          row.classList.add('routing-selected');
-          speakText(row.speakText);
-        };
-        row.addEventListener('click', row._clickHandler);
-      }
-    });
-    // const pl = decodeFlexPolyline("BG6lv62D-pyixBxtCi3DvlBjxD_OnpB7GjNzU_TjI_OjDjIjXw0BvCoGzjBosCrO4c3NwWrOoV_EoGrEAjXwWvbkcjDkDrEoL_EvRrJjhB_pF36QrE3NrO7uBrJriBnL_sBrErOrErTnBnQ8BvHUnGT7L");
-    // console.log(pl);
-  }
-
-  function routingStyleRound(meters) {
-    if (meters < 20) return Math.ceil(meters);
-    if (meters < 500) return Math.ceil(meters / 10) * 10;
-    if (meters < 1000) return Math.ceil(meters / 50) * 50;
-    // For 1000 or more, round up to nearest 100 and convert to km if needed
-    return Math.ceil(meters / 100) * 100;
-  }
 //#endregion Routing UI

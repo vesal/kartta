@@ -16,6 +16,7 @@
       height: 100%;
       margin: 0;
       padding: 0;
+      overflow: hidden;
       /*
       width: 100vw;
       height: 100vh;
@@ -175,7 +176,7 @@
     .layout-container {
       display: flex;
       flex-direction: column;
-      height: 100dvh;
+      height: 100%;
     }
 
     .ui-layout-north {
@@ -194,6 +195,11 @@
       flex-direction: column;
       overflow: hidden; /* Prevent scrolling */
 
+    }
+
+    .ui-layout-center {
+      height: 100%;
+      overflow: hidden;
     }
 
     .ui-widget {
@@ -241,12 +247,6 @@
     }
 
     /*noinspection CssUnusedSymbol*/
-    .leaflet-bar {
-      margin-right: 20px !important;
-      margin-top: -5px !important;
-    }
-
-    /*noinspection CssUnusedSymbol*/
     .data {
       font-family: sans-serif;
       font-weight: bold;
@@ -263,7 +263,7 @@
 
     /*noinspection CssUnusedSymbol*/
     .winbox {
-      z-index: 1015 !important;
+      z-index: 1030 !important;
     }
 
     /*noinspection CssUnusedSymbol*/
@@ -283,9 +283,34 @@
 
     /*noinspection CssUnusedSymbol*/
     .leaflet-routing-container {
-      max-height: 30vh !important; /* Näkyy enintään 30% näytöstä */
-      overflow-y: auto !important;;
-      font-size: 0.85em !important;;
+      /* max-height: 30vh !important; /* Näkyy enintään 30% näytöstä */
+      overflow-y: auto !important;
+      font-size: 0.75em !important;
+      padding-top: 0 !important;
+      width: unset !important;
+    }
+
+    /*noinspection CssUnusedSymbol*/
+    .leaflet-routing-alt {
+      padding: 0 !important;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      max-height: unset !important;
+      display: block !important;
+    }
+
+    .leaflet-routing-alt h2,
+    .leaflet-routing-alt h3 {
+      display: inline-block;
+      vertical-align: middle;
+      white-space: nowrap;
+      margin: 0 !important;
+    }
+
+    .leaflet-routing-alt table {
+      display: block !important;
+      width: 100% !important;
+      margin-top: 5px !important;
     }
 
     .leaflet-routing-container h2 {
@@ -293,8 +318,124 @@
     }
 
     /*noinspection CssUnusedSymbol*/
+    .leaflet-bar {
+      margin-right: 0 !important;
+      margin-top: 0 !important;
+    }
+
+    /*noinspection CssUnusedSymbol*/
+    .leaflet-routing-alt-minimized {
+      max-height: 25px !important;
+    }
+
+    /*noinspection CssUnusedSymbol*/
     .routing-selected {
       background-color: yellow;
+    }
+
+    /*noinspection CssUnusedSymbol*/
+    .route-alt.route-alt-selected {
+      background-color: yellow;
+    }
+
+    /*noinspection CssUnusedSymbol*/
+    .itineraryDiv {
+      font-size: 0.85em;
+    }
+
+    /*noinspection CssUnusedSymbol*/
+    p.route-alt {
+      margin: 0;
+    }
+
+
+    .routing-main-div {
+      /* visibility: hidden;
+      width: 360px;
+      height: 400px;
+      top: 100px;
+      position: absolute;
+      right: 0;
+      z-index: 1030; */
+      background: white;
+    }
+
+    .routing-main-div .popupIn {
+      position: relative; /* or remove position if not needed */
+      top: unset;
+      bottom: unset;
+      left: unset;
+      right: unset;
+      overflow: auto;
+      padding: 0 0 0 3px;
+      border-radius: 0;
+    }
+
+    .routing-main-div {
+      box-sizing: border-box;
+      height: 100%;
+    }
+
+    .routing-main-div .popupIn {
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .driving {
+      overflow: hidden;
+    }
+
+    /*noinspection CssUnusedSymbol*/
+    .leaflet-routing-container {
+    }
+
+    /*noinspection CssUnusedSymbol*/
+    .route-alt, .route-alt-selected {
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    .routing-main-div .popupIn, .driving {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    #addressDiv, #routeAlts {
+      flex: 0 0 auto;
+    }
+
+    #routeAlts {
+      font-size: 0.75em;
+      border-bottom: 1px solid #ccc;
+    }
+
+    #itineraryDiv {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      min-height: 0; /* prevents overflow in flexbox */
+    }
+
+    .inner {
+      display: flex;
+      align-items: center;
+      gap: 0.3em;
+      flex-wrap: nowrap;
+    }
+
+    .inner label {
+      flex: 1 1 auto;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .inner input[type="text"] {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    #addressDiv .instructions {
+      font-size: 0.75em;
     }
   </style>
   <script src="KeyValStore.js" defer></script>
@@ -1384,8 +1525,15 @@
     document.getElementById('buttonAddPin').innerText = text;
   }
 
+  function getInputText(name) {
+    const elem = document.getElementById(name);
+    if (!elem) return "";
+    let s = sanitizeInput(elem.value.trim());
+    return s;
+  }
+
   function getPinInputText() {
-    let s = sanitizeInput(document.getElementById('editPinLoc').value.trim());
+    let s = getInputText('editPinLoc');
     return s;
   }
 
@@ -2693,14 +2841,61 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   }
 
 
-
   //=================================================================
   // Functions to handle components ends
   //=================================================================
   //#endregion Meter Components
 
+  //# region Routing
+
+  function pToStr(p, sep) {
+    // noinspection UnnecessaryLocalVariableJS
+    const s = p[0].toFixed(5) + sep + p[1].toFixed(5);
+    return s;
+  }
+
+
+  function moveEditTo(edit) {
+    const editField = document.getElementById(edit);
+    editField.value = getPinInputText();
+    const name = edit.replace("edit", "").toLowerCase();
+    setOption(name, editField.value);
+    // calcDistance();
+  }
+
+  function moveITo(edit) {
+    const editField = document.getElementById(edit);
+    const p = mapWrapper.getPinLocation(myPin);
+
+    editField.value = pToStr(p, ' ');
+    const name = edit.replace("edit", "").toLowerCase();
+    setOption(name, editField.value);
+    calcDistance();
+  }
+
+
+  function getNormalizedCoordinateString(s, sep) {
+    const pos = getCoordinateFromText(s);
+    if (pos == null) return "";
+    return pos.latitude + sep + pos.longitude;
+  }
+
+
+  function checkSpecialCoord(s) {
+    const su = s.toUpperCase();
+    if (su === "" || su === "I")
+      return pToStr(currentPosPin.getLocation(), ' ');
+    if (su === "H")
+      return pToStr(hitPin.getLocation(), ' ');
+    if (isCoordinate(s)) return getNormalizedCoordinateString(s, " ");
+    return s;
+  }
+
 
   function showRoutePane(routerType = 0) {
+    createRouteWindow();
+    let fromText = checkSpecialCoord(getInputText("editFrom"));
+    let toText = checkSpecialCoord(getInputText("editTo"));
     let fromPin = lastSelected;
     if (!fromPin) fromPin = myPin;
     const from = mapWrapper.getPinLocation(fromPin);
@@ -2722,6 +2917,40 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     });
   }
 
+  let routingWindow = null;
+
+  function createRouteWindow() {
+    // noinspection JSUnresolvedReference
+    if (routingWindow) return;
+    const routingMainDiv = document.getElementById("routingMainDiv");
+    routingMainDiv.style.visibility = "visible";
+    routingWindow = new WinBox("Ajo-ohjeet", {
+      id: "routingWindow",
+      mount: routingMainDiv,
+      height: 300,
+      width: 300,
+      header: 16,
+      class: ["no-full"],
+      y: "25px",
+      onresize: function () {
+        saveWindowPos(routingWindow);
+      },
+      onmove: function () {
+        saveWindowPos(routingWindow);
+      },
+      onclose: function () {
+        routingWindow = null;
+        return false;
+      },
+      // background: document.getElementById("editCompsBackground").value,
+    });
+    readWindowPos(routingWindow);
+    // compsWindow.onmove = function(x,y) { saveWindowPos(compsWindow); };
+    // compsWindow.onresize = function(w,h) { saveWindowPos(compsWindow); };
+  }
+
+
+  //# endregion Routing
 
 </script>
 <div id="mySidenavHamburger"
@@ -2995,6 +3224,41 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   <span class="coord" id="coord"></span>
   <a class="link" onclick="copyToUrl()">Laita&nbsp;URLiin</a>
 </div>
+
+<div class="routing-main-div" id="routingMainDiv" style="visibility: hidden">
+  <!--<label class="closebtn" style="top: -13px;" onclick="showRoutePane();">&times;</label>-->
+  <div class="popupIn">
+    <div id='addressDiv'>
+      <span class="instructions">Kirjoita osoitteet tai koordinaatit:<span><br>
+      <span class="inner">
+      <button class="inner" type="button" title="Laita nykypiste lähtöpisteeksi"
+              onclick='moveEditTo("editFrom")'>S</button>
+      <button class="inner" type="button" title="Laita oma paikka lähtöpisteeksi"
+              onclick='moveITo("editFrom")'>I</button>
+      <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editFrom")'>E</button>
+      <label><input type="text" name="editFrom" id="editFrom" value="Tontuntie 11, Jyväskylä"/></label><br>
+      </span>
+      <span class="inner">
+      =&gt;
+      <button class="inner" type="button" title="Laita nykypiste loppupisteeksi"
+              onclick='moveEditTo("editTo")'>S</button>
+      <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editTo")'>E</button>
+      <label><input type="text" name="editTo" id="editTo" value="Mattilanniemi 2, Jyväskylä" /></label><br>
+      </span>
+      <span class="inner">
+        <label><input type="checkbox" name="RouteMode" id="RouteMode" value="walk"/>Kävely</label>
+        <button type="button" onclick="findDriving()">Etsi&nbsp;reitti</button>
+        <a class="link" onclick="copyRouteToUrl()">Laita&nbsp;URLiin</a>
+      </span>
+    </div>
+    <div class="driving">
+      <div id="routeAlts">
+      </div>
+      <div id='itineraryDiv'></div>
+    </div>
+  </div>
+</div>
+
 
 </body>
 </html>
