@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.25">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.26">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -437,6 +437,48 @@
     #addressDiv .instructions {
       font-size: 0.75em;
     }
+
+    .flex-labels {
+      display: table;
+      width: auto;
+      margin-left: 0;
+      padding-left: 0;
+    }
+
+    .flex-labels > div {
+      display: table-row;
+    }
+
+    .flex-labels label {
+      display: table-cell;
+      text-align: left;
+      padding-right: 8px;
+    }
+    .flex-labels input, .flex-labels select {
+      display: table-cell;
+    }
+
+    #transportChoices {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+    }
+    .transport-choice {
+      font-size: 1.1em;
+      cursor: pointer;
+      padding: 0;
+      border-radius: 3px;
+      border: 1px solid transparent;
+      background: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    /*noinspection CssUnusedSymbol*/
+    .transport-choice.selected {
+      border-color: #0078D7;
+      background: #e0f0ff;
+    }
+
   </style>
   <script src="KeyValStore.js" defer></script>
   <script>
@@ -1107,6 +1149,11 @@
     flipPins: isTouch,
     showZoomButtons: !isTouch,
     hereApiKey: "",
+    graphHopperApiKey: "",
+    speechRate: 100,
+    dialect: "savo",
+    routeModeWalk: false,
+    routeModeBike: false,
   };
 
   const areaDatas = [
@@ -1805,7 +1852,7 @@
   //#region Initialization
   function showVersion() {
     const manifestLink = document.getElementById('manifest-link');
-    const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.23"
+    const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.24"
 
     // Parsitaan query-parametri
     const url = new URL(href, window.location.href);
@@ -1973,6 +2020,12 @@
       }
     }
 
+    // Select all text in any input[type="text"] when focused
+    document.querySelectorAll('input[type="text"]').forEach(input => {
+      input.addEventListener('focus', function() {
+        this.select();
+      });
+    });
 
   } // initializeMapPage ends
 
@@ -2023,7 +2076,7 @@
     s.visibility = "hidden";
   }
 
-  function toggleDiv(divId, force = null) {
+  function toggleDiv(divId, force = null, callBackShow = null, callBackHide = null) {
     const div = document.getElementById(divId);
     let show = div.style.display !== 'block';
     if (force !== null) {
@@ -2032,9 +2085,11 @@
     if (show) {
       div.style.display = 'block';
       div.style.visibility = 'visible';
+      if (callBackShow) callBackShow();
     } else {
       div.style.display = 'none';
       div.style.visibility = 'hidden';
+      if (callBackHide) callBackHide();
     }
   }
 
@@ -2127,12 +2182,13 @@
 
 
   function getOptionInt(name, editName, def) {
+    if (!editName) editName = name;
     const edit = document.getElementById(editName);
     if (!edit) return;
-    const val = parseInt(localStorage.getItem(name)) || def;
+    const val = parseInt(localStorage.getItem(name)) || def || parseInt(edit.value);
     options[name] = params[name] || val || def;
     if (options[name] !== "")
-      edit.vallue = options[name];
+      edit.value = options[name];
     // noinspection JSUnusedLocalSymbols
     edit.addEventListener("change", function (event) {
       setOptionInt(name, this.value, def);
@@ -2292,6 +2348,8 @@
     getOption("from", "editFrom");
     getOption("tpR", "editTPR");
     getOption("hereApiKey");
+    getOption("graphHopperApiKey");
+    getOptionInt("speechRate");
 
     getOption("tag", "editTag");
     getOption("logname", "editLog");
@@ -2368,8 +2426,34 @@
     changeRaportView();
 
     checkSleep(); // check if use wake lock or not
-  }
 
+    options.dialect = localStorage.getItem('dialect') || 'savo';
+    // getCBOption("routeModeWalk");
+    // getCBOption("routeModeBike");
+
+    // Route transport mode selection
+    const lastMode = localStorage.getItem('routeMode');
+    const choices = document.querySelectorAll('#transportChoices .transport-choice');
+    choices.forEach(choice => {
+      if (choice.dataset.mode === lastMode) {
+        choice.classList.add('selected');
+        options.routeModeWalk = (lastMode === 'walk');
+        options.routeModeBike = (lastMode === 'bike');
+      }
+      choice.addEventListener('click', () => {
+        choices.forEach(c => c.classList.remove('selected'));
+        choice.classList.add('selected');
+        const mode = choice.dataset.mode;
+        options.routeModeWalk = (mode === 'walk');
+        options.routeModeBike = (mode === 'bike');
+        localStorage.setItem('routeMode', mode);
+        // You can use choice.dataset.mode for the selected mode
+      });
+    });
+    // End of route transport mode selection}
+
+    checkRouterButtons();
+  }
 
   async function clearServiceWorker() {
     if ('serviceWorker' in navigator) {
@@ -2877,29 +2961,32 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   function getNormalizedCoordinateString(s, sep) {
     const pos = getCoordinateFromText(s);
     if (pos == null) return "";
-    return pos.latitude + sep + pos.longitude;
+    return pos[0] + sep + pos[1];
   }
 
 
   function checkSpecialCoord(s) {
     const su = s.toUpperCase();
     if (su === "" || su === "I")
-      return pToStr(currentPosPin.getLocation(), ' ');
+      return pToStr(mapWrapper.getPinLocation(myPin), ' ');
     if (su === "H")
-      return pToStr(hitPin.getLocation(), ' ');
+      return pToStr(mapWrapper.getPinLocation(hitPin), ' ');
     if (isCoordinate(s)) return getNormalizedCoordinateString(s, " ");
     return s;
   }
 
 
   function showRoutePane(routerType = 0) {
+    checkRouterButtons();
     createRouteWindow();
     let fromText = checkSpecialCoord(getInputText("editFrom"));
     let toText = checkSpecialCoord(getInputText("editTo"));
-    let fromPin = lastSelected;
-    if (!fromPin) fromPin = myPin;
-    const from = mapWrapper.getPinLocation(fromPin);
-    const to = mapWrapper.getPinLocation(hitPin);
+    // let fromPin = lastSelected;
+    // if (!fromPin) fromPin = myPin;
+    // const from = mapWrapper.getPinLocation(fromPin);
+    // const to = mapWrapper.getPinLocation(hitPin);
+    const from = getCoordinateFromText(fromText);
+    const to = getCoordinateFromText(toText);
     loadRoutingMachine(function () {
       switch (routerType) {
         case 0:
@@ -2910,6 +2997,9 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
           break;
         case 2:
           findRouteOSRM(from, to, initRoutingEvents);
+          break;
+        case 3:
+          findRouteGraphHopper(from, to, options.graphHopperApiKey, initRoutingEvents);
           break;
         default:
           return;
@@ -2924,13 +3014,15 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     if (routingWindow) return;
     const routingMainDiv = document.getElementById("routingMainDiv");
     routingMainDiv.style.visibility = "visible";
+    // noinspection JSUnresolvedReference
     routingWindow = new WinBox("Ajo-ohjeet", {
       id: "routingWindow",
       mount: routingMainDiv,
       height: 300,
       width: 300,
+      minwidth: 100,
       header: 16,
-      class: ["no-full"],
+      class: ["no-full", "no-max"],
       y: "25px",
       x: "right",
       onresize: function () {
@@ -2951,8 +3043,32 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     // compsWindow.onresize = function(w,h) { saveWindowPos(compsWindow); };
   }
 
+function findDriving(routerType=2) {
+  showRoutePane(routerType);
+}
+
+function googleDirections() {
+  let s = getPinInputText();
+  if (isCoordinate(s)) {
+    s = getNormalizedCoordinateString(s, ",")
+  }
+  // const url = "https://www.google.com/maps/search/?api=1&query=" + s;
+  const url = "https://www.google.com/maps/dir/?api=1" +
+                "&destination=" + encodeURIComponent(s) + "&travelmode=driving";
+  const win = window.open(url, '_blank');
+  win.focus();
+}
+
+function checkRouterButtons() {
+  const hasHere = options.hereApiKey && options.hereApiKey.length > 10;
+  const hasGH = options.graphHopperApiKey && options.graphHopperApiKey.length > 10;
+  document.getElementById("buttonHERE").style.display = hasHere ? "" : "none";
+  document.getElementById("buttonOSRM").style.display = false; // always available
+  document.getElementById("buttonGraphHopper").style.display = hasGH ? "" : "none";
+}
 
   //# endregion Routing
+
 
 </script>
 <div id="mySidenavHamburger"
@@ -2970,12 +3086,14 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     <li><span onclick="toggleDiv('settings');">Asetukset...</span> <a class="help" data-href="#settings"></a></li>
     <li><span onclick="toggleDiv('findDiv'); closeNav();">Pinnien lisääminen...</span> <a class="help"
                                                                                           data-href="#addpins"></a></li>
-    <li><span onclick="showRoutePane(); closeNav()">Ajo-ohjeet...</span> <a class="help" data-href="#directions"></a>
+    <li><span onclick="loadRoutingMachine(() => toggleDiv('routingOptions', null, initRoutingOptions))">Ajo-ohjeiden asetukset...</span> <a class="help" data-href="#settings"></a></li>
+
+    <li><span onclick="showRoutePane(2); closeNav()">Ajo-ohjeet...</span> <a class="help" data-href="#directions"></a>
     </li>
     <li><span onclick="showRoutePane(1); closeNav()">Ajo-ohjeet sample</span> <a class="help"
                                                                                  data-href="#directions"></a></li>
-    <li><span onclick="showRoutePane(2); closeNav()">Ajo-ohjeet OSRM</span> <a class="help" data-href="#directions"></a>
-    </li>
+    <!--<li><span onclick="showRoutePane(2); closeNav()">Ajo-ohjeet OSRM</span> <a class="help" data-href="#directions"></a></li>
+    <li><span onclick="showRoutePane(3); closeNav()">Ajo-ohjeet GraphHopper</span> <a class="help" data-href="#directions"></a></li>-->
     <li><span onclick="toggleDiv('loadTrack'); ">Lataa track-tiedosto...</span> <a class="help"
                                                                                    data-href="#loadtrack"></a></li>
     <li><span onclick="toggleDiv('trackDiv'); ">Näytä track-tiedot</span> <a class="help"
@@ -3142,8 +3260,6 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
         <button type="button" onclick="toggleDiv('followArea', true); toggleDiv('accountArea', false);">Palaa
           seuranta-asetuksiin...
         </button>
-        <p>Eri reitityspalvelujen API-avaimia</p>
-        <label>HERE API-key<input type="text" id="hereApiKey"></label>
       </div>
     </div>
   </div>
@@ -3231,26 +3347,33 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   <!--<label class="closebtn" style="top: -13px;" onclick="showRoutePane();">&times;</label>-->
   <div class="popupIn">
     <div id='addressDiv'>
-      <span class="instructions">Kirjoita osoitteet tai koordinaatit:<span><br>
+      <span class="instructions">Kirjoita osoitteet tai koordinaatit:         <a class="link" onclick="copyRouteToUrl()">Laita&nbsp;URLiin</a>
+        <a class="link" onclick="copyRouteToUrl()">Laita&nbsp;URLiin</a>
+      </span><br>
       <span class="inner">
       <button class="inner" type="button" title="Laita nykypiste lähtöpisteeksi"
               onclick='moveEditTo("editFrom")'>S</button>
       <button class="inner" type="button" title="Laita oma paikka lähtöpisteeksi"
               onclick='moveITo("editFrom")'>I</button>
       <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editFrom")'>E</button>
-      <label><input type="text" name="editFrom" id="editFrom" value="Tontuntie 11, Jyväskylä"/></label><br>
+      <label><input type="text" name="editFrom" id="editFrom" value="I"/></label><br>
       </span>
       <span class="inner">
       =&gt;
       <button class="inner" type="button" title="Laita nykypiste loppupisteeksi"
               onclick='moveEditTo("editTo")'>S</button>
       <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editTo")'>E</button>
-      <label><input type="text" name="editTo" id="editTo" value="Mattilanniemi 2, Jyväskylä" /></label><br>
+      <label><input type="text" name="editTo" id="editTo" value="H" /></label><br>
       </span>
       <span class="inner">
-        <label><input type="checkbox" name="RouteMode" id="RouteMode" value="walk"/>Kävely</label>
-        <button type="button" onclick="findDriving()">Etsi&nbsp;reitti</button>
-        <a class="link" onclick="copyRouteToUrl()">Laita&nbsp;URLiin</a>
+        <span id="transportChoices">
+          <span class="transport-choice" data-mode="car">🚗</span>
+          <span class="transport-choice" data-mode="bike">🚲</span>
+          <span class="transport-choice" data-mode="walk">🚶</span>
+        </span>
+        <button id="buttonOSRM" type="button" onclick="findDriving(2)" title="Etsi OSMR-reittittimellä (ei osaa muuta kuin auton)">Etsi&nbsp;reitti</button>
+        <button id="buttonHERE" type="button" onclick="findDriving(0)" title="Etsi HERE-reitittimellä">H</button>
+        <button id="buttonGraphHopper" type="button" onclick="findDriving(3)" title="Etsi GraphHopper-reitittimellä (antaa vain yhden)">G</button>
       </span>
     </div>
     <div class="driving">
@@ -3260,6 +3383,27 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     </div>
   </div>
 </div>
+
+<div class="popup" id="routingOptions" style=" ">
+  <label class="closebtn" onclick="checkRouterButtons(); toggleDiv('routingOptions')">&times;</label>
+  <div class="popupIn">
+  <h2>Ajo-ohjeiden asetuksia</h2>
+    <div class="flex-labels">
+      <div><label for="speechRate">Puhenopeus %: </label><input type="text" size="3" id="speechRate" value="120"></div>
+      <div><label for="dialectSelect">Murre: </label><select  id="dialectSelect" ></select></div>
+    </div>
+    <button onclick="exampleSpeech()">Puhu malliksi</button><br>
+    <button onclick="showRoutePane(1); closeNav()">Ajo-ohjeet malli</button>
+    <hr>
+    <h3>Eri reitityspalvelujen API-avaimia</h3>
+    <p>Lisäämällä avaimia, saat käyttöön muitakin reitityspavelimia. Lue lisää ?</p>
+    <div class="flex-labels">
+      <div><label for="hereApiKey">HERE API-key: </label><input type="text" size="50" id="hereApiKey"></div>
+      <div><label for="graphHopperApiKey">GraphHopper API-key: </label><input type="text" size="50" id="graphHopperApiKey"></div>
+    </div>
+  </div>
+</div>
+
 
 
 </body>

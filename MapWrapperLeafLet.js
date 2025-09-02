@@ -424,15 +424,40 @@ function loadRoutingMachine(callback) {
     });
   }
 
-  // Load JS
-  function loadJS() {
-    return new Promise(resolve => {
-      if (window.L && window.L["Routing"]) return resolve();
+  function createScript(src, resolve) {
       const script = document.createElement('script');
-      script.src = 'https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js';
+      script.src = src;
       script.onload = resolve;
       script.onerror = resolve;
       document.head.appendChild(script);
+  }
+
+    // Load JS
+  function loadJS() {
+    return new Promise(resolve => {
+      if (window.L && window.L["Routing"]) return resolve();
+      createScript('https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js', resolve);
+    });
+  }
+
+  function loadPolylineJS() {
+    return new Promise(resolve => {
+      if (typeof polyline !== 'undefined') return resolve();
+      createScript('js/polyline.js', resolve);
+    });
+  }
+
+  function loadCorsLiteJS() {
+    return new Promise(resolve => {
+      if (typeof corslite !== 'undefined') return resolve();
+      createScript('js/corslite.js', resolve);
+    });
+  }
+
+  function loadGraphHopperJS() {
+    return new Promise(resolve => {
+      if (window.L && window.L["Routing"] && window.L["Routing"]["graphHopper"]) return resolve();
+      createScript('js/lrm-graphhopper.js', resolve);
     });
   }
 
@@ -440,14 +465,11 @@ function loadRoutingMachine(callback) {
   function loadRouter() {
     return new Promise(resolve => {
       if (typeof findRouteOSRM !== "undefined") return resolve();
-      const script = document.createElement('script');
-      script.src = 'routersLeaflet.js?v=' + Date.now();
-      script.onload = resolve;
-      script.onerror = resolve;
-      document.head.appendChild(script);
+      createScript('routersLeaflet.js?v=' + Date.now(), resolve);
     });
   }
 
+  /* Tämä ei toimi:
   // Load osrm-text-instructions from CDN
   function loadOsrmTextInstructions() {
     return new Promise(resolve => {
@@ -459,9 +481,12 @@ function loadRoutingMachine(callback) {
       document.head.appendChild(script);
     });
   }
+  */
 
-  Promise.all([loadCSS(), loadJS(), loadRouter(), loadOsrmTextInstructions()]).then(() => {
-    if (callback) callback();
+  Promise.all([loadCSS(), loadJS(), loadPolylineJS(), loadCorsLiteJS(), loadRouter() /*, loadOsrmTextInstructions()*/]).then(() => {
+      loadGraphHopperJS().then(() => {
+        if (callback) callback();
+      });
   });
 }
 
