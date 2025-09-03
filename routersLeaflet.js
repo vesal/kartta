@@ -8,27 +8,56 @@ function processRouteData(text, waypoints) {
   if (!data.routes || data.routes.length === 0) {
     return [];
   }
-  let routeIndex = 0;
-  for (const route of data.routes) {
-    if (route.sections) {
-      for (const section of route.sections) {
-        routeIndex++;
-      }
-    }
-  }
 
-  const routeCount = routeIndex;
-  routeIndex = 1;
+  const routeCount = data.routes.length;
+  let routeIndex = 1;
   const routeObjs = [];
   for (const route of data.routes) {
     if (route.sections) {
-      for (const section of route.sections) {
-        const routeObj = processSection(section, waypoints);
+      let allCoords = [];
+      let allInstructions = [];
+      let totalDistance = 0;
+      let totalTime = 0;
+      let coordOffset = 0;
+      for (let si = 0; si < route.sections.length; si++) {
+        const section = route.sections[si];
+        const routeObj = processSection(section, waypoints, {legIndex: si, legCount: route.sections.length});
         if (routeObj) {
-          routeObj.name = `Reitti ${routeIndex}/${routeCount}`; // = ${(routeObj.summary.totalDistance / 1000).toFixed(1)} km`;
-          routeObjs.push(routeObj);
-          routeIndex++;
+          // Adjust instruction offsets
+          for (let instr of routeObj.instructions) {
+            if (typeof instr.index === "number") {
+              instr.index += coordOffset;
+            }
+          }
+          if (si < route.sections.length - 1) {
+            // Change last instruction to "WaypointReached" if not the final section
+            let instr = routeObj.instructions[routeObj.instructions.length - 1];
+            instr.type = "WaypointReached";
+          }
+          coordOffset += routeObj.coordinates.length;  // last point dublicated
+          allCoords = allCoords.concat(routeObj.coordinates);
+          allInstructions = allInstructions.concat(routeObj.instructions);
+          totalDistance += routeObj.summary.totalDistance;
+          totalTime += routeObj.summary.totalTime;
+
+          // routeObj.name = `Reitti ${routeIndex}/${routeCount}`; // = ${(routeObj.summary.totalDistance / 1000).toFixed(1)} km`;
+          // routeObjs.push(routeObj);
+          // routeIndex++;
         }
+      }
+      if (allCoords.length > 0) {
+        routeObjs.push({
+          coordinates: allCoords,
+          name: `Reitti ${routeIndex}/${routeCount}`,
+          instructions: allInstructions,
+          summary: {
+            totalDistance: totalDistance,
+            totalTime: totalTime
+          },
+          inputWaypoints: waypoints,
+          properties: {isSimplified: false}
+        });
+        routeIndex++;
       }
     }
   }
@@ -36,7 +65,7 @@ function processRouteData(text, waypoints) {
   return routeObjs;
 }
 
-function processSection(section, waypoints) {
+function processSection(section, waypoints, index) {
   if (!section.polyline || !section.turnByTurnActions) {
     return null;
   }
@@ -159,7 +188,7 @@ function processSection(section, waypoints) {
         text = a.action; // fallback
     }
     m.exit = exit;
-    text = routeStepToText(step, i); // käytä OSRM-tyyliä
+    text = routeStepToText(step, index); // käytä OSRM-tyyliä
     instructions.push(
       {
         text: text,
@@ -209,7 +238,12 @@ function createHereRouter() {
         if (options.routeMode === "walk") transportMode = "pedestrian";
         if (options.routeMode === "bike") transportMode = "bicycle";
         const coords = waypoints.map(wp => `${wp.latLng.lat},${wp.latLng.lng}`);
-        const hereUrl = `${this.options.serviceUrl}?transportMode=${transportMode}&origin=${coords[0]}&destination=${coords[coords.length - 1]}&apiKey=${this.options.apiKey}&return=polyline,turnbyturnactions&alternatives=5`;
+        let hereUrl = `${this.options.serviceUrl}?transportMode=${transportMode}&origin=${coords[0]}&destination=${coords[coords.length - 1]}&apiKey=${this.options.apiKey}&return=polyline,turnbyturnactions&alternatives=5`;
+        for (let i = 1; i < coords.length - 1; i++) {
+          hereUrl += `&via=${coords[i]}`;
+        }
+
+        // console.log("HERE URL:", hereUrl);
 
         // Käytä PHP-proxya
         const proxyUrl = "https://www.mit.jyu.fi/demowww/cyclo/index.php?getredirect=" + encodeURIComponent(hereUrl);
@@ -248,7 +282,7 @@ function findRouteHERE(from, to, apiKey, callback, useSample = false) {
     ],
     router: router,
     container: document.getElementById('itineraryDiv'),
-    routeWhileDragging: true,
+    routeWhileDragging: false,
     showAlternatives: true,
     lineOptions: {
       styles: [{color: 'orange', opacity: 1, weight: 5}] // <- vaihda väri
@@ -264,6 +298,10 @@ function findRouteHERE(from, to, apiKey, callback, useSample = false) {
         callback(mapWrapper.routingControl)
       }, 0);
     }
+  });
+  mapWrapper.routingControl.on('waypointschanged', function(e) {
+  // This will recalculate the route with the new waypoints
+    // mapWrapper.routingControl._route();
   });
   return mapWrapper.routingControl;
 }
@@ -325,6 +363,7 @@ function routeStepToTextSuomi(step, index) {
     case "exit":
       return `Postu ${suunta}, suuntaan ${step.name}`;
     case "arrive":
+      if ((index?.legIndex ?? 0) < (index?.legCount ?? 0) - 1) return "Olet välipisteessä!";
       return "Olet perillä!";
     case "thenDrive":
       return ", sitten aja ";
@@ -387,6 +426,7 @@ function routeStepToTextSavo(step, index) {
     case "exit":
       return `Tempasehha syrjää ${suunta}, suuntoo ${step.name}`;
     case "arrive":
+      if ((index?.legIndex ?? 0) < (index?.legCount ?? 0) - 1) return  "Oot välpistees!";
       return "Kahh siinähä oot!";
     case "thenDrive":
       return ", sitten pörräätät ";

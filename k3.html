@@ -1405,6 +1405,48 @@
     return "0123456789-".indexOf(s[0]) >= 0;
   }
 
+  /*
+  function findAddressCoordinate(addr) {
+    fetch(`https://nominatim.openstreetmap.org/search?q=${addr}&format=json`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.length === 0) return null;
+        const item = data[0];
+        return [item.lat, item.lon];
+      })
+      .catch(err => null);
+  }
+  */
+
+  async function findAddressCoordinate(addr) {
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${addr}&format=json`);
+      const data = await response.json();
+      if (data.length === 0) return null;
+      const item = data[0];
+      if (data.length === 1) return [item.lat, item.lon];
+      let refPos;
+      if (lastSelected) refPos = mapWrapper.getPinLocation(lastSelected);
+      else if (myPin) refPos = mapWrapper.getPinLocation(myPin);
+      else if (hitPin) refPos = mapWrapper.getPinLocation(hitPin);
+      if (!refPos) return [item.lat, item.lon];
+      let bestDist = 1000000;
+      let bestPos = [item.lat, item.lon];
+      for (const d of data)  {
+        // noinspection JSUnresolvedReference
+        const pos = [d.lat, d.lon];
+        const dist = WGS84_distance(refPos, pos);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestPos = pos;
+        }
+      }
+      return bestPos;
+    } catch (err) {
+      return null;
+    }
+  }
+
   function geocodeQuery(query) {
 
     const select = document.getElementById('searchCombo');
@@ -2966,42 +3008,40 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   }
 
 
-  function checkSpecialCoord(s, def) {
+  async function checkSpecialCoord(s, def) {
     if (s.toUpperCase() === "S") {
       if (lastSelected) {
-        return pToStr(mapWrapper.getPinLocation(lastSelected), ' ');
+        return mapWrapper.getPinLocation(lastSelected);
       }
       s = def;
     }
     if (s === "") s = def;
     const pin = mapWrapper.findPin(s);
-    if (pin) return pToStr(mapWrapper.getPinLocation(pin), ' ');
-    if (isCoordinate(s)) return getNormalizedCoordinateString(s, " ");
-    return s;
+    if (pin) return mapWrapper.getPinLocation(pin);
+    if (isCoordinate(s)) return getCoordinateFromText(s);
+    return await findAddressCoordinate(s);
   }
 
 
-  function showRoutePane(routerType = 0) {
+  async function showRoutePane(routerType = 0) {
     checkRouterButtons();
     createRouteWindow();
-    let fromText;
-    let toText;
+    let from;
+    let to;
     if (routerType === 1) {  // example
-      fromText = "62.29978 25.73234";
-      toText = "62.25574 25.77731 H";
+      from = [62.29978,25.73234];
+      to = [62.25574,25.77731];
     }
     else {
-      fromText = checkSpecialCoord(getInputText("editFrom"), "I");
+      from = await checkSpecialCoord(getInputText("editFrom"), "I");
       let s = getInputText("editTo");
       if (s.trim() === "") s = "S";
-      toText = checkSpecialCoord(s, "H");
+      to = await checkSpecialCoord(s, "H");
     }
     // let fromPin = lastSelected;
     // if (!fromPin) fromPin = myPin;
     // const from = mapWrapper.getPinLocation(fromPin);
     // const to = mapWrapper.getPinLocation(hitPin);
-    const from = getCoordinateFromText(fromText);
-    const to = getCoordinateFromText(toText);
     if (!from || !to) {
       let message = "";
       let toText = getInputText("editTo").trim();
@@ -3075,8 +3115,8 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     // compsWindow.onresize = function(w,h) { saveWindowPos(compsWindow); };
   }
 
-function findDriving(routerType=2) {
-  showRoutePane(routerType);
+async function findDriving(routerType=2) {
+  await showRoutePane(routerType);
 }
 
 function googleDirections() {
@@ -3423,7 +3463,7 @@ function checkRouterButtons() {
     <div class="flex-labels">
       <div><label for="speechRate">Puhenopeus %: </label><input type="text" size="3" id="speechRate" value="120"></div>
       <div><label for="dialectSelect">Murre: </label><select  id="dialectSelect" ></select></div>
-      <div><label for="exampleText">Malliteksti: </label><input type="text" size="10" id="exampleText" value=""></div>
+      <div><label for="exampleText">Malliteksti: </label><input type="text" size="30" id="exampleText" value=""></div>
     </div>
     <button onclick="exampleSpeech()">Puhu malliksi</button><br>
     <button onclick="showRoutePane(1); closeNav()">Ajo-ohjeet malli</button>
