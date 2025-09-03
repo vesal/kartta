@@ -1,3 +1,4 @@
+
 class MapWrapper {
   /**
    * @typedef {Object} Polyline
@@ -312,6 +313,36 @@ class MapWrapper {
     }
     pin.on(eventName, callback);
   }
+
+  findPin(name) {
+    name = name.trim().toUpperCase();
+    /*
+    let pin = null;
+    this.map.eachLayer(function(layer) {
+      if (!pin)
+        if (layer instanceof this.L.Marker) {
+          const label = this.getPinLabel(layer);
+          if (label.trim().toUpperCase() === name) {
+            pin = layer;
+          }
+      }
+      return pin;
+    }.bind(this));
+     */
+    // noinspection JSUnresolvedReference
+    const layers = this.map._layers;
+    for (const key in layers) {
+      const layer = layers[key];
+      if (layer instanceof this.L.Marker) {
+        const label = this.getPinLabel(layer);
+        if (label.trim().toUpperCase() === name) {
+          return layer;
+        }
+      }
+    }
+    return null;
+  }
+
 
   addLines(lines, from, to, options = {}, text = null, draw = true) {
     if (!lines) {

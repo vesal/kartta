@@ -1156,8 +1156,7 @@
     graphHopperApiKey: "",
     speechRate: 100,
     dialect: "savo",
-    routeModeWalk: false,
-    routeModeBike: false,
+    routeMode: "car",
   };
 
   const areaDatas = [
@@ -2432,24 +2431,19 @@
     checkSleep(); // check if use wake lock or not
 
     options.dialect = localStorage.getItem('dialect') || 'savo';
-    // getCBOption("routeModeWalk");
-    // getCBOption("routeModeBike");
 
     // Route transport mode selection
-    const lastMode = localStorage.getItem('routeMode');
+    options.routeMode = localStorage.getItem('routeMode');
     const choices = document.querySelectorAll('#transportChoices .transport-choice');
     choices.forEach(choice => {
-      if (choice.dataset.mode === lastMode) {
+      if (choice.dataset.mode === options.routeMode) {
         choice.classList.add('selected');
-        options.routeModeWalk = (lastMode === 'walk');
-        options.routeModeBike = (lastMode === 'bike');
       }
       choice.addEventListener('click', () => {
         choices.forEach(c => c.classList.remove('selected'));
         choice.classList.add('selected');
         const mode = choice.dataset.mode;
-        options.routeModeWalk = (mode === 'walk');
-        options.routeModeBike = (mode === 'bike');
+        options.routeMode =mode;
         localStorage.setItem('routeMode', mode);
         // You can use choice.dataset.mode for the selected mode
       });
@@ -2969,12 +2963,16 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   }
 
 
-  function checkSpecialCoord(s) {
-    const su = s.toUpperCase();
-    if (su === "" || su === "I")
-      return pToStr(mapWrapper.getPinLocation(myPin), ' ');
-    if (su === "H")
-      return pToStr(mapWrapper.getPinLocation(hitPin), ' ');
+  function checkSpecialCoord(s, def) {
+    if (s.toUpperCase() === "S") {
+      if (lastSelected) {
+        return pToStr(mapWrapper.getPinLocation(lastSelected), ' ');
+      }
+      s = def;
+    }
+    if (s === "") s = def;
+    const pin = mapWrapper.findPin(s);
+    if (pin) return pToStr(mapWrapper.getPinLocation(pin), ' ');
     if (isCoordinate(s)) return getNormalizedCoordinateString(s, " ");
     return s;
   }
@@ -2983,14 +2981,31 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   function showRoutePane(routerType = 0) {
     checkRouterButtons();
     createRouteWindow();
-    let fromText = checkSpecialCoord(getInputText("editFrom"));
-    let toText = checkSpecialCoord(getInputText("editTo"));
+    let fromText;
+    let toText;
+    if (routerType === 1) {  // example
+      fromText = "62.29978 25.73234";
+      toText = "62.25574 25.77731 H";
+    }
+    else {
+      fromText = checkSpecialCoord(getInputText("editFrom"), "I");
+      let s = getInputText("editTo");
+      if (s.trim() === "") s = "S";
+      toText = checkSpecialCoord(s, "H");
+    }
     // let fromPin = lastSelected;
     // if (!fromPin) fromPin = myPin;
     // const from = mapWrapper.getPinLocation(fromPin);
     // const to = mapWrapper.getPinLocation(hitPin);
     const from = getCoordinateFromText(fromText);
     const to = getCoordinateFromText(toText);
+    if (!from || !to) {
+      let message = "";
+      if (!from) message += "Ei löydy lähtö: " + getInputText("editFrom")+ "<br>";
+      if (!to) message += "Ei löydy kohde: " + getInputText("editTo") + "<br>";
+      removeOldRoutingControl(message);
+      return;
+    }
     loadRoutingMachine(function () {
       switch (routerType) {
         case 0:
@@ -3067,7 +3082,7 @@ function checkRouterButtons() {
   const hasHere = options.hereApiKey && options.hereApiKey.length > 10;
   const hasGH = options.graphHopperApiKey && options.graphHopperApiKey.length > 10;
   document.getElementById("buttonHERE").style.display = hasHere ? "" : "none";
-  document.getElementById("buttonOSRM").style.display = false; // always available
+  document.getElementById("buttonOSRM").style.display = ""; // always available
   document.getElementById("buttonGraphHopper").style.display = hasGH ? "" : "none";
 }
 
@@ -3357,16 +3372,16 @@ function checkRouterButtons() {
       <span class="inner">
       <button class="inner" type="button" title="Laita nykypiste lähtöpisteeksi"
               onclick='moveEditTo("editFrom")'>S</button>
-      <button class="inner" type="button" title="Laita oma paikka lähtöpisteeksi"
-              onclick='moveITo("editFrom")'>I</button>
-      <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editFrom")'>E</button>
+      <!--<button class="inner" type="button" title="Laita oma paikka lähtöpisteeksi"
+              onclick='moveITo("editFrom")'>I</button>-->
+      <!-- <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editFrom")'>E</button> -->
       <label><input type="text" name="editFrom" id="editFrom" value="I"/></label><br>
       </span>
       <span class="inner">
       =&gt;
       <button class="inner" type="button" title="Laita nykypiste loppupisteeksi"
               onclick='moveEditTo("editTo")'>S</button>
-      <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editTo")'>E</button>
+      <!-- <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editTo")'>E</button> -->
       <label><input type="text" name="editTo" id="editTo" value="H" /></label><br>
       </span>
       <span class="inner">

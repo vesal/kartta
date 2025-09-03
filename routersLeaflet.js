@@ -206,8 +206,8 @@ function createHereRouter() {
         }, 0);
       } else {  // hae oikeasti netistä
         let transportMode = "car";
-        if (options.routeModeWalk) transportMode = "pedestrian";
-        if (options.routeModeBike) transportMode = "bicycle";
+        if (options.routeMode === "walk") transportMode = "pedestrian";
+        if (options.routeMode === "bike") transportMode = "bicycle";
         const coords = waypoints.map(wp => `${wp.latLng.lat},${wp.latLng.lng}`);
         const hereUrl = `${this.options.serviceUrl}?transportMode=${transportMode}&origin=${coords[0]}&destination=${coords[coords.length - 1]}&apiKey=${this.options.apiKey}&return=polyline,turnbyturnactions&alternatives=5`;
 
@@ -343,53 +343,53 @@ function routeStepToTextSavo(step, index) {
 
   switch (m.modifier) {
     case "left":
-      suunta = "vasemmallee";
+      suunta = "vasemmalle";
       break;
     case "right":
-      suunta = "oikeelle";
+      suunta = "oekeelle";
       break;
     case "straight":
       suunta = "suoroo";
       break;
     case "slight right":
-      suunta = "hitusen oikeelle";
+      suunta = "hitusen oekeelle";
       break;
     case "slight left":
-      suunta = "ätväse vasemmallee";
+      suunta = "ätväse vasemmalle";
       break;
     case "uturn":
-      suunta = "tee U-kiännös";
+      suunta = "tie U-kiännös";
       break;
   }
   switch (m.type) {
     case "depart":
-      return `Pörräytä tiellee ${step.name}${dirtext}`;
+      return `Pörräätä tiellee ${step.name}${dirtext}`;
     case "turn":
       return `Kiänny ${suunta} tielle ${step.name}`;
     case "roundabout":
-      return `Meehhä ympyrää ja luikaha pihalle kolosta ${m.exit}`;
+      return `Määhhä ympyrrään ja luikaha pihalle kolosta ${m.exit}`;
     case "exit roundabout":
       return `Kurvoo pihalle paekasta ${m.exit}, suuntoo ${step.name}`;
     case "roundabout turn":
-      return `Tee jottai ympyrässä`;
+      return `Tie jottaen ympyrässä`;
     case "merge":
       return `Änkee tielle ${step.name}`;
     case "off ramp":
-      return `Kurvoo pois tieltä ${step.name}`;
+      return `Kurvoo poes tieltä ${step.name}`;
     case "new name":
       return `Tuuppoo ${suunta} tielle ${step.name}`;
     case "end of road":
       return `Viennä ${suunta} tielle ${step.name}`;
     case "continue":
-      return `Hurrauta sammaan suuntaa ${suunta} tielle ${step.name}`;
+      return `Hurrautahhan sammaan suuntaa ${suunta} tielle ${step.name}`;
     case "exit rotary":
-      return `Tempasehan syrjöö ${suunta}, suuntoo ${step.name}`;
+      return `Tempasehha syrjää ${suunta}, suuntoo ${step.name}`;
     case "exit":
-      return `Tempasehan syrjöö ${suunta}, suuntoo ${step.name}`;
+      return `Tempasehha syrjää ${suunta}, suuntoo ${step.name}`;
     case "arrive":
       return "Kahh siinähä oot!";
     case "thenDrive":
-      return ", sitten pörräytä ";
+      return ", sitten pörräätät ";
     case "exampleVoice":
       return "Nyt huastetaan savvoo noppeuvella ";
   }
@@ -433,7 +433,9 @@ function routeStepToText(step, index= -1) {
   return stepToTextFunctions[options.dialect](step, index);
 }
 
-function removeOldRoutingControl() {
+function removeOldRoutingControl(message=null) {
+  const routeAltsDiv = document.getElementById('routeAlts');
+  routeAltsDiv.innerHTML = message;
   if (mapWrapper.routingControl == null) return;
   mapWrapper.map.removeControl(mapWrapper.routingControl);
   mapWrapper.routingControl = null;
@@ -504,8 +506,8 @@ function findRouteOSRM(from, to, callback) {
 function findRouteGraphHopper(from, to, apiKey, callback) {
   removeOldRoutingControl();
   let vechile = "car"
-  if (options.routeModeWalk) vechile = "foot";
-  if (options.routeModeBike) vechile = "bike";
+  if (options.routeMode === "walk") vechile = "foot";
+  if (options.routeMode === "bike") vechile = "bike";
 
   mapWrapper.routingControl = mapWrapper. L.Routing.control({
     waypoints: [
