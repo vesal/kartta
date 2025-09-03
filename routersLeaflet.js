@@ -25,7 +25,7 @@ function processRouteData(text, waypoints) {
       for (const section of route.sections) {
         const routeObj = processSection(section, waypoints);
         if (routeObj) {
-          routeObj.name = `Reitti ${routeIndex}/${routeCount} = ${(routeObj.summary.totalDistance / 1000).toFixed(1)} km`;
+          routeObj.name = `Reitti ${routeIndex}/${routeCount}`; // = ${(routeObj.summary.totalDistance / 1000).toFixed(1)} km`;
           routeObjs.push(routeObj);
           routeIndex++;
         }
@@ -346,7 +346,7 @@ function routeStepToTextSavo(step, index) {
       suunta = "vasemmalle";
       break;
     case "right":
-      suunta = "oekeelle";
+      suunta = "ookeelle";
       break;
     case "straight":
       suunta = "suoroo";
@@ -367,7 +367,7 @@ function routeStepToTextSavo(step, index) {
     case "turn":
       return `Kiänny ${suunta} tielle ${step.name}`;
     case "roundabout":
-      return `Määhhä ympyrrään ja luikaha pihalle kolosta ${m.exit}`;
+      return `Määhä ympyrrään ja luikaha pihalle kolosta ${m.exit}`;
     case "exit roundabout":
       return `Kurvoo pihalle paekasta ${m.exit}, suuntoo ${step.name}`;
     case "roundabout turn":
@@ -576,7 +576,8 @@ function stepFromType(maneuverType) {
 }
 
 function exampleSpeech() {
-  const exampleText = routeStepToText(stepFromType('exampleVoice'));
+  let exampleText = document.getElementById('exampleText').value;
+  if (exampleText === '') exampleText = routeStepToText(stepFromType('exampleVoice'));
   speakText(exampleText + " " + numberToFinnishWords(options.speechRate));
 }
 
