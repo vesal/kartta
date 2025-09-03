@@ -521,3 +521,10 @@ function loadRoutingMachine(callback) {
   });
 }
 
+function removeOldRoutingControl(message=null) {
+  const routeAltsDiv = document.getElementById('routeAlts');
+  routeAltsDiv.innerHTML = message;
+  if (mapWrapper.routingControl == null) return;
+  mapWrapper.map.removeControl(mapWrapper.routingControl);
+  mapWrapper.routingControl = null;
+}

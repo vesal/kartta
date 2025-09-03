@@ -358,7 +358,7 @@ function routeStepToTextSavo(step, index) {
       suunta = "ätväse vasemmalle";
       break;
     case "uturn":
-      suunta = "tie U-kiännös";
+      suunta = "tiehhä U-kiännös";
       break;
   }
   switch (m.type) {
@@ -371,7 +371,7 @@ function routeStepToTextSavo(step, index) {
     case "exit roundabout":
       return `Kurvoo pihalle paekasta ${m.exit}, suuntoo ${step.name}`;
     case "roundabout turn":
-      return `Tie jottaen ympyrässä`;
+      return `Tiehhä jottaen ympyrässä`;
     case "merge":
       return `Änkee tielle ${step.name}`;
     case "off ramp":
@@ -433,13 +433,6 @@ function routeStepToText(step, index= -1) {
   return stepToTextFunctions[options.dialect](step, index);
 }
 
-function removeOldRoutingControl(message=null) {
-  const routeAltsDiv = document.getElementById('routeAlts');
-  routeAltsDiv.innerHTML = message;
-  if (mapWrapper.routingControl == null) return;
-  mapWrapper.map.removeControl(mapWrapper.routingControl);
-  mapWrapper.routingControl = null;
-}
 
 function findRouteOSRM(from, to, callback) {
 

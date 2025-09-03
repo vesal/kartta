@@ -3006,6 +3006,10 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
       removeOldRoutingControl(message);
       return;
     }
+    if (WGS84_distance(from, to) < 0.010) {
+      removeOldRoutingControl("Pisteet ovat liian lähellä toisiaan (<10m).");
+      return;
+    }
     loadRoutingMachine(function () {
       switch (routerType) {
         case 0:
