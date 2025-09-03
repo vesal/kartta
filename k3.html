@@ -1157,6 +1157,8 @@
     speechRate: 100,
     dialect: "savo",
     routeMode: "car",
+    from: "",
+    to: ""
   };
 
   const areaDatas = [
@@ -3001,8 +3003,14 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     const to = getCoordinateFromText(toText);
     if (!from || !to) {
       let message = "";
+      let toText = getInputText("editTo").trim();
       if (!from) message += "Ei löydy lähtö: " + getInputText("editFrom")+ "<br>";
-      if (!to) message += "Ei löydy kohde: " + getInputText("editTo") + "<br>";
+      if (!to) {
+        message += "Ei löydy kohdetta: " + toText + "<br>";
+        if (toText.toUpperCase() === "H" || toText === "") {
+          message += "Klikkaa kartalla paikkaa johon haluat reitin.<br>";
+        }
+      }
       removeOldRoutingControl(message);
       return;
     }
@@ -3379,14 +3387,14 @@ function checkRouterButtons() {
       <!--<button class="inner" type="button" title="Laita oma paikka lähtöpisteeksi"
               onclick='moveITo("editFrom")'>I</button>-->
       <!-- <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editFrom")'>E</button> -->
-      <label><input type="text" name="editFrom" id="editFrom" value="I"/></label><br>
+      <label><input type="text" name="editFrom" id="editFrom" value=""/></label><br>
       </span>
       <span class="inner">
       =&gt;
       <button class="inner" type="button" title="Laita nykypiste loppupisteeksi"
               onclick='moveEditTo("editTo")'>S</button>
       <!-- <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editTo")'>E</button> -->
-      <label><input type="text" name="editTo" id="editTo" value="H" /></label><br>
+      <label><input type="text" name="editTo" id="editTo" value="" /></label><br>
       </span>
       <span class="inner">
         <span id="transportChoices">
