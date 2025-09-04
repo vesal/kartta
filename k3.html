@@ -484,6 +484,10 @@
       float: right;
     }
 
+    .leaflet-top.leaflet-right {
+        margin-right: 2em;
+    }
+
   </style>
   <script src="KeyValStore.js" defer></script>
   <script>
@@ -2448,6 +2452,7 @@
     const cb1 = document.getElementById('area1cb');
     const cb2 = document.getElementById('area1cbCopy');
 
+    /*
     for (let area of areaDatas) {
       getCBOption(area.cb, function () {
         checkArea(area);
@@ -2457,6 +2462,8 @@
       });
       getOption(area.cb + "Opt", area.cb + "Opt")
     }
+    
+     */
 
     // Sync the two checkboxes
     cb1.addEventListener('change', syncCheckboxes);

@@ -26,6 +26,10 @@ class MapWrapper {
         bearing: 0,
         touchRotate: true,
         shiftKeyRotate: true,
+ 				rotateControl: {
+					closeOnZeroBearing: false,
+					position: 'topright',
+				},
 
       }
       // mapWrapper.map.rotate.enable();
