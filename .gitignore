@@ -6,4 +6,5 @@ js/
 download/
 osrm/
 bbark.php
+*.pem
 
