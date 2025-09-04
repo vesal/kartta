@@ -373,6 +373,10 @@ function routeStepToTextSuomi(step, index) {
   return `No höh! ${m.type} ${suunta} ${step.name}`; // fallback if not found
 }
 
+function rnd(words) {
+  const arr = words.split("|");
+  return arr[Math.floor(Math.random() * arr.length)];
+}
 
 function routeStepToTextSavo(step, index) {
   const m = step.maneuver;
@@ -402,13 +406,13 @@ function routeStepToTextSavo(step, index) {
   }
   switch (m.type) {
     case "depart":
-      return `Pörräätä tiellee ${step.name}${dirtext}`;
+      return `${rnd("Pörräätä|Lähehä")} tiellee ${step.name}${dirtext}`;
     case "turn":
-      return `Kiänny ${suunta} tielle ${step.name}`;
+      return `${rnd("Kiänny|Kurvooo|Vänkee")} ${suunta} tielle ${step.name}`;
     case "roundabout":
-      return `Määhä ympyrrään ja luikaha pihalle kolosta ${m.exit}`;
+      return `${rnd("Määhä|Tungeha")} ympyrrään ja ${rnd("luikaha|puthaka|kurvoo")} pihalle kolosta ${m.exit}`;
     case "exit roundabout":
-      return `Kurvoo pihalle paekasta ${m.exit}, suuntoo ${step.name}`;
+      return `${rnd("Tempasehha|Kurvoo|Putkaha|Luikaha|Vänkeehhä")} pihalle paekasta ${m.exit}, suuntoo ${step.name}`;
     case "roundabout turn":
       return `Tiehhä jottaen ympyrässä`;
     case "merge":
@@ -418,7 +422,7 @@ function routeStepToTextSavo(step, index) {
     case "new name":
       return `Tuuppoo ${suunta} tielle ${step.name}`;
     case "end of road":
-      return `Viennä ${suunta} tielle ${step.name}`;
+      return `${rnd("Viennä|Kiennä")} ${suunta} tielle ${step.name}`;
     case "continue":
       return `Hurrautahhan sammaan suuntaa ${suunta} tielle ${step.name}`;
     case "exit rotary":
@@ -429,7 +433,7 @@ function routeStepToTextSavo(step, index) {
       if ((index?.legIndex ?? 0) < (index?.legCount ?? 0) - 1) return  "Oot välpistees!";
       return "Kahh siinähä oot!";
     case "thenDrive":
-      return ", sitten pörräätät ";
+      return `, ${rnd("sitte|koht sillee")} ${rnd("pörräätät|tuuppoot|hurrautat")} `;
     case "exampleVoice":
       return "Nyt huastetaan savvoo noppeuvella ";
   }
