@@ -2154,6 +2154,7 @@
     // Siirretään kartta käyttäjän sijaintiin
     const center = mapWrapper.getPinLocation(myPin);
     mapWrapper.setView(center);
+    mapWrapper.map.setBearing(0);
   }
 
   function toggleFullscreen() {
@@ -2462,7 +2463,7 @@
       });
       getOption(area.cb + "Opt", area.cb + "Opt")
     }
-    
+
      */
 
     // Sync the two checkboxes
