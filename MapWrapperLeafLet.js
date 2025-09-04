@@ -22,7 +22,16 @@ class MapWrapper {
         // maxZoom: 26,
         minZoom: 2,
         zoomControl: false,
+        rotate: true,
+        bearing: 30,
+        touchRotate: true,
+        shiftKeyRotate: true,
+
       }
+      // mapWrapper.map.rotate.enable();
+      // this.map.touchRotate.enable();
+      // mapWrapper.map.rotate.setAngle(45);
+
       this.map = this.L.map('map', tileLayerOptions).setView([60.1699, 24.9384], 13);
       this.pins = [];
       // this.L.control.zoom({ position: 'topright' }).addTo(this.map);

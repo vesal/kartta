@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.26">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.27">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -507,6 +507,7 @@
 <script src="js/winbox.bundle.min.js" defer></script>
 <script src="js/leaflet.js" defer></script>
 <script src="js/leaflet.textpath.js" defer></script>
+<script src="js/leaflet-rotate.js" defer></script>
 <!--<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />-->
 <!--<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js" defer></script>-->
 <script src="MapWrapperLeafLet.js" defer></script>
@@ -1900,7 +1901,7 @@
   //#region Initialization
   function showVersion() {
     const manifestLink = document.getElementById('manifest-link');
-    const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.24"
+    const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.25"
 
     // Parsitaan query-parametri
     const url = new URL(href, window.location.href);
@@ -1926,6 +1927,8 @@
 
     mapWrapper = new MapWrapper('map', mapModes, options.useCache);
     mapWrapper.setZoomButtons(options.showZoomButtons);
+
+
     // Täytetään select-valikko
     const mapSelect = document.getElementById('mapModeSelect');
     for (const key in mapModes) {
