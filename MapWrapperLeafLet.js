@@ -27,7 +27,7 @@ class MapWrapper {
         touchRotate: true,
         shiftKeyRotate: true,
  				rotateControl: {
-					closeOnZeroBearing: true,
+					closeOnZeroBearing: false,
 					position: 'topright',
 				},
 
