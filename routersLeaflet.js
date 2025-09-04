@@ -385,7 +385,7 @@ function routeStepToTextSavo(step, index) {
       suunta = "vasemmalle";
       break;
     case "right":
-      suunta = "ookeelle";
+      suunta = "ooekkeeelle";
       break;
     case "straight":
       suunta = "suoroo";
@@ -450,7 +450,7 @@ const textsForNumbersSavo = {
   ones: ["nolla", "yks", "kaks", "kolome", "nelejä", "viis", "kuus", "seihtemän", "kaheksan", "yheksän",
     "kymmene", "ykstoesta", "kakstoesta", "kolmetoesta", "neljätoesta", "viistoesta", "kuusitoesta", "seihtemäntoesta", "kaheksantoesta", "yheksäntoesta"],
   tens: ["", "", "kakskymment", "kolmekymment", "neljäkymment", "viiskymment", "kuuskymment", "seihtemänkymment", "kaheksankymment", "yheksänkymment"],
-  hundreds: ["", "satta", "sattoo"],
+  hundreds: ["", "sata", "sattoo"],
   thousands: ["", "tuhat", "tuhattoo"],
   km: ["", "kilomeetri", "kilomeetrii"],
   m: ["", "metri", "metrii"],
