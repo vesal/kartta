@@ -484,6 +484,7 @@
       float: right;
     }
 
+    /*noinspection CssUnusedSymbol*/
     .leaflet-top.leaflet-right {
         margin-right: 2em;
     }
@@ -1164,7 +1165,8 @@
     dialect: "savo",
     routeMode: "car",
     from: "",
-    to: ""
+    to: "",
+    doubleClickZoom: false,
   };
 
   const areaDatas = [
@@ -1931,7 +1933,7 @@
 
     mapWrapper = new MapWrapper('map', mapModes, options.useCache);
     mapWrapper.setZoomButtons(options.showZoomButtons);
-
+    mapWrapper.setDoubleClickZoom(options.doubleClickZoom);
 
     // Täytetään select-valikko
     const mapSelect = document.getElementById('mapModeSelect');
@@ -1980,61 +1982,75 @@
     }
 
 
-    mapWrapper.on('click', async (e) => {
-      closeNav();
-      if (e.originalEvent && e.originalEvent.target.id === 'mapModeSelect') return;
-      const {lat, lng} = e.latlng;
-      const loc = [lat, lng];
-      if (!hitPin) {
-        // Luo hitPin ensimmäisellä klikkauksella
-        hitPin = mapWrapper.createPin(loc, 'H', 'red', function () {
-          lastHitPoint = mapWrapper.getPinLocation(hitPin);
-          calcDistance();
-          // setPinText(`${lastHitPoint[0].toFixed(5)} ${lastHitPoint[1].toFixed(5)} Hi`);
-          // calcDistance();
-          // lastHitPoint = mapWrapper.getPinLocation(hitPin);
-        }, null, options.flipPins);
-        mapWrapper.setPinDragging(hitPin, true);
-        mapWrapper.setPinOn(hitPin, 'dragend', function () {
-          // Kun hitPin on siirretty, päivitetään sen sijainti
-          calcDistance(-1, -1);
-          lastHitPoint = mapWrapper.getPinLocation(hitPin);
-          if (options.HCenter2 && options.HStationary) {
-            // preventMapMove = true;
-            mapWrapper.setView(lastHitPoint);
-          }
-          hitPinXY = mapWrapper.getCoordXY(lastHitPoint);
-        });
-        mapWrapper.setPinOn(hitPin, 'drag', function () {
-          // Kun hitPin on siirretty, päivitetään sen sijainti
-          const loc = mapWrapper.getPinLocation(hitPin);
-          setPinInputText(`${loc[0].toFixed(5)} ${loc[1].toFixed(5)} H`);
-          calcDistance(-1, -1);
-        });
-        mapWrapper.setPinOn(hitPin, 'drag', function () {
-          // Kun hitPin on siirretty, päivitetään sen sijainti
-          const loc = mapWrapper.getPinLocation(hitPin);
-          setPinInputText(`${loc[0].toFixed(5)} ${loc[1].toFixed(5)} H`);
-          calcDistance(-1, -1);
-        });
-      } else
-        // Siirrä olemassa olevaa hitPiniä uuteen paikkaan
-      if (distanceLines.length > 0) {
-        lastHitPoint = distanceLines[distanceLines.length - 1].to;
-      }
-      mapWrapper.setPinLocation(hitPin, loc);
-      setHitPinLoc(loc);
-      hitPinXY = mapWrapper.getCoordXY(mapWrapper.getPinLocation(hitPin));
-      lastHitPoint = loc;
+    mapWrapper.clickTimer = null;
 
-      const elevation = await getElevation(loc);
-
-      setPinInputText(`${lat.toFixed(5)} ${lng.toFixed(5)} H ${elevation}`);
-      if (options.HCenter2 && options.HStationary) {
-        mapWrapper.setView(loc);
+    mapWrapper.on('dblclick', (e) => {
+      if (mapWrapper.clickTimer) {
+        clearTimeout(mapWrapper.clickTimer);
+        mapWrapper.clickTimer = null;
       }
-      // simulateGPS();
-    });  // mapWarpper.on  click end
+      // Double click action, e.g. zoom in
+      // mapWrapper.map.setZoom(mapWrapper.map.getZoom() + 1, { animate: true });
+    });
+
+    mapWrapper.on('click', (e) => {
+      if (mapWrapper.clickTimer) clearTimeout(mapWrapper.clickTimer);
+      mapWrapper.clickTimer = setTimeout(async () => {
+        closeNav();
+        if (e.originalEvent && e.originalEvent.target.id === 'mapModeSelect') return;
+        const {lat, lng} = e.latlng;
+        const loc = [lat, lng];
+        if (!hitPin) {
+          // Luo hitPin ensimmäisellä klikkauksella
+          hitPin = mapWrapper.createPin(loc, 'H', 'red', function () {
+            lastHitPoint = mapWrapper.getPinLocation(hitPin);
+            calcDistance();
+            // setPinText(`${lastHitPoint[0].toFixed(5)} ${lastHitPoint[1].toFixed(5)} Hi`);
+            // calcDistance();
+            // lastHitPoint = mapWrapper.getPinLocation(hitPin);
+          }, null, options.flipPins);
+          mapWrapper.setPinDragging(hitPin, true);
+          mapWrapper.setPinOn(hitPin, 'dragend', function () {
+            // Kun hitPin on siirretty, päivitetään sen sijainti
+            calcDistance(-1, -1);
+            lastHitPoint = mapWrapper.getPinLocation(hitPin);
+            if (options.HCenter2 && options.HStationary) {
+              // preventMapMove = true;
+              mapWrapper.setView(lastHitPoint);
+            }
+            hitPinXY = mapWrapper.getCoordXY(lastHitPoint);
+          });
+          mapWrapper.setPinOn(hitPin, 'drag', function () {
+            // Kun hitPin on siirretty, päivitetään sen sijainti
+            const loc = mapWrapper.getPinLocation(hitPin);
+            setPinInputText(`${loc[0].toFixed(5)} ${loc[1].toFixed(5)} H`);
+            calcDistance(-1, -1);
+          });
+          mapWrapper.setPinOn(hitPin, 'drag', function () {
+            // Kun hitPin on siirretty, päivitetään sen sijainti
+            const loc = mapWrapper.getPinLocation(hitPin);
+            setPinInputText(`${loc[0].toFixed(5)} ${loc[1].toFixed(5)} H`);
+            calcDistance(-1, -1);
+          });
+        } else
+          // Siirrä olemassa olevaa hitPiniä uuteen paikkaan
+        if (distanceLines.length > 0) {
+          lastHitPoint = distanceLines[distanceLines.length - 1].to;
+        }
+        mapWrapper.setPinLocation(hitPin, loc);
+        setHitPinLoc(loc);
+        hitPinXY = mapWrapper.getCoordXY(mapWrapper.getPinLocation(hitPin));
+        lastHitPoint = loc;
+
+        const elevation = await getElevation(loc);
+
+        setPinInputText(`${lat.toFixed(5)} ${lng.toFixed(5)} H ${elevation}`);
+        if (options.HCenter2 && options.HStationary) {
+          mapWrapper.setView(loc);
+        }
+        // simulateGPS();
+      }, options.doubleClickZoom ? 250 : 0);
+    }); // mapWarpper.on  click end
 
     mapWrapper.on('move', mapMove);
 
@@ -2445,6 +2461,9 @@
     });
     getCBOption("useCompsWindow");
     getCBOption("drawDistanceLine");
+    getCBOption("doubleClickZoom", function() {
+      if (mapWrapper) mapWrapper.setDoubleClickZoom(options.doubleClickZoom);
+    });
     getCBOption("calcDistanceSum");
     getCBOption("showZoomButtons", function () {
       if (mapWrapper) mapWrapper.setZoomButtons(options.showZoomButtons);
@@ -3282,7 +3301,8 @@ function checkRouterButtons() {
     <label><input type="checkbox" id="drawDistanceLine" value="drawDistanceLine"/>Piirrä mittaviivaa</label>
     <label><input type="checkbox" id="calcDistanceSum" value="calcDistanceSum"/>Laske summaa <a class="help"
                                                                                                 data-href="#addpins"></a></label><br>
-    <label><input type="checkbox" id="showZoomButtons" value="showZoomButtons"/>Näytä Zoom-painikkeet (+/-)</label><br>
+    <label><input type="checkbox" id="showZoomButtons" value="showZoomButtons"/>Näytä Zoom-painikkeet (+/-)</label>
+    <label><input type="checkbox" id="doubleClickZoom" value="doubleClickZoom"/>Tuplaklikkaus Zoom</label><br>
     <br><br>
 
 

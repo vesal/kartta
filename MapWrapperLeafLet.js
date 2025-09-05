@@ -22,7 +22,7 @@ class MapWrapper {
         // maxZoom: 26,
         minZoom: 2,
         zoomControl: false,
-        rotate: true,
+        rotate: false,
         bearing: 0,
         touchRotate: true,
         shiftKeyRotate: true,
@@ -146,6 +146,13 @@ class MapWrapper {
 
   }; // CustomTileLayer ends
 
+  setDoubleClickZoom(enable) {
+    if (enable) {
+      this.map.doubleClickZoom.enable();
+    } else {
+      this.map.doubleClickZoom.disable();
+    }
+  }
 
   // Aluksi luodaan ja lisätään ensimmäinen layer
   setMapMode(modeKey) {
