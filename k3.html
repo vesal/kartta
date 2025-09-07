@@ -748,9 +748,10 @@ function getAspectRatio(aspectRatioStr) {
 }
 
 function setCompassRotation(heading) {
-  const compass = document.getElementById('compass');
-  if (compass) {
-    compass.style.transform = `rotate(${heading}deg)`;
+  const svg = document.querySelector('#compass svg');
+  if (svg) {
+    svg.style.transform = `rotate(${heading}deg)`;
+    svg.style.transformOrigin = '50% 50%';
   }
 }
 
