@@ -2360,6 +2360,8 @@ function setCompassRotation(heading) {
       if (!event.absolute && 'undefined' !== typeof window.orientation) {
           deviceOrientation = window.orientation;
       }
+      const debug = document.getElementById('distance');
+      debug.innerText = `${angle.toFixed(0)}° / ${deviceOrientation}°`;
 
       setCompassRotation(angle - deviceOrientation);
     });
