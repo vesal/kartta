@@ -262,9 +262,17 @@
       vertical-align: top;
     }
 
+    #compsWindow .wb-body {
+        background: black;
+    }
+
     /*noinspection CssUnusedSymbol*/
     .winbox {
       z-index: 1030 !important;
+    }
+
+    .winbox.min {
+        width: 100px !important;
     }
 
     /*noinspection CssUnusedSymbol*/
@@ -3197,6 +3205,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
 
     startstop = document.createElement("input");
     startstop.setAttribute("type", "checkbox");
+    startstop.style.verticalAlign = "bottom";
     startstop.onclick = function () {
       localStorage.setItem("startstop", startstop.checked ? "1" : "0");
       startCounters(startstop.checked);
@@ -3407,6 +3416,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
       mount: routingMainDiv,
       height: 300,
       width: 300,
+      minHeight: 20,
       minwidth: 100,
       header: 16,
       class: ["no-full", "no-max"],
