@@ -2326,7 +2326,15 @@ function setCompassRotation(heading) {
     });
     // draggable end
 
-    window.addEventListener('deviceorientation', function(event) {
+    let deviceOrientationEvent = null;
+    if ('ondeviceorientationabsolute' in window) {
+        deviceOrientationEvent = 'deviceorientationabsolute';
+    } else if('ondeviceorientation' in window) {
+        deviceOrientationEvent = 'deviceorientation';
+    }
+
+
+    window.addEventListener(deviceOrientationEvent, function(event) {
       /*
         // event.alpha is the compass heading (0-360 degrees)
         let heading = event.alpha;
@@ -2346,7 +2354,7 @@ function setCompassRotation(heading) {
           angle = 360 - angle;
       }
 
-      let deviceOrientation = (screen.orientation && screen.orientation.angle) || window.orientation || 0;
+      let deviceOrientation = 0; // (screen.orientation && screen.orientation.angle) || window.orientation || 0;
 
       // Older browsers
       if (!event.absolute && 'undefined' !== typeof window.orientation) {
