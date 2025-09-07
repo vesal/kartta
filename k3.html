@@ -259,6 +259,7 @@
       padding: 0 7px 0 7px;
       line-height: 0.9;
       font-size: x-small;
+      vertical-align: top;
     }
 
     /*noinspection CssUnusedSymbol*/
@@ -2221,8 +2222,8 @@ function setCompassRotation(heading) {
         el.style.right = ''; // Remove right to allow left positioning
         el.style.left = clamp((e.clientX - offsetX), -w, maxRight) + 'px';
         el.style.top = clamp(e.clientY - offsetY, -h, maxBottom) + 'px';
-        const debug = document.getElementById('distance');
-        debug.innerText = `${window.innerWidth} ${el.style.left}`;
+        // const debug = document.getElementById('distance');
+        // debug.innerText = `${window.innerWidth} ${el.style.left}`;
         e.preventDefault();
       }
 
@@ -2304,8 +2305,8 @@ function setCompassRotation(heading) {
       document.addEventListener('touchmove', function (e) {
         if (!isDragging) return;
         const touch = e.touches[0];
-        const debug = document.getElementById('distance');
-        debug.innerText = `move: ${touch.clientX}`;
+        // const debug = document.getElementById('distance');
+        // debug.innerText = `move: ${touch.clientX}`;
         const w = el.offsetWidth/2;
         const h = el.offsetHeight/2;
         const maxRight = window.innerWidth - w;
@@ -2335,18 +2336,6 @@ function setCompassRotation(heading) {
 
 
     window.addEventListener(deviceOrientationEvent, function(event) {
-      /*
-        // event.alpha is the compass heading (0-360 degrees)
-        let heading = event.alpha;
-        // Adjust for screen orientation
-        let orientation = (screen.orientation && screen.orientation.angle) || window.orientation || 0;
-        heading = (heading + orientation) % 360;
-        const compass = document.getElementById('compass');
-        if (compass && heading !== null) {
-          compass.style.transform = `rotate(${heading}deg)`;
-        }
-
-       */
       let angle = event.webkitCompassHeading || event.alpha;
 
       // Safari iOS
@@ -2356,12 +2345,12 @@ function setCompassRotation(heading) {
 
       let deviceOrientation =  (screen.orientation && screen.orientation.angle) || window.orientation || 0;
 
-      // Older browsers
+      // Older browsers and iOS
       if (!event.absolute && 'undefined' !== typeof window.orientation) {
            deviceOrientation = window.orientation;
       }
-      const debug = document.getElementById('distance');
-      debug.innerText = `${angle.toFixed(0)}° / ${deviceOrientation}°`;
+      // const debug = document.getElementById('distance');
+      // debug.innerText = `${angle.toFixed(0)}° / ${deviceOrientation}°`;
 
       setCompassRotation(angle - deviceOrientation);
     });
@@ -3817,7 +3806,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
 </div>
 
 <div id="compass" class="draggable noselect" style="position:absolute;
-  top:10px;right:10px;z-index:2000;
+  top:10px;right:10px;z-index:1030;
   width: 60px; height: auto;
   aspect-ratio: 1 / 1;
    ">
