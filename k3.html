@@ -2326,6 +2326,7 @@ function setCompassRotation(heading) {
     // draggable end
 
     window.addEventListener('deviceorientation', function(event) {
+      /*
         // event.alpha is the compass heading (0-360 degrees)
         let heading = event.alpha;
         // Adjust for screen orientation
@@ -2335,7 +2336,23 @@ function setCompassRotation(heading) {
         if (compass && heading !== null) {
           compass.style.transform = `rotate(${heading}deg)`;
         }
-      });
+
+       */
+      let angle = event.webkitCompassHeading || event.alpha;
+      let deviceOrientation = 0;
+
+      // Safari iOS
+      if (!event.absolute && event.webkitCompassHeading) {
+          angle = 360 - angle;
+      }
+
+      // Older browsers
+      if (!event.absolute && 'undefined' !== typeof window.orientation) {
+          deviceOrientation = window.orientation;
+      }
+
+      setCompassRotation(angle - deviceOrientation);
+    });
 
   } // initializeMapPage ends
 
