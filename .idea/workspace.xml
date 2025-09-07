@@ -12,6 +12,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MapWrapperLeafLet.js" beforeDir="false" afterPath="$PROJECT_DIR$/MapWrapperLeafLet.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routersLeaflet.js" beforeDir="false" afterPath="$PROJECT_DIR$/routersLeaflet.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,7 +78,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "editor.preferences.folding",
+    "settings.editor.selected.configurable": "preferences.keymap",
     "ts.external.directory.path": "C:\\devel\\PyCharm\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
@@ -208,7 +209,7 @@
       <workItem from="1754836285386" duration="11554000" />
       <workItem from="1754904718618" duration="251000" />
       <workItem from="1754904988042" duration="228616000" />
-      <workItem from="1756132556973" duration="276471000" />
+      <workItem from="1756132556973" duration="304998000" />
     </task>
     <servers />
   </component>
@@ -240,7 +241,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/routersLeaflet.js</url>
-          <line>471</line>
+          <line>475</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="347" />
         </line-breakpoint>

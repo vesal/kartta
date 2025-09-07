@@ -22,7 +22,7 @@ class MapWrapper {
         // maxZoom: 26,
         minZoom: 2,
         zoomControl: false,
-        rotate: false,
+        rotate: true,
         bearing: 0,
         touchRotate: true,
         shiftKeyRotate: true,

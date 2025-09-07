@@ -351,7 +351,9 @@ function routeStepToTextSuomi(step, index) {
     case "merge":
       return `Liity tielle ${step.name}`;
     case "off ramp":
-      return `Postu tieltä ${step.name}`;
+      return `Postu ${suunta} tieltä ${step.name}`;
+    case "fork":
+      return `Haarauta ${suunta} tielle ${step.name}`;
     case "new name":
       return `Aja ${suunta} tielle ${step.name}`;
     case "end of road":
@@ -418,7 +420,9 @@ function routeStepToTextSavo(step, index) {
     case "merge":
       return `Änkee tielle ${step.name}`;
     case "off ramp":
-      return `Kurvoo poes tieltä ${step.name}`;
+      return `Kurvoo ${suunta} poes tieltä ${step.name}`;
+    case "fork":
+      return `Huaraata ${suunta} tielle ${step.name}`;
     case "new name":
       return `Tuuppoo ${suunta} tielle ${step.name}`;
     case "end of road":

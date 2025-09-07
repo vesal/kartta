@@ -213,7 +213,7 @@
       top: 0;
       left: 0;
       z-index: 1030;
-      background: rgba(255, 255, 255, 0.9);
+      /* background: rgba(255, 255, 255, 0.9); */
       padding: 0;
       border-radius: 0;
       /* width: 100%; */
@@ -455,6 +455,7 @@
       text-align: left;
       padding-right: 8px;
     }
+
     .flex-labels input, .flex-labels select {
       display: table-cell;
     }
@@ -464,6 +465,7 @@
       gap: 3px;
       align-items: center;
     }
+
     .transport-choice {
       font-size: 1.1em;
       cursor: pointer;
@@ -486,7 +488,50 @@
 
     /*noinspection CssUnusedSymbol*/
     .leaflet-top.leaflet-right {
-        margin-right: 2em;
+      margin-right: 2em;
+    }
+
+    .draggable {
+      cursor: move;
+    }
+
+    .noselect {
+      user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      -moz-user-select: none;
+    }
+
+    .resize-handle {
+      width: 22px;
+      height: 22px;
+      background: transparent;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      cursor: se-resize;
+    }
+
+    .draggable:hover .resize-handle, .draggable.show-handle .resize-handle {
+      opacity: 1;
+      /* background: red; */
+      border-bottom: 2px solid #888;
+      border-right: 2px solid #888;
+      /* Optional: add a diagonal line */
+      background-image: linear-gradient(
+        135deg,
+        transparent 0%,
+        transparent 50%,
+        #888 50%,
+        #888 60%,
+        transparent 60%,
+        transparent 75%,
+        #888 75%,
+        #888 100%
+      );
+      background-size: 16px 16px;
+      background-position: right bottom;
+      background-repeat: no-repeat;
     }
 
   </style>
@@ -690,9 +735,29 @@
     return "" + d;
   }
 
-  //#endregion Helpper functions
+function getAspectRatio(aspectRatioStr) {
+  if (!aspectRatioStr) return null;
+  const parts = aspectRatioStr.split('/');
+  if (parts.length === 2) {
+    const w = parseFloat(parts[0]);
+    const h = parseFloat(parts[1]);
+    if (!isNaN(w) && !isNaN(h) && h !== 0) return w / h;
+  }
+  const num = parseFloat(aspectRatioStr);
+  return isNaN(num) ? null : num;
+}
 
-  //#region MapModes
+function setCompassRotation(heading) {
+  const compass = document.getElementById('compass');
+  if (compass) {
+    compass.style.transform = `rotate(${heading}deg)`;
+  }
+}
+
+
+//#endregion Helpper functions
+
+//#region MapModes
 
   // Simulation of C# string.Format, only {n} works.
   if (!String.format) {
@@ -1167,6 +1232,7 @@
     from: "",
     to: "",
     doubleClickZoom: false,
+    rotate: "none"
   };
 
   const areaDatas = [
@@ -1439,7 +1505,7 @@
       if (!refPos) return [item.lat, item.lon];
       let bestDist = 1000000;
       let bestPos = [item.lat, item.lon];
-      for (const d of data)  {
+      for (const d of data) {
         // noinspection JSUnresolvedReference
         const pos = [d.lat, d.lon];
         const dist = WGS84_distance(refPos, pos);
@@ -2093,14 +2159,186 @@
 
     // Select all text in any input[type="text"] when focused
     document.querySelectorAll('input[type="text"]').forEach(input => {
-      input.addEventListener('focus', function() {
+      input.addEventListener('focus', function () {
         this.select();
       });
     });
 
+
+    // Make all elements with class "draggable" movable / resizable
+    document.querySelectorAll('.draggable').forEach(el => {
+      let isDragging = false, offsetX = 0, offsetY = 0;
+      restorePos(el);
+
+      function clamp(val, min, max) {
+        return Math.max(min, Math.min(val, max));
+      }
+
+      function savePos(el) {
+        const rect = el.getBoundingClientRect();
+        localStorage[el.id + '_pos'] = `${Math.trunc(rect.left)};${Math.trunc(rect.top)};${Math.trunc(rect.width)};${Math.trunc(rect.height)}`;
+      }
+
+      function restorePos(el) {
+        const pos = localStorage[el.id + '_pos'];
+        if (pos) {
+          try {
+            const [left, top, width, height] = pos.split(';');
+            const w = width/2;
+            const h = height/2;
+            const maxRight = window.innerWidth - w;
+            const maxBottom = window.innerHeight - h;
+            el.style.position = 'absolute';
+            el.style.width = width + 'px';
+            if (!el.style.aspectRatio) el.style.height = height + 'px';
+            el.style.right = ''; // Remove right to allow left positioning
+            el.style.left = clamp(left, -w, maxRight) + 'px';
+            el.style.top = clamp(top, -h, maxBottom) + 'px';
+          } catch (e) {
+            // Ignore JSON parse errors
+          }
+        }
+      }
+
+      el.addEventListener('mousedown', function (e) {
+        isDragging = true;
+        offsetX = e.clientX - el.offsetLeft;
+        offsetY = e.clientY - el.offsetTop;
+        el.style.cursor = 'move';
+        el.style.position = 'absolute';
+        e.preventDefault();
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+
+      function onMouseMove(e) {
+        if (!isDragging) return;
+        const w = el.offsetWidth/2;
+        const h = el.offsetHeight/2;
+        const maxRight = window.innerWidth - w;
+        const maxBottom = window.innerHeight - h;
+        el.style.right = ''; // Remove right to allow left positioning
+        el.style.left = clamp((e.clientX - offsetX), -w, maxRight) + 'px';
+        el.style.top = clamp(e.clientY - offsetY, -h, maxBottom) + 'px';
+        const debug = document.getElementById('distance');
+        debug.innerText = `${window.innerWidth} ${el.style.left}`;
+        e.preventDefault();
+      }
+
+      function onMouseUp(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        isDragging = false;
+        el.style.cursor = 'pointer';
+        savePos(el);
+      }
+
+      const handle = el.querySelector('.resize-handle');
+
+      if (handle) {
+        handle.addEventListener('mousedown', handleMouseDown);
+        handle.addEventListener('touchstart', handleMouseDown);
+
+        function handleMouseDown(e) {
+          e.stopPropagation();
+          let et = e; if (e.touches) et = e.touches[0];
+          let startX = et.clientX;
+          let startY = et.clientY;
+          let startW = el.offsetWidth;
+          let startH = el.offsetHeight;
+
+          function onHandleMouseMove(e) {
+            e.stopPropagation();
+            let et = e; if (e.touches) et = e.touches[0];
+            let newW = clamp(startW + (et.clientX - startX), 30, window.innerWidth);
+            let aspect = getAspectRatio(el.style.aspectRatio);
+            let newH;
+            if (aspect) {
+              newH = newW / aspect;
+              if (newH > window.innerHeight) {
+                newH = window.innerHeight;
+                newW = newH * aspect;
+            } else
+              newH = clamp(startH + (et.clientY - startY), 30, window.innerHeight);
+            }
+            el.style.width = newW + 'px';
+            if (!el.style.aspectRatio) {
+              el.style.height = newH + 'px';
+            }
+            e.preventDefault();
+          }
+
+          function onHandleMouseUp(e) {
+            e.stopPropagation();
+            document.removeEventListener('mousemove', onHandleMouseMove);
+            document.removeEventListener('mouseup', onHandleMouseUp);
+            document.removeEventListener('touchmove', onHandleMouseMove);
+            document.removeEventListener('touchup', onHandleMouseUp);
+            savePos(el);
+            e.preventDefault();
+          }
+
+          document.addEventListener('mousemove', onHandleMouseMove, { passive: false });
+          document.addEventListener('mouseup', onHandleMouseUp, { passive: false });
+          document.addEventListener('touchmove', onHandleMouseMove, { passive: false });
+          document.addEventListener('touchend', onHandleMouseUp, { passive: false });
+          e.preventDefault();
+        }
+      } // if handle
+      // Touch events
+      el.addEventListener('touchstart', function (e) {
+        if (e.touches.length !== 1) return;
+        el.classList.add('show-handle');
+        setTimeout(() => el.classList.remove('show-handle'), 2000);
+        isDragging = true;
+        const rect = el.getBoundingClientRect();
+        offsetX = e.touches[0].clientX - rect.left;
+        offsetY = e.touches[0].clientY - rect.top;
+        el.style.cursor = 'move';
+        e.preventDefault();
+      });
+
+      document.addEventListener('touchmove', function (e) {
+        if (!isDragging) return;
+        const touch = e.touches[0];
+        const debug = document.getElementById('distance');
+        debug.innerText = `move: ${touch.clientX}`;
+        const w = el.offsetWidth/2;
+        const h = el.offsetHeight/2;
+        const maxRight = window.innerWidth - w;
+        const maxBottom = window.innerHeight - h;
+        el.style.right = ''
+        el.style.left = clamp(touch.clientX - offsetX, -w, maxRight) + 'px';
+        el.style.top = clamp(touch.clientY - offsetY, -h, maxBottom) + 'px';
+        el.style.position = 'absolute';
+        e.preventDefault();
+      }, {passive: false});
+
+      document.addEventListener('touchend', function () {
+        if (!isDragging) return;
+        isDragging = false;
+        el.style.cursor = 'pointer';
+        savePos(el);
+      });
+    });
+    // draggable end
+
+    window.addEventListener('deviceorientation', function(event) {
+      // event.alpha is the compass heading (0-360 degrees)
+      const heading = event.alpha;
+      const compass = document.getElementById('compass');
+      if (compass && heading !== null) {
+        compass.style.transform = `rotate(${-heading}deg)`; // negative to match compass direction
+      }
+    });
+
   } // initializeMapPage ends
 
+
   //#endregion Initialization
+
 
 
   function closeParent(element) {
@@ -2308,6 +2546,33 @@
     setCBOption(name, cb.checked);
   }
 
+  function setDDOption(name, value) {
+    if (value === undefined) return;
+    options[name] = value;
+    localStorage.setItem(name, value);
+  }
+
+
+  function getDDOption(name, f) {
+    const dd = document.getElementById(name);
+    if (!dd)
+      return;
+    let value = params[name];
+    if (value === undefined) value = localStorage.getItem(name) || options[name] || undefined;
+    options[name] = value;
+    if (options[name]) {
+      dd.value = value;
+    }
+    ;
+
+    // noinspection JSUnusedLocalSymbols
+    dd.addEventListener("change", function (event) {
+      setDDOption(name, event.target.value);
+      if (typeof f !== "undefined") f(event.target.value);
+    });
+    setDDOption(name, dd.value);
+  }
+
   function changeRaportView() {
     // TODO: korjaa raportin näkymä
     /*
@@ -2461,13 +2726,14 @@
     });
     getCBOption("useCompsWindow");
     getCBOption("drawDistanceLine");
-    getCBOption("doubleClickZoom", function() {
+    getCBOption("doubleClickZoom", function () {
       if (mapWrapper) mapWrapper.setDoubleClickZoom(options.doubleClickZoom);
     });
     getCBOption("calcDistanceSum");
     getCBOption("showZoomButtons", function () {
       if (mapWrapper) mapWrapper.setZoomButtons(options.showZoomButtons);
     });
+    getDDOption("rotate");
 
     const cb1 = document.getElementById('area1cb');
     const cb2 = document.getElementById('area1cbCopy');
@@ -2518,7 +2784,7 @@
         choices.forEach(c => c.classList.remove('selected'));
         choice.classList.add('selected');
         const mode = choice.dataset.mode;
-        options.routeMode =mode;
+        options.routeMode = mode;
         localStorage.setItem('routeMode', mode);
         // You can use choice.dataset.mode for the selected mode
       });
@@ -3059,10 +3325,9 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     let from;
     let to;
     if (routerType === 1) {  // example
-      from = [62.29978,25.73234];
-      to = [62.25574,25.77731];
-    }
-    else {
+      from = [62.29978, 25.73234];
+      to = [62.25574, 25.77731];
+    } else {
       from = await checkSpecialCoord(getInputText("editFrom"), "I");
       let s = getInputText("editTo");
       if (s.trim() === "") s = "S";
@@ -3075,7 +3340,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     if (!from || !to) {
       let message = "";
       let toText = getInputText("editTo").trim();
-      if (!from) message += "Ei löydy lähtö: " + getInputText("editFrom")+ "<br>";
+      if (!from) message += "Ei löydy lähtö: " + getInputText("editFrom") + "<br>";
       if (!to) {
         message += "Ei löydy kohdetta: " + toText + "<br>";
         if (toText.toUpperCase() === "H" || toText === "") {
@@ -3145,29 +3410,29 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     // compsWindow.onresize = function(w,h) { saveWindowPos(compsWindow); };
   }
 
-async function findDriving(routerType=2) {
-  await showRoutePane(routerType);
-}
-
-function googleDirections() {
-  let s = getPinInputText();
-  if (isCoordinate(s)) {
-    s = getNormalizedCoordinateString(s, ",")
+  async function findDriving(routerType = 2) {
+    await showRoutePane(routerType);
   }
-  // const url = "https://www.google.com/maps/search/?api=1&query=" + s;
-  const url = "https://www.google.com/maps/dir/?api=1" +
-                "&destination=" + encodeURIComponent(s) + "&travelmode=driving";
-  const win = window.open(url, '_blank');
-  win.focus();
-}
 
-function checkRouterButtons() {
-  const hasHere = options.hereApiKey && options.hereApiKey.length > 10;
-  const hasGH = options.graphHopperApiKey && options.graphHopperApiKey.length > 10;
-  document.getElementById("buttonHERE").style.display = hasHere ? "" : "none";
-  document.getElementById("buttonOSRM").style.display = ""; // always available
-  document.getElementById("buttonGraphHopper").style.display = hasGH ? "" : "none";
-}
+  function googleDirections() {
+    let s = getPinInputText();
+    if (isCoordinate(s)) {
+      s = getNormalizedCoordinateString(s, ",")
+    }
+    // const url = "https://www.google.com/maps/search/?api=1&query=" + s;
+    const url = "https://www.google.com/maps/dir/?api=1" +
+      "&destination=" + encodeURIComponent(s) + "&travelmode=driving";
+    const win = window.open(url, '_blank');
+    win.focus();
+  }
+
+  function checkRouterButtons() {
+    const hasHere = options.hereApiKey && options.hereApiKey.length > 10;
+    const hasGH = options.graphHopperApiKey && options.graphHopperApiKey.length > 10;
+    document.getElementById("buttonHERE").style.display = hasHere ? "" : "none";
+    document.getElementById("buttonOSRM").style.display = ""; // always available
+    document.getElementById("buttonGraphHopper").style.display = hasGH ? "" : "none";
+  }
 
   //# endregion Routing
 
@@ -3188,7 +3453,8 @@ function checkRouterButtons() {
     <li><span onclick="toggleDiv('settings');">Asetukset...</span> <a class="help" data-href="#settings"></a></li>
     <li><span onclick="toggleDiv('findDiv'); closeNav();">Pinnien lisääminen...</span> <a class="help"
                                                                                           data-href="#addpins"></a></li>
-    <li><span onclick="loadRoutingMachine(() => toggleDiv('routingOptions', null, initRoutingOptions))">Ajo-ohjeiden asetukset...</span> <a class="help" data-href="#settings"></a></li>
+    <li><span onclick="loadRoutingMachine(() => toggleDiv('routingOptions', null, initRoutingOptions))">Ajo-ohjeiden asetukset...</span>
+      <a class="help" data-href="#settings"></a></li>
 
     <li><span onclick="showRoutePane(2); closeNav()">Ajo-ohjeet...</span> <a class="help" data-href="#directions"></a>
     </li>
@@ -3303,6 +3569,13 @@ function checkRouterButtons() {
                                                                                                 data-href="#addpins"></a></label><br>
     <label><input type="checkbox" id="showZoomButtons" value="showZoomButtons"/>Näytä Zoom-painikkeet (+/-)</label>
     <label><input type="checkbox" id="doubleClickZoom" value="doubleClickZoom"/>Tuplaklikkaus Zoom</label><br>
+    <label for="rotate">Kartan kierto:</label>
+    <select id="rotate" name="rotate">
+      <option value="none">Ei kiertoa</option>
+      <option value="manual">Manuaalinen</option>
+      <option value="gps">GPS suunnan mukaan</option>
+      <option value="compass">Kompassin mukaan</option>
+    </select>
     <br><br>
 
 
@@ -3456,17 +3729,17 @@ function checkRouterButtons() {
       <span class="inner">
       <button class="inner" type="button" title="Laita nykypiste lähtöpisteeksi"
               onclick='moveEditTo("editFrom")'>S</button>
-      <!--<button class="inner" type="button" title="Laita oma paikka lähtöpisteeksi"
-              onclick='moveITo("editFrom")'>I</button>-->
-      <!-- <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editFrom")'>E</button> -->
+        <!--<button class="inner" type="button" title="Laita oma paikka lähtöpisteeksi"
+                onclick='moveITo("editFrom")'>I</button>-->
+        <!-- <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editFrom")'>E</button> -->
       <label><input type="text" name="editFrom" id="editFrom" value=""/></label><br>
       </span>
       <span class="inner">
       =&gt;
       <button class="inner" type="button" title="Laita nykypiste loppupisteeksi"
               onclick='moveEditTo("editTo")'>S</button>
-      <!-- <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editTo")'>E</button> -->
-      <label><input type="text" name="editTo" id="editTo" value="" /></label><br>
+        <!-- <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editTo")'>E</button> -->
+      <label><input type="text" name="editTo" id="editTo" value=""/></label><br>
       </span>
       <span class="inner">
         <span id="transportChoices">
@@ -3474,9 +3747,11 @@ function checkRouterButtons() {
           <span class="transport-choice" data-mode="bike">🚲</span>
           <span class="transport-choice" data-mode="walk">🚶</span>
         </span>
-        <button id="buttonOSRM" type="button" onclick="findDriving(2)" title="Etsi OSMR-reittittimellä (ei osaa muuta kuin auton)">Etsi&nbsp;reitti</button>
+        <button id="buttonOSRM" type="button" onclick="findDriving(2)"
+                title="Etsi OSMR-reittittimellä (ei osaa muuta kuin auton)">Etsi&nbsp;reitti</button>
         <button id="buttonHERE" type="button" onclick="findDriving(0)" title="Etsi HERE-reitittimellä">H</button>
-        <button id="buttonGraphHopper" type="button" onclick="findDriving(3)" title="Etsi GraphHopper-reitittimellä (antaa vain yhden)">G</button>
+        <button id="buttonGraphHopper" type="button" onclick="findDriving(3)"
+                title="Etsi GraphHopper-reitittimellä (antaa vain yhden)">G</button>
       </span>
     </div>
     <div class="driving">
@@ -3490,25 +3765,55 @@ function checkRouterButtons() {
 <div class="popup" id="routingOptions" style=" ">
   <label class="closebtn" onclick="checkRouterButtons(); toggleDiv('routingOptions')">&times;</label>
   <div class="popupIn">
-  <h2>Ajo-ohjeiden asetuksia</h2>
+    <h2>Ajo-ohjeiden asetuksia</h2>
     <div class="flex-labels">
       <div><label for="speechRate">Puhenopeus %: </label><input type="text" size="3" id="speechRate" value="120"></div>
-      <div><label for="dialectSelect">Murre: </label><select  id="dialectSelect" ></select></div>
+      <div><label for="dialectSelect">Murre: </label><select id="dialectSelect"></select></div>
       <div><label for="exampleText">Malliteksti: </label><input type="text" size="30" id="exampleText" value=""></div>
     </div>
-    <button onclick="exampleSpeech()">Puhu malliksi</button><br>
+    <button onclick="exampleSpeech()">Puhu malliksi</button>
+    <br>
     <button onclick="showRoutePane(1); closeNav()">Ajo-ohjeet malli</button>
     <hr>
     <h3>Eri reitityspalvelujen API-avaimia</h3>
     <p>Lisäämällä avaimia, saat käyttöön muitakin reitityspavelimia. Lue lisää ?</p>
     <div class="flex-labels">
       <div><label for="hereApiKey">HERE API-key: </label><input type="text" size="50" id="hereApiKey"></div>
-      <div><label for="graphHopperApiKey">GraphHopper API-key: </label><input type="text" size="50" id="graphHopperApiKey"></div>
+      <div><label for="graphHopperApiKey">GraphHopper API-key: </label><input type="text" size="50"
+                                                                              id="graphHopperApiKey"></div>
     </div>
   </div>
 </div>
 
-
+<div id="compass" class="draggable noselect" style="position:absolute;
+  top:10px;right:10px;z-index:2000;
+  width: 60px; height: auto;
+  aspect-ratio: 1 / 1;
+   ">
+  <svg width="100%" height="100%" viewBox="0 0 80 80" preserveAspectRatio="xMidYMid meet">
+    <!-- Outer circle -->
+    <circle cx="40" cy="40" r="39" stroke="black" stroke-width="2" fill="white"/>
+    <!-- Inner circle -->
+    <circle cx="40" cy="40" r="36" stroke="#aaa" stroke-width="1" fill="#f8f8f8"/>
+    <!-- Cardinal directions -->
+    <text x="40" y="14" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">N</text>
+    <text x="40" y="75" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">S</text>
+    <text x="71" y="44" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">E</text>
+    <text x="11" y="44" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">W</text>
+    <!-- Needle group for rotation -->
+    <g id="needle-group">
+      <!-- Needle shadow -->
+      <line x1="40" y1="40" x2="40" y2="20" stroke="#888" stroke-width="5" opacity="0.2"/>
+      <!-- Needle (red) -->
+      <line x1="40" y1="40" x2="40" y2="16" stroke="red" stroke-width="4" stroke-linecap="round"/>
+      <!-- Needle tail (blue) -->
+      <line x1="40" y1="40" x2="40" y2="64" stroke="blue" stroke-width="3" stroke-linecap="round"/>
+      <!-- Center dot -->
+      <circle cx="40" cy="40" r="5" fill="#333" stroke="white" stroke-width="2"/>
+    </g>
+  </svg>
+  <div class="resize-handle"></div>
+</div>
 
 </body>
 </html>
