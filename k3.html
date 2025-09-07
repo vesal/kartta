@@ -2339,12 +2339,13 @@ function setCompassRotation(heading) {
 
        */
       let angle = event.webkitCompassHeading || event.alpha;
-      let deviceOrientation = 0;
 
       // Safari iOS
       if (!event.absolute && event.webkitCompassHeading) {
           angle = 360 - angle;
       }
+
+      let deviceOrientation = (screen.orientation && screen.orientation.angle) || window.orientation || 0;
 
       // Older browsers
       if (!event.absolute && 'undefined' !== typeof window.orientation) {
