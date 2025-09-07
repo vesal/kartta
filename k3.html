@@ -2333,7 +2333,7 @@ function setCompassRotation(heading) {
         heading = (heading + orientation) % 360;
         const compass = document.getElementById('compass');
         if (compass && heading !== null) {
-          compass.style.transform = `rotate(${-heading}deg)`;
+          compass.style.transform = `rotate(${heading}deg)`;
         }
       });
 
