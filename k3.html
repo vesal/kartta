@@ -2326,13 +2326,16 @@ function setCompassRotation(heading) {
     // draggable end
 
     window.addEventListener('deviceorientation', function(event) {
-      // event.alpha is the compass heading (0-360 degrees)
-      const heading = event.alpha;
-      const compass = document.getElementById('compass');
-      if (compass && heading !== null) {
-        compass.style.transform = `rotate(${-heading}deg)`; // negative to match compass direction
-      }
-    });
+        // event.alpha is the compass heading (0-360 degrees)
+        let heading = event.alpha;
+        // Adjust for screen orientation
+        let orientation = (screen.orientation && screen.orientation.angle) || window.orientation || 0;
+        heading = (heading + orientation) % 360;
+        const compass = document.getElementById('compass');
+        if (compass && heading !== null) {
+          compass.style.transform = `rotate(${-heading}deg)`;
+        }
+      });
 
   } // initializeMapPage ends
 
