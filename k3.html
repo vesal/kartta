@@ -1242,7 +1242,8 @@ function setCompassRotation(heading) {
     from: "",
     to: "",
     doubleClickZoom: false,
-    rotate: "none"
+    showRotate: "none",
+    showCompass: "gps"
   };
 
   const areaDatas = [
@@ -1929,7 +1930,15 @@ function setCompassRotation(heading) {
       mapWrapper.addPolylinePoint(myPolyline, loc);
     }
     if (options.send) postPosition(position);
-    // mapWrapper.setView(loc);
+    if (options.showCompass === "gps") {
+      const heading = position.coords.heading;
+      if (heading !== null && !isNaN(heading)) setCompassRotation(heading);
+    }
+    if (options.showRotate === "gps") {
+      const heading = position.coords.heading;
+      if (heading !== null && !isNaN(heading)) mapWrapper.setBearing(heading);
+    }
+    if (lastSelected === myPin) mapWrapper.setView(loc);
   }
 
   // noinspection JSUnusedGlobalSymbols
@@ -1992,6 +2001,53 @@ function setCompassRotation(heading) {
     // Näytetään Asetukset-kohtaan
     document.getElementById('version-display').textContent = version;
   }
+
+  function onCompassDirection(event) {
+    let angle = event.webkitCompassHeading || event.alpha;
+
+    // Safari iOS
+    if (!event.absolute && event.webkitCompassHeading) {
+        angle = 360 - angle;
+    }
+
+    let deviceOrientation =  (screen.orientation && screen.orientation.angle) || window.orientation || 0;
+
+    // Older browsers and iOS
+    if (!event.absolute && 'undefined' !== typeof window.orientation) {
+         deviceOrientation = window.orientation;
+    }
+    // const debug = document.getElementById('distance');
+    // debug.innerText = `${angle.toFixed(0)}° / ${deviceOrientation}°`;
+    const newAngle = angle - deviceOrientation;
+    if (options.showCompass === "compass") setCompassRotation(newAngle);
+  }
+
+  function initCompass() {
+    const compassElem = document.getElementById('compass');
+    if (options.showCompass === "none")  compassElem.style.display = 'none';
+    else compassElem.style.display = 'block';
+
+    let deviceOrientationEvent = null;
+    if ('ondeviceorientationabsolute' in window) {
+        deviceOrientationEvent = 'deviceorientationabsolute';
+    } else if('ondeviceorientation' in window) {
+        deviceOrientationEvent = 'deviceorientation';
+    }
+    window.removeEventListener(deviceOrientationEvent, onCompassDirection);
+    if (options.showCompass !== "compass" && options.showRotate !== "compass") return;
+
+    window.addEventListener(deviceOrientationEvent, onCompassDirection);
+  }
+
+  function initRotate() {
+    initCompass(); // to set/remove listener
+    if (!mapWrapper) return;
+    if (options.showRotate === "none") {
+      mapWrapper.setRotateControl(options.showRotate);
+    }
+  }
+
+
 
   function initializeMapPage() {
     showVersion()
@@ -2335,34 +2391,7 @@ function setCompassRotation(heading) {
     });
     // draggable end
 
-    let deviceOrientationEvent = null;
-    if ('ondeviceorientationabsolute' in window) {
-        deviceOrientationEvent = 'deviceorientationabsolute';
-    } else if('ondeviceorientation' in window) {
-        deviceOrientationEvent = 'deviceorientation';
-    }
-
-
-    window.addEventListener(deviceOrientationEvent, function(event) {
-      let angle = event.webkitCompassHeading || event.alpha;
-
-      // Safari iOS
-      if (!event.absolute && event.webkitCompassHeading) {
-          angle = 360 - angle;
-      }
-
-      let deviceOrientation =  (screen.orientation && screen.orientation.angle) || window.orientation || 0;
-
-      // Older browsers and iOS
-      if (!event.absolute && 'undefined' !== typeof window.orientation) {
-           deviceOrientation = window.orientation;
-      }
-      // const debug = document.getElementById('distance');
-      // debug.innerText = `${angle.toFixed(0)}° / ${deviceOrientation}°`;
-
-      setCompassRotation(angle - deviceOrientation);
-    });
-
+    initRotate(); // calls also initCompass
   } // initializeMapPage ends
 
 
@@ -2437,7 +2466,7 @@ function setCompassRotation(heading) {
     // Siirretään kartta käyttäjän sijaintiin
     const center = mapWrapper.getPinLocation(myPin);
     mapWrapper.setView(center);
-    mapWrapper.map.setBearing(0);
+    mapWrapper.setBearing(0);
   }
 
   function toggleFullscreen() {
@@ -2761,7 +2790,8 @@ function setCompassRotation(heading) {
     getCBOption("showZoomButtons", function () {
       if (mapWrapper) mapWrapper.setZoomButtons(options.showZoomButtons);
     });
-    getDDOption("rotate");
+    getDDOption("showRotate", initRotate);
+    getDDOption("showCompass", initCompass);
 
     const cb1 = document.getElementById('area1cb');
     const cb2 = document.getElementById('area1cbCopy');
@@ -3599,10 +3629,17 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
                                                                                                 data-href="#addpins"></a></label><br>
     <label><input type="checkbox" id="showZoomButtons" value="showZoomButtons"/>Näytä Zoom-painikkeet (+/-)</label>
     <label><input type="checkbox" id="doubleClickZoom" value="doubleClickZoom"/>Tuplaklikkaus Zoom</label><br>
-    <label for="rotate">Kartan kierto:</label>
-    <select id="rotate" name="rotate">
+    <label for="showRotate">Kartan kierto:</label>
+    <select id="showRotate" name="showRotate">
       <option value="none">Ei kiertoa</option>
       <option value="manual">Manuaalinen</option>
+      <option value="gps">GPS suunnan mukaan</option>
+      <option value="compass">Kompassin mukaan</option>
+    </select>
+    <br>
+    <label for="showCompass">Kompassi:</label>
+    <select id="showCompass" name="showCompass">
+      <option value="none">Ei kompassia</option>
       <option value="gps">GPS suunnan mukaan</option>
       <option value="compass">Kompassin mukaan</option>
     </select>
@@ -3737,7 +3774,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   </div>
 </div>
 
-<div id="openShowComps" style="bottom: 3em; left: 0; position: absolute; z-index:1011" onclick="showCompsDiv(true)">
+<div id="openShowComps" style="bottom: 0.5em; left: 0; position: absolute; z-index:1011" onclick="showCompsDiv(true)">
   <span style="font-size: 30px;">></span>
 </div>
 <div id="showComps" class="showComps" style="bottom: 0; left: 0; position: absolute; z-index:1012">

@@ -45,6 +45,26 @@ class MapWrapper {
       }).addTo(this.map);
     }
 
+   setBearing(angle) {
+      if (this.map.setBearing) {
+        this.map.setBearing(angle);
+      }
+   }
+
+   setRotateControl(show) {
+      if (show !== "None") {
+        if (!this.rotateControl) {
+          this.rotateControl = this.L.control.rotate({
+            position: 'topright',
+            closeOnZeroBearing: false,
+          }).addTo(this.map);
+        }
+      } else {
+        if (this.rotateControl) this.rotateControl.remove();
+        this.rotateControl = null;
+      }
+   }
+
    setZoomButtons(show) {
       if (show) {
         this.zoomControl = this.L.control.zoom({ position: 'topright' }).addTo(this.map);
