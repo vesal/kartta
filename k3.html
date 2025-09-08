@@ -2023,6 +2023,7 @@ function setCompassRotation(heading) {
     // debug.innerText = `${angle.toFixed(0)}° / ${deviceOrientation}°`;
     const newAngle = angle - deviceOrientation;
     if (options.showCompass === "compass") setCompassRotation(newAngle);
+    if (options.showRotate === "compass") mapWrapper.setBearing(newAngle);
   }
 
   function initCompass() {
