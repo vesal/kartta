@@ -1932,7 +1932,7 @@ function setCompassRotation(heading) {
     if (options.send) postPosition(position);
     if (options.showCompass === "gps") {
       const heading = position.coords.heading;
-      if (heading !== null && !isNaN(heading)) setCompassRotation(heading);
+      if (heading !== null && !isNaN(heading)) setCompassRotation(-heading);
     }
     if (options.showRotate === "gps") {
       const heading = position.coords.heading;
