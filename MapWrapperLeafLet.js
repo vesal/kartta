@@ -24,12 +24,14 @@ class MapWrapper {
         zoomControl: false,
         rotate: true,
         bearing: 0,
-        touchRotate: true,
-        shiftKeyRotate: true,
- 				rotateControl: {
-					closeOnZeroBearing: false,
-					position: 'topright',
-				},
+        touchRotate: false,
+        shiftKeyRotate: false,
+        rotateControl: false,
+        compassBearing: false,
+ 				// rotateControl: {
+				//	closeOnZeroBearing: false,
+				//	position: 'topright',
+				//},
 
       }
       // mapWrapper.map.rotate.enable();
@@ -52,16 +54,27 @@ class MapWrapper {
    }
 
    setRotateControl(show) {
-      if (show !== "None") {
+      this.map.compassBearing.disable();
+      if (show === "none") {
+        if (this.rotateControl) this.rotateControl.remove();
+        this.rotateControl = null;
+      } else {
+        /*
         if (!this.rotateControl) {
           this.rotateControl = this.L.control.rotate({
             position: 'topright',
             closeOnZeroBearing: false,
           }).addTo(this.map);
         }
+         */
+        // this.map.rotate.enable();
+      }
+      if (show === "manual") {
+        this.map.touchRotate.enable();
+        this.map.shiftKeyRotate.enable();
       } else {
-        if (this.rotateControl) this.rotateControl.remove();
-        this.rotateControl = null;
+        this.map.touchRotate.disable();
+        this.map.shiftKeyRotate.disable();
       }
    }
 

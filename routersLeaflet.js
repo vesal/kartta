@@ -729,6 +729,7 @@ function initRoutingEvents(routingControl) {
 
       const instr = routeInstructions[idx];
       if (instr) {
+        instr.uiRow = row;
         const meters = routingStyleRound(instr.distance);
         let smeters = numberToFinnishDistance(meters);
         if (instr.type === "Roundabout" || instr.type === "Rotary") smeters = "";
@@ -784,4 +785,107 @@ function initRoutingOptions() {
     localStorage.setItem('dialect', options.dialect);
   });
   routingOptionsLoaded = true;
+}
+
+function findInstruction(route, coord, lastIdx = -1) {
+  if (!route || !route.instructions || route.instructions.length === 0) return null;
+  let closestInstr = 0;
+  let closestDist = Infinity;
+  for (let idx = lastIdx+1; idx <route.instructions.length; idx++) {
+    const instr = route.instructions[idx];
+    const ipos = route.coordinates[instr.index];
+    const dist = WGS84_distance([ipos.lat, ipos.lng], coord);
+    if (dist < closestDist) {
+      closestDist = dist;
+      closestInstr = idx;
+    }
+    if (dist < 0.1) break; // very close
+  }
+  return [closestInstr, closestDist];
+}
+
+function distToNextInstruction(route, coord, lastIdx = -1) {
+  if (!route || !route.instructions || route.instructions.length === 0) return null;
+  const ic1 = route.instructions[lastIdx].index;
+  const ic2 = route.instructions[lastIdx+1].index;
+
+
+}
+
+mapWrapper.routeMarkers = [];
+
+function startNavigation(coord) {
+   const rc = mapWrapper.routingControl;
+   if (!rc) return false;
+   const route = rc.currentRoutes[rc.activeRouteIndex];
+   if (!route) return false;
+
+   // debug markers
+   mapWrapper.routeMarkers = []
+   for (let idx = 0; idx < route.coordinates.length; idx++) {
+     const coord = route.coordinates[idx];
+     const icon = mapWrapper.L.divIcon({
+      className: 'route-index-marker',
+      html: `<div style="background:blue;color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:12px;">${idx}</div>`,
+      iconSize: [18, 18]
+    });
+    const marker = mapWrapper.L.marker([coord.lat, coord.lng], { icon }).addTo(mapWrapper.map);      mapWrapper.routeMarkers.push(marker);
+   } // end debug markers
+
+   const [idx, _] = findInstruction(route, coord);
+   route.step = idx;
+   route.coordStep = route.instructions[idx].index;
+   const instr = route.instructions[idx];
+   if (instr.uiRow) instr.uiRow.click();
+   return true;
+}
+
+function checkLegsCoords(route, coord) {
+   if (route.coordStep > route.coordinates.length) return 0;
+   if (route.step >= route.instructions.length - 1) return 0;
+   let sum = 0;
+   let prevPos = null;
+   for (let i = route.coordStep; i <= route.instructions[route.step+1].index; i++) {
+      const p = route.coordinates[i];
+      const pos = [p.lat, p.lng];
+      let dist = WGS84_distance(pos, coord);
+      if (dist < 0.04 && !prevPos) { // 40 meters
+         mapWrapper.routeMarkers[route.coordStep].remove();
+         route.coordStep = i + 1;
+      } else if (!prevPos) {
+         sum += dist;
+         prevPos = pos
+      } else {
+         dist = WGS84_distance(pos,prevPos);
+         sum += dist;
+         prevPos = pos;
+      }
+   }
+   return sum;
+}
+
+function continueNavigation(coord, speed) {
+   const rc = mapWrapper.routingControl;
+   if (!rc) return false;
+   const route = rc.currentRoutes[rc.activeRouteIndex];
+   if (!route) return false;
+   const dist = checkLegsCoords(route, coord);
+
+   // const [idx, dist] = findInstruction(route, coord, route.step);
+   if (dist*1000/speed > 10) return false;
+   if (route.step >= route.instructions.length - 2 && dist > 0.02) return false;
+   let idx = route.step+1;
+   route.step = idx;
+   let midx = Math.min(idx, route.instructions.length - 1);
+   for (let i = route.coordStep; i<route.instructions[midx].index; i++) {
+      mapWrapper.routeMarkers[i].remove();
+   }
+   route.coordStep = route.instructions[midx].index;
+   const instr = route.instructions[midx];
+   if (instr.uiRow) instr.uiRow.click();
+   return true;
+}
+
+function stopNavigation() {
+
 }

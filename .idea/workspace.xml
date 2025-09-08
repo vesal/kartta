@@ -10,7 +10,9 @@
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MapWrapperLeafLet.js" beforeDir="false" afterPath="$PROJECT_DIR$/MapWrapperLeafLet.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routersLeaflet.js" beforeDir="false" afterPath="$PROJECT_DIR$/routersLeaflet.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,7 +71,7 @@
     "WebServerToolWindowFactoryState": "true",
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "E:/riippu/saa/tuulet",
+    "last_opened_file_path": "E:/riippu/kartta/js",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -82,6 +84,9 @@
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\riippu\kartta\js" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="E:\riippu\kartta" />
       <recent name="E:\riippu\kartta\src" />
@@ -207,7 +212,7 @@
       <workItem from="1754836285386" duration="11554000" />
       <workItem from="1754904718618" duration="251000" />
       <workItem from="1754904988042" duration="228616000" />
-      <workItem from="1756132556973" duration="326669000" />
+      <workItem from="1756132556973" duration="348934000" />
     </task>
     <servers />
   </component>

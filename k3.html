@@ -566,7 +566,7 @@
 <script src="js/winbox.bundle.min.js" defer></script>
 <script src="js/leaflet.js" defer></script>
 <script src="js/leaflet.textpath.js" defer></script>
-<script src="js/leaflet-rotate.js" defer></script>
+<script src="js/leaflet-rotate-src.js" defer></script>
 <!--<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />-->
 <!--<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js" defer></script>-->
 <script src="MapWrapperLeafLet.js" defer></script>
@@ -1246,7 +1246,8 @@ function setCompassRotation(heading) {
     doubleClickZoom: false,
     showRotate: "none",
     showCompass: "gps",
-    simulateSpeed: 0
+    simulateSpeed: 0,
+    navigate: false,
   };
 
   const areaDatas = [
@@ -1301,7 +1302,7 @@ function setCompassRotation(heading) {
     if (options.HCenter2) {
       setHitPinLoc(mapWrapper.getCenter(), -1, -1);
       displayLocPin(hitPin);
-    } else if (options.HStationary) {
+    } else if (options.HStationary  && !simulationGoing) {
       const loc = mapWrapper.getXYCoord(hitPinXY);
       setHitPinLoc(loc, -1, -1);
       displayLocPin(hitPin);
@@ -1943,10 +1944,15 @@ function setCompassRotation(heading) {
       if (heading !== null && !isNaN(heading)) mapWrapper.setBearing(-heading);
     }
     if (lastSelected === myPin) mapWrapper.setView(loc);
+
+    if (options.navigate) continueNavigation(loc, position.coords.speed);
   }
+
+  let simulationGoing = false;
 
   // noinspection JSUnusedGlobalSymbols
   function simulateGPS() {
+    simulationGoing =true;
     const loc = mapWrapper.getPinLocation(hitPin);
     const lat = loc[0]; // 62.25 + (Math.random() - 0.5) * 0.1;
     const lng = loc[1]; // 25.75 + (Math.random() - 0.5) * 0.1;
@@ -1964,6 +1970,7 @@ function setCompassRotation(heading) {
       timestamp: Date.now()
     };
     displayCurrentPosition(position);
+    setTimeout(() => {simulationGoing = false;}, 500);
   }
 
 
@@ -2047,8 +2054,9 @@ function setCompassRotation(heading) {
     initCompass(); // to set/remove listener
     if (!mapWrapper) return;
     if (options.showRotate === "none") {
-      mapWrapper.setRotateControl(options.showRotate);
+      mapWrapper.setBearing(0);
     }
+    mapWrapper.setRotateControl(options.showRotate);
   }
 
 
@@ -2518,7 +2526,8 @@ function setCompassRotation(heading) {
   }
 
 
-  window.addEventListener('DOMContentLoaded', initializeMapPage)
+  window.addEventListener('DOMContentLoaded', initializeMapPage);
+  window.addEventListener('DOMContentLoaded', () => showRoutePane(1));
 
   function setOption(name, value) {
     options[name] = value;
@@ -2558,7 +2567,7 @@ function setCompassRotation(heading) {
     const edit = document.getElementById(editName);
     if (!edit) return;
     const val = parseInt(localStorage.getItem(name)) || def || parseInt(edit.value);
-    options[name] = params[name] || val || def;
+    options[name] = params[name] ?? val ?? def;
     if (options[name] !== "")
       edit.value = options[name];
     // noinspection JSUnusedLocalSymbols
@@ -3500,6 +3509,18 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     document.getElementById("buttonGraphHopper").style.display = hasGH ? "" : "none";
   }
 
+  function checkNavigate(nav) {
+    options.navigate = nav;
+    if (nav) {
+      if (!startNavigation(mapWrapper.getPinLocation(myPin))) {
+        options.navigate = false;
+        document.getElementById("navigate").checked = false;
+      }
+    } else {
+      stopNavigation();
+    }
+  }
+
   //# endregion Routing
 
 
@@ -3825,6 +3846,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
         <button id="buttonHERE" type="button" onclick="findDriving(0)" title="Etsi HERE-reitittimellä">H</button>
         <button id="buttonGraphHopper" type="button" onclick="findDriving(3)"
                 title="Etsi GraphHopper-reitittimellä (antaa vain yhden)">G</button>
+        <label><input type="checkbox" name="navigate" id="navigate" value="navigate" onclick="checkNavigate(this.checked)"/>Aja</label>
       </span>
     </div>
     <div class="driving">
