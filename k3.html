@@ -1144,6 +1144,7 @@ function setCompassRotation(heading) {
 
 
   let distanceLines = [];
+  let lastHeading = 0;
 
   function calcDistance(idx1 = -1000, idx2 = -1000) {
     let d = 0;
@@ -1168,6 +1169,7 @@ function setCompassRotation(heading) {
     }
     d = WGS84_distance(from, to);
     const deg = bearingDegrees(from, to);
+    lastHeading = deg;
     const s = `${d.toFixed(3)} km, ${deg.toFixed(1)}°`;
     if (idx1 >= -1) mapWrapper.removeLines(distanceLines, idx1, idx2);
     distanceLines = mapWrapper.addLines(distanceLines, from, to, {
@@ -1243,7 +1245,8 @@ function setCompassRotation(heading) {
     to: "",
     doubleClickZoom: false,
     showRotate: "none",
-    showCompass: "gps"
+    showCompass: "gps",
+    simulateSpeed: 0
   };
 
   const areaDatas = [
@@ -1897,6 +1900,7 @@ function setCompassRotation(heading) {
 
 
   function checkGeoLocation() {
+    if (options.simulateSpeed) return;
     startGeoLocation(document.getElementById("readGPS").checked);
   }
 
@@ -1936,31 +1940,30 @@ function setCompassRotation(heading) {
     }
     if (options.showRotate === "gps") {
       const heading = position.coords.heading;
-      if (heading !== null && !isNaN(heading)) mapWrapper.setBearing(heading);
+      if (heading !== null && !isNaN(heading)) mapWrapper.setBearing(-heading);
     }
     if (lastSelected === myPin) mapWrapper.setView(loc);
   }
 
   // noinspection JSUnusedGlobalSymbols
   function simulateGPS() {
-    for (let i = 0; i < 10; i++) {
-      const lat = 62.25 + (Math.random() - 0.5) * 0.1;
-      const lng = 25.75 + (Math.random() - 0.5) * 0.1;
-      const coords = {
-        latitude: lat,
-        longitude: lng,
-        altitude: 100 + Math.random() * 50,
-        accuracy: 5 + Math.random() * 5,
-        altitudeAccuracy: 10 + Math.random() * 10,
-        heading: Math.random() * 360,
-        speed: Math.random() * 10
-      };
-      const position = {
-        coords: coords,
-        timestamp: Date.now()
-      };
-      displayCurrentPosition(position);
-    }
+    const loc = mapWrapper.getPinLocation(hitPin);
+    const lat = loc[0]; // 62.25 + (Math.random() - 0.5) * 0.1;
+    const lng = loc[1]; // 25.75 + (Math.random() - 0.5) * 0.1;
+    const coords = {
+      latitude: lat,
+      longitude: lng,
+      altitude: 100 + Math.random() * 50,
+      accuracy: 5 + Math.random() * 5,
+      altitudeAccuracy: 10 + Math.random() * 10,
+      heading: lastHeading, // Math.random() * 360,
+      speed: options.simulateSpeed // 0.01 + Math.random() * 0.1
+    };
+    const position = {
+      coords: coords,
+      timestamp: Date.now()
+    };
+    displayCurrentPosition(position);
   }
 
 
@@ -2180,7 +2183,7 @@ function setCompassRotation(heading) {
         if (options.HCenter2 && options.HStationary) {
           mapWrapper.setView(loc);
         }
-        // simulateGPS();
+        if (options.simulateSpeed) simulateGPS();
       }, options.doubleClickZoom ? 250 : 0);
     }); // mapWarpper.on  click end
 
@@ -2792,6 +2795,8 @@ function setCompassRotation(heading) {
     });
     getDDOption("showRotate", initRotate);
     getDDOption("showCompass", initCompass);
+
+    getOptionInt("simulateSpeed");
 
     const cb1 = document.getElementById('area1cb');
     const cb2 = document.getElementById('area1cbCopy');
@@ -3848,6 +3853,10 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
       <div><label for="hereApiKey">HERE API-key: </label><input type="text" size="50" id="hereApiKey"></div>
       <div><label for="graphHopperApiKey">GraphHopper API-key: </label><input type="text" size="50"
                                                                               id="graphHopperApiKey"></div>
+    </div>
+    <hr>
+    <div>
+      <div><label for="simulateSpeed">Simuloinnin nopeus m/s: </label><input type="text" size="5" id="simulateSpeed" value="0"></div>
     </div>
   </div>
 </div>
