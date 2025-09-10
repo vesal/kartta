@@ -117,6 +117,7 @@ function processSection(section, waypoints, index) {
     m.type = a.action;
     m.mode = mode;
     m.modifier = a.direction;
+    step.duration = a.duration;
 
     switch (type) {
       case "turn":
@@ -193,11 +194,11 @@ function processSection(section, waypoints, index) {
       {
         text: text,
         distance: distance,
-        // time: a.duration,
+        time: a.duration,
         index: a.offset,
         type: type,
         modifier: modifier,
-        // mode: mode,
+        mode: mode,
       });
   }
   const routeObj = {
@@ -391,13 +392,13 @@ function routeStepToTextSavo(step, index) {
       suunta = "vasemmalle";
       break;
     case "right":
-      suunta = "ooekkeeelle";
+      suunta = "oekkeelle,";
       break;
     case "straight":
       suunta = "suoroo";
       break;
     case "slight right":
-      suunta = "hitusen oekeelle";
+      suunta = "hitusen oekkeelle,";
       break;
     case "slight left":
       suunta = "ätväse vasemmalle";
@@ -412,7 +413,7 @@ function routeStepToTextSavo(step, index) {
     case "turn":
       return `${rnd("Kiänny|Kurvooo|Vänkee")} ${suunta} tielle ${step.name}`;
     case "roundabout":
-      return `${rnd("Määhä|Tungeha")} ympyrrään ja ${rnd("luikaha|puthaka|kurvoo")} pihalle kolosta ${m.exit}`;
+      return `${rnd("Määhä|Tungeha")} ympyrrään ja ${rnd("luikaha|putkaha|kurvoo|vänkee")} pihalle kolosta ${m.exit}`;
     case "exit roundabout":
       return `${rnd("Tempasehha|Kurvoo|Putkaha|Luikaha|Vänkeehhä")} pihalle paekasta ${m.exit}, suuntoo ${step.name}`;
     case "roundabout turn":
@@ -757,12 +758,12 @@ function initRoutingEvents(routingControl) {
 
 function routingStyleRound(meters) {
   if (meters < 20) return Math.ceil(meters);
-  if (meters < 500) return Math.ceil(meters / 50) * 50;
-  if (meters < 1000) return Math.ceil(meters / 100) * 100;
-  if (meters < 3000) return Math.ceil(meters / 500) * 500;
+  if (meters < 500) return Math.round(meters / 50) * 50;
+  if (meters < 1000) return Math.round(meters / 100) * 100;
+  if (meters < 3000) return Math.round(meters / 500) * 500;
   // For 1000 or more, round up to nearest 100 and convert to km if needed
   if (meters < 10000) return Math.round(meters / 1000) * 1000;
-  return Math.ceil(meters / 1000) * 1000;
+  return Math.round(meters / 1000) * 1000;
 }
 
 //#endregion Routing UI
@@ -813,15 +814,27 @@ function distToNextInstruction(route, coord, lastIdx = -1) {
 }
 
 mapWrapper.routeMarkers = [];
+let naviInfo = null;
+let naviText = null;
 
 function startNavigation(coord) {
    const rc = mapWrapper.routingControl;
    if (!rc) return false;
    const route = rc.currentRoutes[rc.activeRouteIndex];
    if (!route) return false;
+   if (!route.instructions || route.instructions.length === 0) return false;
+   if (!route.coordinates || route.coordinates.length === 0) return false;
+
+   naviInfo = document.getElementById('naviInfo');
+   naviInfo.style.visibility = 'visible';
+   naviText = document.getElementById('naviInfoText');
 
    // debug markers
+   for (const m of mapWrapper.routeMarkers) {
+     if (m) m.remove();
+   }
    mapWrapper.routeMarkers = []
+
    for (let idx = 0; idx < route.coordinates.length; idx++) {
      const coord = route.coordinates[idx];
      const icon = mapWrapper.L.divIcon({
@@ -837,7 +850,21 @@ function startNavigation(coord) {
    route.coordStep = route.instructions[idx].index;
    const instr = route.instructions[idx];
    if (instr.uiRow) instr.uiRow.click();
+   showNaviText(route, idx);
    return true;
+}
+
+function showNaviText(route, idx  = 0) {
+  if (!naviText) return;
+  const instr = route.instructions[idx];
+  const nextinstr = route.instructions[idx+1];
+  const icon1= instr.uiRow.querySelector('td')?.innerHTML ?? '';
+  let text = icon1 + instr.text + " " + instr.distance + " m " + instr.time + " s";
+  if (nextinstr) {
+    const icon2= nextinstr.uiRow.querySelector('td')?.innerHTML ?? '';
+    text += "<br>" + icon2 + " Sitten " +  nextinstr.text;
+  }
+  naviText.innerHTML = "<p>" + text + "</p>";
 }
 
 function checkLegsCoords(route, coord) {
@@ -850,7 +877,8 @@ function checkLegsCoords(route, coord) {
       const pos = [p.lat, p.lng];
       let dist = WGS84_distance(pos, coord);
       if (dist < 0.04 && !prevPos) { // 40 meters
-         mapWrapper.routeMarkers[route.coordStep].remove();
+         mapWrapper.routeMarkers[route.coordStep]?.remove();
+         mapWrapper.routeMarkers[route.coordStep] = null;
          route.coordStep = i + 1;
       } else if (!prevPos) {
          sum += dist;
@@ -871,8 +899,9 @@ function continueNavigation(coord, speed) {
    if (!route) return false;
    const dist = checkLegsCoords(route, coord);
 
-   // const [idx, dist] = findInstruction(route, coord, route.step);
+   // Is it time to the next instruction? More than 10s, no!
    if (dist*1000/speed > 10) return false;
+   // Is it near last instruction? Wait closer (20m)
    if (route.step >= route.instructions.length - 2 && dist > 0.02) return false;
    let idx = route.step+1;
    route.step = idx;
@@ -883,9 +912,15 @@ function continueNavigation(coord, speed) {
    route.coordStep = route.instructions[midx].index;
    const instr = route.instructions[midx];
    if (instr.uiRow) instr.uiRow.click();
+   showNaviText(route, midx);
+   if (midx === route.instructions.length-1) stopNavigation();
    return true;
 }
 
 function stopNavigation() {
-
+   const cb = document.getElementById('navigate');
+   if (cb) cb.checked = false;
+   const naviInfo = document.getElementById('naviInfo');
+   naviInfo.style.visibility = 'hidden';
+   options.navigate = false;
 }

@@ -7,10 +7,12 @@ class MapWrapper {
    // Luo layer-muuttuja, johon asetetaan nykyinen karttalaatta
 
 
-    constructor(containerId, mapmodes, useCache = true) {
+    constructor(containerId, mapmodes, options= {}) {
+      const defaultOptions = { useCache: true, rotate: false };
+      options = { ...defaultOptions, ...options };
       // noinspection TypeScriptUMDGlobal
       this.tileStore = new KeyValStore('kartta-db', 'tiles');
-      this.useCache = useCache;
+      this.useCache = options.useCache;
       // noinspection TypeScriptUMDGlobal
       this.L = L;
       this.currentLayer = null;
@@ -22,7 +24,7 @@ class MapWrapper {
         // maxZoom: 26,
         minZoom: 2,
         zoomControl: false,
-        rotate: true,
+        rotate: options.rotate,
         bearing: 0,
         touchRotate: false,
         shiftKeyRotate: false,
@@ -54,7 +56,8 @@ class MapWrapper {
    }
 
    setRotateControl(show) {
-      this.map.compassBearing.disable();
+      if (!this.map.rotate) return; // Ei tukea
+      if (this.map.compassBearing) this.map.compassBearing.disable();
       if (show === "none") {
         if (this.rotateControl) this.rotateControl.remove();
         this.rotateControl = null;

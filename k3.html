@@ -262,6 +262,7 @@
       vertical-align: top;
     }
 
+    /*noinspection CssUnusedSymbol*/
     #compsWindow .wb-body {
         background: black;
     }
@@ -271,6 +272,7 @@
       z-index: 1030 !important;
     }
 
+    /*noinspection CssUnusedSymbol*/
     .winbox.min {
         width: 100px !important;
     }
@@ -426,6 +428,12 @@
       min-height: 0; /* prevents overflow in flexbox */
     }
 
+    /*noinspection CssUnusedSymbol*/
+    #naviInfoText .leaflet-routing-icon {
+      transform: scale(3);
+      margin: 5px 20px 15px 5px;
+    }
+
     .inner {
       display: flex;
       align-items: center;
@@ -566,7 +574,7 @@
 <script src="js/winbox.bundle.min.js" defer></script>
 <script src="js/leaflet.js" defer></script>
 <script src="js/leaflet.textpath.js" defer></script>
-<script src="js/leaflet-rotate-src.js" defer></script>
+<script src="js/leaflet-rotate-src.js" defer></script> 
 <!--<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />-->
 <!--<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js" defer></script>-->
 <script src="MapWrapperLeafLet.js" defer></script>
@@ -2075,7 +2083,8 @@ function setCompassRotation(heading) {
     localStorage.zoom = pzoom;
     localStorage.mapName = mapName;
 
-    mapWrapper = new MapWrapper('map', mapModes, options.useCache);
+    mapWrapper = new MapWrapper('map', mapModes,
+      {useCache:options.useCache, rotate: options.showRotate !== "none"});
     mapWrapper.setZoomButtons(options.showZoomButtons);
     mapWrapper.setDoubleClickZoom(options.doubleClickZoom);
 
@@ -2128,7 +2137,7 @@ function setCompassRotation(heading) {
 
     mapWrapper.clickTimer = null;
 
-    mapWrapper.on('dblclick', (e) => {
+    mapWrapper.on('dblclick', () => {
       if (mapWrapper.clickTimer) {
         clearTimeout(mapWrapper.clickTimer);
         mapWrapper.clickTimer = null;
@@ -2243,6 +2252,8 @@ function setCompassRotation(heading) {
     });
 
 
+    let isDragging = null;
+
     // Make all elements with class "draggable" movable / resizable
     document.querySelectorAll('.draggable').forEach(el => {
       let isDragging = false, offsetX = 0, offsetY = 0;
@@ -2278,26 +2289,39 @@ function setCompassRotation(heading) {
         }
       }
 
-      el.addEventListener('mousedown', function (e) {
+      el.addEventListener('mousedown', onMouseDown);
+      el.addEventListener('touchstart', onMouseDown);
+
+      function onMouseDown(e) {
+        e.preventDefault();
+        let et = e; if (e.touches) {
+          et = e.touches[0];
+          el.classList.add('show-handle');
+          setTimeout(() => el.classList.remove('show-handle'), 2000);
+        }
         isDragging = true;
-        offsetX = e.clientX - el.offsetLeft;
-        offsetY = e.clientY - el.offsetTop;
+        const rect = el.getBoundingClientRect();
+        offsetX = et.clientX - rect.left; // el.offsetLeft;
+        offsetY = et.clientY - rect.top; // el.offsetTop;
         el.style.cursor = 'move';
         el.style.position = 'absolute';
-        e.preventDefault();
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-      });
+        document.addEventListener('mousemove', onMouseMove, {passive: false});
+        document.addEventListener('mouseup', onMouseUp, {passive: false});
+        document.addEventListener('touchmove', onMouseMove, {passive: false});
+        document.addEventListener('touchend', onMouseUp);
+      }
 
       function onMouseMove(e) {
         if (!isDragging) return;
+        let et = e; if (e.touches) et = e.touches[0];
         const w = el.offsetWidth/2;
         const h = el.offsetHeight/2;
         const maxRight = window.innerWidth - w;
         const maxBottom = window.innerHeight - h;
         el.style.right = ''; // Remove right to allow left positioning
-        el.style.left = clamp((e.clientX - offsetX), -w, maxRight) + 'px';
-        el.style.top = clamp(e.clientY - offsetY, -h, maxBottom) + 'px';
+        el.style.left = clamp(et.clientX - offsetX, -w, maxRight) + 'px';
+        el.style.top = clamp(et.clientY - offsetY, -h, maxBottom) + 'px';
+        el.position = 'absolute';
         // const debug = document.getElementById('distance');
         // debug.innerText = `${window.innerWidth} ${el.style.left}`;
         e.preventDefault();
@@ -2308,6 +2332,8 @@ function setCompassRotation(heading) {
         e.preventDefault();
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onMouseMove);
+        document.removeEventListener('touchend', onMouseUp);
         isDragging = false;
         el.style.cursor = 'pointer';
         savePos(el);
@@ -2316,90 +2342,57 @@ function setCompassRotation(heading) {
       const handle = el.querySelector('.resize-handle');
 
       if (handle) {
-        handle.addEventListener('mousedown', handleMouseDown);
-        handle.addEventListener('touchstart', handleMouseDown);
+        handle.addEventListener('mousedown', handleMouseDown, { passive: false });
+        handle.addEventListener('touchstart', handleMouseDown, { passive: false });
 
         function handleMouseDown(e) {
           e.stopPropagation();
+          e.preventDefault();
           let et = e; if (e.touches) et = e.touches[0];
           let startX = et.clientX;
           let startY = et.clientY;
           let startW = el.offsetWidth;
           let startH = el.offsetHeight;
 
+          document.addEventListener('mousemove', onHandleMouseMove, { passive: false });
+          document.addEventListener('mouseup', onHandleMouseUp, { passive: false });
+          document.addEventListener('touchmove', onHandleMouseMove, { passive: false });
+          document.addEventListener('touchend', onHandleMouseUp, { passive: false });
+
           function onHandleMouseMove(e) {
-            e.stopPropagation();
+            // e.stopPropagation();
+            e.preventDefault();
             let et = e; if (e.touches) et = e.touches[0];
             let newW = clamp(startW + (et.clientX - startX), 30, window.innerWidth);
+            let newH = clamp(startH + (et.clientY - startY), 30, window.innerHeight);
             let aspect = getAspectRatio(el.style.aspectRatio);
-            let newH;
             if (aspect) {
               newH = newW / aspect;
               if (newH > window.innerHeight) {
                 newH = window.innerHeight;
                 newW = newH * aspect;
-            } else
-              newH = clamp(startH + (et.clientY - startY), 30, window.innerHeight);
+              } else {
+                newH = clamp(startH + (et.clientY - startY), 30, window.innerHeight);
+              }
             }
             el.style.width = newW + 'px';
             if (!el.style.aspectRatio) {
               el.style.height = newH + 'px';
             }
-            e.preventDefault();
           }
 
           function onHandleMouseUp(e) {
-            e.stopPropagation();
+            // e.stopPropagation();
+            e.preventDefault();
             document.removeEventListener('mousemove', onHandleMouseMove);
             document.removeEventListener('mouseup', onHandleMouseUp);
             document.removeEventListener('touchmove', onHandleMouseMove);
-            document.removeEventListener('touchup', onHandleMouseUp);
+            document.removeEventListener('touchend', onHandleMouseUp);
             savePos(el);
-            e.preventDefault();
           }
-
-          document.addEventListener('mousemove', onHandleMouseMove, { passive: false });
-          document.addEventListener('mouseup', onHandleMouseUp, { passive: false });
-          document.addEventListener('touchmove', onHandleMouseMove, { passive: false });
-          document.addEventListener('touchend', onHandleMouseUp, { passive: false });
-          e.preventDefault();
         }
       } // if handle
-      // Touch events
-      el.addEventListener('touchstart', function (e) {
-        if (e.touches.length !== 1) return;
-        el.classList.add('show-handle');
-        setTimeout(() => el.classList.remove('show-handle'), 2000);
-        isDragging = true;
-        const rect = el.getBoundingClientRect();
-        offsetX = e.touches[0].clientX - rect.left;
-        offsetY = e.touches[0].clientY - rect.top;
-        el.style.cursor = 'move';
-        e.preventDefault();
-      });
 
-      document.addEventListener('touchmove', function (e) {
-        if (!isDragging) return;
-        const touch = e.touches[0];
-        // const debug = document.getElementById('distance');
-        // debug.innerText = `move: ${touch.clientX}`;
-        const w = el.offsetWidth/2;
-        const h = el.offsetHeight/2;
-        const maxRight = window.innerWidth - w;
-        const maxBottom = window.innerHeight - h;
-        el.style.right = ''
-        el.style.left = clamp(touch.clientX - offsetX, -w, maxRight) + 'px';
-        el.style.top = clamp(touch.clientY - offsetY, -h, maxBottom) + 'px';
-        el.style.position = 'absolute';
-        e.preventDefault();
-      }, {passive: false});
-
-      document.addEventListener('touchend', function () {
-        if (!isDragging) return;
-        isDragging = false;
-        el.style.cursor = 'pointer';
-        savePos(el);
-      });
     });
     // draggable end
 
@@ -2527,7 +2520,7 @@ function setCompassRotation(heading) {
 
 
   window.addEventListener('DOMContentLoaded', initializeMapPage);
-  window.addEventListener('DOMContentLoaded', () => showRoutePane(1));
+  // window.addEventListener('DOMContentLoaded', () => showRoutePane(1));
 
   function setOption(name, value) {
     options[name] = value;
@@ -2881,8 +2874,8 @@ function setCompassRotation(heading) {
           await caches.delete(name);
         }
       }
-      location.reload(); // Reload the page to ensure everything is reset
     }
+    location.reload(); // Reload the page to ensure everything is reset
   }
 
   function checkMemoryUsage() {
@@ -3882,6 +3875,13 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
       <div><label for="simulateSpeed">Simuloinnin nopeus m/s: </label><input type="text" size="5" id="simulateSpeed" value="0"></div>
     </div>
   </div>
+</div>
+
+<div id="naviInfo" class="draggable noselect" style="background-color: white; position:absolute; padding: 5px; border: 1px solid black;
+  min-width: 120px;top:10px;right:200px;width: unset; height: unset; z-index:1031; visibility: hidden">
+  <div id="naviInfoText" style="background-color: white; ">
+  </div>
+  <div class="resize-handle"></div>
 </div>
 
 <div id="compass" class="draggable noselect" style="position:absolute;
