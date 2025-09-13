@@ -1,4 +1,5 @@
 #!/usr/local/bin/python
+#py2
 #print "Content-Type: text/html"
 #print
 #print "Hello"

@@ -24,6 +24,7 @@ class MapWrapper {
         // maxZoom: 26,
         minZoom: 2,
         zoomControl: false,
+        zoomSnap: 1,
         rotate: options.rotate,
         bearing: 0,
         touchRotate: false,
@@ -56,7 +57,7 @@ class MapWrapper {
    }
 
    setRotateControl(show) {
-      if (!this.map.rotate) return; // Ei tukea
+      if (!this.map.touchRotate) return; // Ei tukea
       if (this.map.compassBearing) this.map.compassBearing.disable();
       if (show === "none") {
         if (this.rotateControl) this.rotateControl.remove();
@@ -277,6 +278,20 @@ class MapWrapper {
     }
   }
 
+
+  unrotatePoint(point, bearingDeg, map) {
+    const center = map.latLngToContainerPoint(map.getCenter());
+    const angle = -bearingDeg * Math.PI / 180; // negatiivinen -> takaisinpäin
+
+    const dx = point.x - center.x;
+    const dy = point.y - center.y;
+
+    const x = dx * Math.cos(angle) - dy * Math.sin(angle) + center.x;
+    const y = dx * Math.sin(angle) + dy * Math.cos(angle) + center.y;
+
+    return L.point(x, y);
+  }
+
   createPin(coord, label, color, click, text = null, flip = false) {
     const pin = this.L.marker(coord, {icon: this.customPin(label, color, 'black', flip)});
     pin.addTo(this.map);
@@ -286,6 +301,20 @@ class MapWrapper {
     pin.on('click', function() {
       click(pin);
     });
+
+    const map = this.map;
+    pin.on('drag', e => {
+      const mousePoint = map.mouseEventToContainerPoint(e.originalEvent);
+      const correctedPoint = this.unrotatePoint(
+        mousePoint,
+        map.getBearing(),
+        map
+      );
+      const latlng = map.containerPointToLatLng(correctedPoint);
+      pin.setLatLng(e.latlng); // nyt marker seuraa visuaalisesti oikein
+    });
+
+
     return pin;
   }
 
@@ -357,6 +386,7 @@ class MapWrapper {
       pin.dragging.disable();
     }
   }
+
 
   on(event, callback) {
     this.map.on(event, callback);
