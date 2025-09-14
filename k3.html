@@ -292,6 +292,11 @@
       overflow: hidden !important;
     }
 
+    .leaflet-interactive {
+      pointer-events: none;
+      user-select: none;
+    }
+
     /*noinspection CssUnusedSymbol*/
     .leaflet-routing-container {
       /* max-height: 30vh !important; /* Näkyy enintään 30% näytöstä */
@@ -2148,6 +2153,10 @@ function setCompassRotation(heading) {
     });
 
     mapWrapper.on('click', (e) => {
+      const oe = e.originalEvent;
+      const xy = [oe.offsetX, oe.offsetY];
+      const xyp = mapWrapper.getCoordXY(e.latlng);
+      // console.log('Map clicked at', xy, xyp , e.latlng);
       if (mapWrapper.clickTimer) clearTimeout(mapWrapper.clickTimer);
       mapWrapper.clickTimer = setTimeout(async () => {
         closeNav();
@@ -2468,11 +2477,11 @@ function setCompassRotation(heading) {
 
 
   function findMyPlace() {
+    mapWrapper.setBearing(0);
     if (!myPin) return;
     // Siirretään kartta käyttäjän sijaintiin
     const center = mapWrapper.getPinLocation(myPin);
     mapWrapper.setView(center);
-    mapWrapper.setBearing(0);
   }
 
   function toggleFullscreen() {

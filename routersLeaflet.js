@@ -286,7 +286,7 @@ function findRouteHERE(from, to, apiKey, callback, startWhenReady=false, useSamp
     routeWhileDragging: false,
     showAlternatives: true,
     lineOptions: {
-      styles: [{color: 'orange', opacity: 1, weight: 5}] // <- vaihda väri
+      styles: [{color: 'blue', opacity: 1, weight: 5}] // <- vaihda väri
     },
     altLineOptions: {
       styles: [{color: 'gray', opacity: 0.5, weight: 5}]
