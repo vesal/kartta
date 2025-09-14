@@ -3109,25 +3109,29 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     tr.appendChild(td);
   }
 
-  function addTDInput(tr) {
+  function addTDInput(tr, id) {
     const td = document.createElement("td");
     tr.appendChild(td);
     // <input type="text" id="editSpeed" value="50px" size="3" /></td><td><input type="text" id="editSpeedCol" value="rgba(255, 255, 255, 0.6)" size="20" />
     const input = document.createElement("input");
+    input.id = id;
+    const label = document.createElement("label");
+    label.htmlFor = id; // associate label with input
+    label.textContent = ""; // empty label
+    td.appendChild(label);
     td.appendChild(input);
     return input;
   }
 
-  function addTDCB(tr) {
-    const cb = addTDInput(tr);
+  function addTDCB(tr, id) {
+    const cb = addTDInput(tr, id);
     cb.setAttribute("type", "checkbox");
     return cb;
   }
 
   function addTDEdit(tr, name, size, text) {
     // <input type="text" id="editSpeed" value="50px" size="3" /></td><td><input type="text" id="editSpeedCol" value="rgba(255, 255, 255, 0.6)" size="20" />
-    const edit = addTDInput(tr);
-    edit.setAttribute("id", "edit" + name);
+    const edit = addTDInput(tr, "edit" + name);
     edit.setAttribute("size", size);
     edit.setAttribute("value", text);
     edit.innerHTML = text;
@@ -3143,7 +3147,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     for (const name in componentsList) {
       const comp = componentsList[name];
       const tr = document.createElement("tr");
-      const cbUse = addTDCB(tr);
+      const cbUse = addTDCB(tr, "cbm" + name);
       cbUse.checked = comp.inUse;
       addTD(tr, comp.label);
       const editFont = addTDEdit(tr, name, 3, comp.font);
