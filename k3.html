@@ -2559,7 +2559,7 @@ function setCompassRotation(heading) {
   function getOptionInt(name, editName, def) {
     if (!editName) editName = name;
     const edit = document.getElementById(editName);
-    const val = parseInt(localStorage.getItem(name)) || def || parseInt(edit.value);
+    const val = parseInt(localStorage.getItem(name)) || def || (edit ? parseInt(edit.value) : undefined);
     options[name] = params[name] ?? val ?? def;
     if (!edit) return;
     if (options[name] !== "")
