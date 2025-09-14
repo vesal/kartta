@@ -292,6 +292,7 @@
       overflow: hidden !important;
     }
 
+    /*noinspection CssUnusedSymbol*/
     .leaflet-interactive {
       pointer-events: none;
       user-select: none;
@@ -2027,18 +2028,22 @@ function setCompassRotation(heading) {
   }
 
   function onCompassDirection(event) {
-    let angle = event.webkitCompassHeading || event.alpha;
+    // noinspection JSUnresolvedReference
+    const evc = event.webkitCompassHeading;
+    let angle = evc || event.alpha;
 
     // Safari iOS
-    if (!event.absolute && event.webkitCompassHeading) {
+    if (!event.absolute && evc) {
         angle = 360 - angle;
     }
 
-    let deviceOrientation =  (screen.orientation && screen.orientation.angle) || window.orientation || 0;
+    // noinspection JSDeprecatedSymbols
+    const wori = window.orientation
+    let deviceOrientation =  (screen.orientation && screen.orientation.angle) || wori || 0;
 
     // Older browsers and iOS
-    if (!event.absolute && 'undefined' !== typeof window.orientation) {
-         deviceOrientation = window.orientation;
+    if (!event.absolute && 'undefined' !== typeof wori) {
+         deviceOrientation = wori;
     }
     // const debug = document.getElementById('distance');
     // debug.innerText = `${angle.toFixed(0)}° / ${deviceOrientation}°`;
@@ -2153,9 +2158,9 @@ function setCompassRotation(heading) {
     });
 
     mapWrapper.on('click', (e) => {
-      const oe = e.originalEvent;
-      const xy = [oe.offsetX, oe.offsetY];
-      const xyp = mapWrapper.getCoordXY(e.latlng);
+      // const oe = e.originalEvent;
+      // const xy = [oe.offsetX, oe.offsetY];
+      // const xyp = mapWrapper.getCoordXY(e.latlng);
       // console.log('Map clicked at', xy, xyp , e.latlng);
       if (mapWrapper.clickTimer) clearTimeout(mapWrapper.clickTimer);
       mapWrapper.clickTimer = setTimeout(async () => {
@@ -2261,8 +2266,6 @@ function setCompassRotation(heading) {
       });
     });
 
-
-    let isDragging = null;
 
     // Make all elements with class "draggable" movable / resizable
     document.querySelectorAll('.draggable').forEach(el => {

@@ -307,7 +307,7 @@ class MapWrapper {
     }
 
     const map = this.map;
-    pin.on('dragstart', e => {
+    pin.on('dragstart', _e => {
       // pin 27x47
       pin.ofs = null;
       // setTimeout(() => {
@@ -317,26 +317,16 @@ class MapWrapper {
     pin.on('drag', e => {
       if (map.getBearing() === 0) return;
       // try to fix offset when bearing !== 0
+      // noinspection JSUnresolvedReference
       const ev = e.originalEvent;
       countOffsets(pin);
-      let mousePoint = map.mouseEventToContainerPoint(ev);
+      let mousePoint;
       if (ev.touches && ev.touches.length > 0) {
         mousePoint = map.mouseEventToContainerPoint(ev.touches[0]);
         pin.ofs[1] *= 2; // lift a bit more with touch
       } else {
         mousePoint = map.mouseEventToContainerPoint(ev);
       }
-      const pt = [mousePoint.x - pin.ofs[0], mousePoint.y - pin.ofs[1]];
-      // const pt = [mousePoint.x, mousePoint.y];
-      const latlng = map.containerPointToLatLng(pt);
-      pin.setLatLng(latlng); // nyt marker seuraa visuaalisesti oikein
-      // console.log(pin.ofs, e.originalEvent, mousePoint, latlng, e.latlng);
-    });
-    pin.on('touchmove', e => {
-      if (map.getBearing() === 0) return;
-      // try to fix offset when bearing !== 0
-      countOffsets(pin);
-      const mousePoint = map.mouseEventToContainerPoint(e.originalEvent);
       const pt = [mousePoint.x - pin.ofs[0], mousePoint.y - pin.ofs[1]];
       // const pt = [mousePoint.x, mousePoint.y];
       const latlng = map.containerPointToLatLng(pt);

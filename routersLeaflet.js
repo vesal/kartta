@@ -13,6 +13,7 @@ function processRouteData(text, waypoints) {
   let routeIndex = 1;
   const routeObjs = [];
   for (const route of data.routes) {
+    // noinspection JSUnresolvedReference
     if (route.sections) {
       let allCoords = [];
       let allInstructions = [];
@@ -66,6 +67,7 @@ function processRouteData(text, waypoints) {
 }
 
 function processSection(section, waypoints, index) {
+  // noinspection JSUnresolvedReference
   if (!section.polyline || !section.turnByTurnActions) {
     return null;
   }
@@ -83,6 +85,7 @@ function processSection(section, waypoints, index) {
     totalTime += a.duration;    // lisää segmentin kesto kokonaisaikaan
     // Haetaan suomenkielinen tien nimi
     let roadName = "";
+    // noinspection JSUnresolvedReference
     if (a.nextRoad && a.nextRoad.name) {
       const fiName = a.nextRoad.name.find(n => n.language === "fi");
       roadName = fiName ? fiName.value : a.nextRoad.name[0].value;
@@ -182,7 +185,9 @@ function processSection(section, waypoints, index) {
       case "exit":
         type = "Exit";
         modifier = "SlightRight"; // aina oikea
+        // noinspection JSUnresolvedReference
         text = `Poistu tieltä ${roadName} kohti ${a.signpost?.labels?.[0]?.routeNumber?.value ?? "oikea"}`;
+        // noinspection JSUnresolvedReference
         step.name = `${a.signpost?.labels?.[0]?.routeNumber?.value ?? "oikea"}`;
         break;
       default:
@@ -227,7 +232,7 @@ function createHereRouter() {
       serviceUrl: 'https://router.hereapi.com/v8/routes',
       // apiKey: apikey // <-- korvaa omalla avaimellasi
     },
-    route: function (waypoints, callback, context, opts) {
+    route: function (waypoints, callback, context, _opts) {
       if (this.options.useSample) {
         // Paikallinen JSON (cache)
         const routeObjs = processRouteData(sampleRouteData, waypoints);
@@ -276,6 +281,7 @@ function findRouteHERE(from, to, apiKey, callback, startWhenReady=false, useSamp
   const router = new HereRouter({apiKey: apiKey, useSample: useSample});
 
   // Luo ja lisää uusi reitti kartalle
+  // noinspection JSUnresolvedReference
   mapWrapper.routingControl = mapWrapper.L.Routing.control({
     waypoints: [
       mapWrapper.L.latLng(from[0], from[1]),
@@ -312,6 +318,15 @@ const stepToTextFunctions = {
   "suomi": routeStepToTextSuomi,
   "savo": routeStepToTextSavo
 }
+
+/**
+ * @typedef {Object} Maneuver
+ * @property {string} type
+ * @property {string} [modifier]
+ * @property {number} [bearing_after]
+ * @property {string} [mode]
+ * @property {number} [exit]
+ */
 
 function routeStepToTextSuomi(step, index) {
   const m = step.maneuver;
@@ -500,6 +515,7 @@ function findRouteOSRM(from, to, callback, startWhenReady = false) {
 
   removeOldRoutingControl();
 
+  // noinspection JSUnresolvedReference
   if (!mapWrapper.L.Routing) {
     // fetch(`https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`)
     fetch(`${osrmServer}/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`)
@@ -511,6 +527,7 @@ function findRouteOSRM(from, to, callback, startWhenReady = false) {
     return;
   }
 
+  // noinspection JSUnresolvedReference
   mapWrapper.routingControl = mapWrapper.L.Routing.control({
     // language: 'fi',  // ei toimi
     waypoints: [
@@ -532,6 +549,10 @@ function findRouteOSRM(from, to, callback, startWhenReady = false) {
     }
   });
 
+  return setCallbackWhenReady(callback, startWhenReady);
+}
+
+function setCallbackWhenReady(callback, startWhenReady = false) {
   mapWrapper.routingControl.addTo(mapWrapper.map);
 
   mapWrapper.routingControl.on('routesfound', function (e) {
@@ -551,7 +572,8 @@ function findRouteGraphHopper(from, to, apiKey, callback, startWhenReady = false
   if (options.routeMode === "walk") vechile = "foot";
   if (options.routeMode === "bike") vechile = "bike";
 
-  mapWrapper.routingControl = mapWrapper. L.Routing.control({
+  // noinspection JSUnresolvedFunction
+  mapWrapper.routingControl = mapWrapper.L.Routing.control({
     waypoints: [
       mapWrapper.L.latLng(from[0], from[1]),
       mapWrapper.L.latLng(to[0], to[1])
@@ -570,6 +592,9 @@ function findRouteGraphHopper(from, to, apiKey, callback, startWhenReady = false
     routeWhileDragging: true
   });
 
+  return setCallbackWhenReady(callback, startWhenReady);
+
+  /*
   mapWrapper.routingControl.addTo(mapWrapper.map);
 
   mapWrapper.routingControl.on('routesfound', function (e) {
@@ -581,7 +606,7 @@ function findRouteGraphHopper(from, to, apiKey, callback, startWhenReady = false
     }
   });
   return mapWrapper.routingControl;
-
+  */
 }
 
 // Esimerkkidata, jos et halua oikeasti hakea netistä kopioitu HEREn vastauksesta
@@ -806,6 +831,10 @@ function findInstruction(route, coord, lastIdx = -1) {
     }
     if (dist < 0.1) break; // very close
   }
+  for (let i = 0; i < closestInstr; i++) {
+      mapWrapper.routeMarkers[i]?.remove();
+      mapWrapper.routeMarkers[i] = null;
+  }
   return [closestInstr, closestDist];
 }
 
@@ -830,10 +859,27 @@ function removeRouteMarkers() {
   }
 }
 
+
+function createDebugMarkers(route) {
+  for (let idx = 0; idx < route.coordinates.length; idx++) {
+    const coord = route.coordinates[idx];
+    const icon = mapWrapper.L.divIcon({
+      className: 'route-index-marker',
+      html: `<div style="background:blue;color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:12px;">${idx}</div>`,
+      iconSize: [18, 18]
+    });
+    const marker = mapWrapper.L.marker([coord.lat, coord.lng], {icon}).addTo(mapWrapper.map);
+    mapWrapper.routeMarkers.push(marker);
+  }
+} // end debug markers
+
+
+
 function lockRoute(rc) {
   // Tämä on vähän ruma tapa estää reitin muokkaus,
   // mutta Leaflet Routing Machine ei tarjoa suoraa APIa tähän.
   // Ja tämän toimivuus tuntuuolevan mitä sattuu :-(
+  // noinspection JSUnresolvedFunction
   const plan = rc.getPlan();
 
   plan.options.draggableWaypoints = false;
@@ -846,31 +892,35 @@ function lockRoute(rc) {
   rc.options.addWaypoints = false;
   rc.options.showAlternatives = false;
 
+  // noinspection JSUnresolvedFunction
   for (const m of plan._markers) {
     m.dragging.disable();
     m.off('click'); // poistaa klikkitapahtuman
   }
 
-   rc._routes.forEach(route => {
-      if (route.line) {
-          route.line.off('click'); // poistaa klikkitapahtuman
-          if (route.line.editing) {
-              route.line.editing.disable();
-          }
-      }
+  // noinspection JSUnresolvedFunction
+  rc._routes.forEach(route => {
+    if (route.line) {
+        route.line.off('click'); // poistaa klikkitapahtuman
+        // noinspection JSUnresolvedFunction
+        if (route.line.editing) {
+            route.line.editing.disable();
+        }
+    }
   });
 
   rc.getContainer().style.pointerEvents = 'none';
 
   // Disable alternative route selection
   // plan.setWaypoints(rc.getWaypoints());
-  document.querySelectorAll('.leaflet-routing-alt').forEach(alt => {
+  // document.querySelectorAll('.leaflet-routing-alt').forEach(alt => {
     // alt.style.pointerEvents = 'none';
     // alt.style.opacity = '0.5';
-  });
+  // });
   // Also disable pointer events for alternative route polylines
   document.querySelectorAll('.leaflet-interactive').forEach(line => {
     // line.off('click'); // poistaa klikkitapahtuman
+    // noinspection JSUnresolvedFunction
     if (line.editing) {
         line.editing.disable();
     }
@@ -878,16 +928,14 @@ function lockRoute(rc) {
       line.remove();
     }
   });
-  const route = rc.currentRoutes[rc.activeRouteIndex];
-  // route.line.editing.disable();
-}
+} // end lockRoute
+
 
 function startNavigation(coord=null) {
    if (!coord) coord = mapWrapper.getPinLocation(myPin);
    removeRouteMarkers();
    const rc = mapWrapper.routingControl;
    if (!rc) return false;
-
 
    const route = rc.currentRoutes[rc.activeRouteIndex];
    if (!route) return false;
@@ -902,15 +950,7 @@ function startNavigation(coord=null) {
 
    lockRoute(rc);
 
-   for (let idx = 0; idx < route.coordinates.length; idx++) {
-     const coord = route.coordinates[idx];
-     const icon = mapWrapper.L.divIcon({
-      className: 'route-index-marker',
-      html: `<div style="background:blue;color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:12px;">${idx}</div>`,
-      iconSize: [18, 18]
-    });
-    const marker = mapWrapper.L.marker([coord.lat, coord.lng], { icon }).addTo(mapWrapper.map);      mapWrapper.routeMarkers.push(marker);
-   } // end debug markers
+   createDebugMarkers(route);
 
    const [idx, _] = findInstruction(route, coord);
    route.step = idx;
@@ -922,15 +962,19 @@ function startNavigation(coord=null) {
    return true;
 }
 
-function showNaviText(route, idx  = 0) {
+function showNaviText(route, idx  = 0, dist = -1) {
   if (!naviText) return;
   const instr = route.instructions[idx];
   const nextinstr = route.instructions[idx+1];
   const icon1= instr.uiRow.querySelector('td')?.innerHTML ?? '';
   let text = icon1 + instr.text + " " + instr.distance + " m " + instr.time + " s";
   if (nextinstr) {
+    let distm = ""
+    if (dist >= 0) {
+      distm = (dist*1000).toFixed(0) + " ";
+    }
     const icon2= nextinstr.uiRow.querySelector('td')?.innerHTML ?? '';
-    text += "<br>" + icon2 + " Sitten " +  nextinstr.text;
+    text += "<br>" + distm + icon2 + " Sitten " +  nextinstr.text;
   }
   naviText.innerHTML = "<p>" + text + "</p>";
 }
@@ -966,6 +1010,8 @@ function continueNavigation(coord, speed) {
    const route = rc.currentRoutes[rc.activeRouteIndex];
    if (!route) return false;
    const dist = checkLegsCoords(route, coord);
+
+   showNaviText(route, route.step, dist);
 
    // Is it time to the next instruction? More than 10s, no!
    if (dist*1000/speed > 10) return false;
