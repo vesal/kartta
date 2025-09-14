@@ -268,7 +268,7 @@ function createHereRouter() {
 } // createHereRouter
 
 
-function findRouteHERE(from, to, apiKey, callback, useSample = false) {
+function findRouteHERE(from, to, apiKey, callback, startWhenReady=false, useSample = false) {
   // Poista vanha reitti, jos se on olemassa
   createHereRouter();
   removeOldRoutingControl();
@@ -296,7 +296,7 @@ function findRouteHERE(from, to, apiKey, callback, useSample = false) {
     mapWrapper.routingControl.currentRoutes = e.routes; // talletetaan kaikki reitit
     if (callback) {
       setTimeout(() => {
-        callback(mapWrapper.routingControl)
+        callback(mapWrapper.routingControl, startWhenReady)
       }, 0);
     }
   });
@@ -483,7 +483,7 @@ function routeStepToText(step, index= -1) {
 }
 
 
-function findRouteOSRM(from, to, callback) {
+function findRouteOSRM(from, to, callback, startWhenReady = false) {
 
   const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
   // Lokaalia ORSM palvelinta varten asenna:
@@ -538,14 +538,14 @@ function findRouteOSRM(from, to, callback) {
     mapWrapper.routingControl.currentRoutes = e.routes; // talletetaan kaikki reitit
     if (callback) {
       setTimeout(() => {
-        callback(mapWrapper.routingControl)
+        callback(mapWrapper.routingControl, startWhenReady)
       }, 0);
     }
   });
   return mapWrapper.routingControl;
 }
 
-function findRouteGraphHopper(from, to, apiKey, callback) {
+function findRouteGraphHopper(from, to, apiKey, callback, startWhenReady = false) {
   removeOldRoutingControl();
   let vechile = "car"
   if (options.routeMode === "walk") vechile = "foot";
@@ -576,7 +576,7 @@ function findRouteGraphHopper(from, to, apiKey, callback) {
     mapWrapper.routingControl.currentRoutes = e.routes; // talletetaan kaikki reitit
     if (callback) {
       setTimeout(() => {
-        callback(mapWrapper.routingControl)
+        callback(mapWrapper.routingControl, startWhenReady)
       }, 0);
     }
   });
@@ -667,7 +667,9 @@ function numberToFinnishDistance(n) {
 }
 
 
-function initRoutingEvents(routingControl) {
+function initRoutingEvents(routingControl, startWhenReady = false) {
+  if (!routingControl) return;
+  removeRouteMarkers()
   const itineraryDiv = document.getElementById('itineraryDiv');
   const routingContainer = document.querySelector('.leaflet-routing-container');
   itineraryDiv.innerHTML = '';
@@ -752,6 +754,7 @@ function initRoutingEvents(routingControl) {
   });
   routingControl.activeRouteIndex = 0;
   routeElements[0].click();
+  if (startWhenReady) startNavigation();
   // const pl = decodeFlexPolyline("BG6lv62D-pyixBxtCi3DvlBjxD_OnpB7GjNzU_TjI_OjDjIjXw0BvCoGzjBosCrO4c3NwWrOoV_EoGrEAjXwWvbkcjDkDrEoL_EvRrJjhB_pF36QrE3NrO7uBrJriBnL_sBrErOrErTnBnQ8BvHUnGT7L");
   // console.log(pl);
 }
@@ -771,6 +774,7 @@ function routingStyleRound(meters) {
 let routingOptionsLoaded = false;
 function initRoutingOptions() {
   if (routingOptionsLoaded) return;
+
   const select = document.getElementById("dialectSelect");
   const dialects = Object.keys(stepToTextFunctions);
   select.innerHTML = "";
@@ -817,23 +821,86 @@ mapWrapper.routeMarkers = [];
 let naviInfo = null;
 let naviText = null;
 
-function startNavigation(coord) {
+function removeRouteMarkers() {
+  if (mapWrapper.routeMarkers) {
+    for (const m of mapWrapper.routeMarkers) {
+      if (m) m.remove();
+    }
+    mapWrapper.routeMarkers = [];
+  }
+}
+
+function lockRoute(rc) {
+  // Tämä on vähän ruma tapa estää reitin muokkaus,
+  // mutta Leaflet Routing Machine ei tarjoa suoraa APIa tähän.
+  // Ja tämän toimivuus tuntuuolevan mitä sattuu :-(
+  const plan = rc.getPlan();
+
+  plan.options.draggableWaypoints = false;
+  plan.options.routeWhileDragging = false;
+  plan.options.addWaypoints = false;
+  plan.options.showAlternatives = false;
+
+  rc.options.draggableWaypoints = false;
+  rc.options.routeWhileDragging = false;
+  rc.options.addWaypoints = false;
+  rc.options.showAlternatives = false;
+
+  for (const m of plan._markers) {
+    m.dragging.disable();
+    m.off('click'); // poistaa klikkitapahtuman
+  }
+
+   rc._routes.forEach(route => {
+      if (route.line) {
+          route.line.off('click'); // poistaa klikkitapahtuman
+          if (route.line.editing) {
+              route.line.editing.disable();
+          }
+      }
+  });
+
+  rc.getContainer().style.pointerEvents = 'none';
+
+  // Disable alternative route selection
+  // plan.setWaypoints(rc.getWaypoints());
+  document.querySelectorAll('.leaflet-routing-alt').forEach(alt => {
+    // alt.style.pointerEvents = 'none';
+    // alt.style.opacity = '0.5';
+  });
+  // Also disable pointer events for alternative route polylines
+  document.querySelectorAll('.leaflet-interactive').forEach(line => {
+    // line.off('click'); // poistaa klikkitapahtuman
+    if (line.editing) {
+        line.editing.disable();
+    }
+    if (line.getAttribute('stroke') === 'gray' || line.style.stroke === 'gray') {
+      line.remove();
+    }
+  });
+  const route = rc.currentRoutes[rc.activeRouteIndex];
+  // route.line.editing.disable();
+}
+
+function startNavigation(coord=null) {
+   if (!coord) coord = mapWrapper.getPinLocation(myPin);
+   removeRouteMarkers();
    const rc = mapWrapper.routingControl;
    if (!rc) return false;
+
+
    const route = rc.currentRoutes[rc.activeRouteIndex];
    if (!route) return false;
    if (!route.instructions || route.instructions.length === 0) return false;
    if (!route.coordinates || route.coordinates.length === 0) return false;
 
+   setNavigation(true);
    naviInfo = document.getElementById('naviInfo');
-   naviInfo.style.visibility = 'visible';
    naviText = document.getElementById('naviInfoText');
 
-   // debug markers
-   for (const m of mapWrapper.routeMarkers) {
-     if (m) m.remove();
-   }
    mapWrapper.routeMarkers = []
+
+   lockRoute(rc);
 
    for (let idx = 0; idx < route.coordinates.length; idx++) {
      const coord = route.coordinates[idx];
@@ -850,6 +917,7 @@ function startNavigation(coord) {
    route.coordStep = route.instructions[idx].index;
    const instr = route.instructions[idx];
    if (instr.uiRow) instr.uiRow.click();
+
    showNaviText(route, idx);
    return true;
 }
@@ -917,10 +985,17 @@ function continueNavigation(coord, speed) {
    return true;
 }
 
+function setNavigation(enable) {
+  const cb = document.getElementById('navigate');
+  if (cb) cb.checked = enable;
+  const naviInfo = document.getElementById('naviInfo');
+  if (enable)
+    naviInfo.style.visibility = 'visible';
+  else
+    naviInfo.style.visibility = 'hidden';
+  options.navigate = enable;
+}
+
 function stopNavigation() {
-   const cb = document.getElementById('navigate');
-   if (cb) cb.checked = false;
-   const naviInfo = document.getElementById('naviInfo');
-   naviInfo.style.visibility = 'hidden';
-   options.navigate = false;
+    setNavigation(false);
 }

@@ -1256,6 +1256,7 @@ function setCompassRotation(heading) {
     showCompass: "gps",
     simulateSpeed: 0,
     navigate: false,
+    lastRouter: 0, // 0=OSRM, 1=graphhopper, 2=here, 3=here sample
   };
 
   const areaDatas = [
@@ -2543,8 +2544,8 @@ function setCompassRotation(heading) {
   function getOption(name, editName) {
     if (!editName) editName = name;
     const edit = document.getElementById(editName);
-    if (!edit) return;
     options[name] = params[name] || localStorage.getItem(name) || "";
+    if (!edit) return;
     if (options[name] !== "")
       edit.value = options[name]; //document.getElementById(edit).value = options[name];
     // noinspection JSUnusedLocalSymbols
@@ -2558,9 +2559,9 @@ function setCompassRotation(heading) {
   function getOptionInt(name, editName, def) {
     if (!editName) editName = name;
     const edit = document.getElementById(editName);
-    if (!edit) return;
     const val = parseInt(localStorage.getItem(name)) || def || parseInt(edit.value);
     options[name] = params[name] ?? val ?? def;
+    if (!edit) return;
     if (options[name] !== "")
       edit.value = options[name];
     // noinspection JSUnusedLocalSymbols
@@ -2800,6 +2801,7 @@ function setCompassRotation(heading) {
     getDDOption("showCompass", initCompass);
 
     getOptionInt("simulateSpeed");
+    getOptionInt("lastRouter");
 
     const cb1 = document.getElementById('area1cb');
     const cb2 = document.getElementById('area1cbCopy');
@@ -3386,18 +3388,30 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   }
 
 
-  async function showRoutePane(routerType = 0) {
+  async function showRoutePane(routerType = -1) {
+    // routerType = parseInt(routerType, 10) || 0;
+    if (routerType < 0) routerType = options.lastRouter;
+    let navigating = false;
+    if (options.navigate) {
+      navigating = true;
+      options.navigate = false;
+      stopNavigation();
+      document.getElementById("navigate").checked = false;
+    }
     checkRouterButtons();
     createRouteWindow();
     let from;
     let to;
-    if (routerType === 1) {  // example
+    if (routerType === 3) {  // example
       from = [62.29978, 25.73234];
       to = [62.25574, 25.77731];
     } else {
-      from = await checkSpecialCoord(getInputText("editFrom"), "I");
+      setOption("lastRouter", routerType);
+      let fromText = getInputText("editFrom");
+      if (navigating) fromText = "I"; // my location if done while navigating is on
+      from = await checkSpecialCoord(fromText, "I");
       let s = getInputText("editTo");
-      if (s.trim() === "") s = "S";
+      if (s.trim() === "") s = "S"; // selected pin if empty
       to = await checkSpecialCoord(s, "H");
     }
     // let fromPin = lastSelected;
@@ -3424,16 +3438,16 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     loadRoutingMachine(function () {
       switch (routerType) {
         case 0:
-          findRouteHERE(from, to, options.hereApiKey, initRoutingEvents);
+          findRouteOSRM(from, to, initRoutingEvents, navigating);
           break;
         case 1:
-          findRouteHERE(from, to, options.hereApiKey, initRoutingEvents, true);
+          findRouteGraphHopper(from, to, options.graphHopperApiKey, initRoutingEvents, navigating);
           break;
         case 2:
-          findRouteOSRM(from, to, initRoutingEvents);
+          findRouteHERE(from, to, options.hereApiKey, initRoutingEvents, navigating);
           break;
         case 3:
-          findRouteGraphHopper(from, to, options.graphHopperApiKey, initRoutingEvents);
+          findRouteHERE(from, to, options.hereApiKey, initRoutingEvents, navigating, true);
           break;
         default:
           return;
@@ -3506,8 +3520,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     options.navigate = nav;
     if (nav) {
       if (!startNavigation(mapWrapper.getPinLocation(myPin))) {
-        options.navigate = false;
-        document.getElementById("navigate").checked = false;
+        stopNavigation();
       }
     } else {
       stopNavigation();
@@ -3536,9 +3549,9 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     <li><span onclick="loadRoutingMachine(() => toggleDiv('routingOptions', null, initRoutingOptions))">Ajo-ohjeiden asetukset...</span>
       <a class="help" data-href="#settings"></a></li>
 
-    <li><span onclick="showRoutePane(2); closeNav()">Ajo-ohjeet...</span> <a class="help" data-href="#directions"></a>
+    <li><span onclick="showRoutePane(); closeNav()">Ajo-ohjeet...</span> <a class="help" data-href="#directions"></a>
     </li>
-    <li><span onclick="showRoutePane(1); closeNav()">Ajo-ohjeet sample</span> <a class="help"
+    <li><span onclick="showRoutePane(3); closeNav()">Ajo-ohjeet esimerkki</span> <a class="help"
                                                                                  data-href="#directions"></a></li>
     <!--<li><span onclick="showRoutePane(2); closeNav()">Ajo-ohjeet OSRM</span> <a class="help" data-href="#directions"></a></li>
     <li><span onclick="showRoutePane(3); closeNav()">Ajo-ohjeet GraphHopper</span> <a class="help" data-href="#directions"></a></li>-->
@@ -3834,11 +3847,11 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
           <span class="transport-choice" data-mode="bike">🚲</span>
           <span class="transport-choice" data-mode="walk">🚶</span>
         </span>
-        <button id="buttonOSRM" type="button" onclick="findDriving(2)"
+        <button id="buttonOSRM" type="button" onclick="findDriving(0)"
                 title="Etsi OSMR-reittittimellä (ei osaa muuta kuin auton)">Etsi&nbsp;reitti</button>
-        <button id="buttonHERE" type="button" onclick="findDriving(0)" title="Etsi HERE-reitittimellä">H</button>
-        <button id="buttonGraphHopper" type="button" onclick="findDriving(3)"
+        <button id="buttonGraphHopper" type="button" onclick="findDriving(1)"
                 title="Etsi GraphHopper-reitittimellä (antaa vain yhden)">G</button>
+        <button id="buttonHERE" type="button" onclick="findDriving(2)" title="Etsi HERE-reitittimellä">H</button>
         <label><input type="checkbox" name="navigate" id="navigate" value="navigate" onclick="checkNavigate(this.checked)"/>Aja</label>
       </span>
     </div>
