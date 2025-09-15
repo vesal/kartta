@@ -1263,6 +1263,10 @@ function setCompassRotation(heading) {
     simulateSpeed: 0,
     navigate: false,
     lastRouter: 0, // 0=OSRM, 1=graphhopper, 2=here, 3=here sample
+    instLeadTime: 10,
+    polygonAckRadius: 40,
+    routePointAckRadius: 15,
+
   };
 
   const areaDatas = [
@@ -2815,6 +2819,10 @@ function setCompassRotation(heading) {
     getOptionInt("simulateSpeed");
     getOptionInt("lastRouter");
 
+    getOptionInt("instLeadTime");
+    getOptionInt("polygonAckRadius");
+    getOptionInt("routePointAckRadius");
+
     const cb1 = document.getElementById('area1cb');
     const cb2 = document.getElementById('area1cbCopy');
 
@@ -3884,7 +3892,13 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   <div class="popupIn">
     <h2>Ajo-ohjeiden asetuksia</h2>
     <div class="flex-labels">
-      <div><label for="speechRate">Puhenopeus %: </label><input type="text" size="3" id="speechRate" value="120"></div>
+      <div><label for="instLeadTime">Kaunako ennen käännöstä luetaan ohje: </label><input type="text" size="3" id="instLeadTime" value="10"> s</div>
+      <div><label for="polygonAckRadius">Millaisella säteellä reittiviivan pisteet kuitataan: </label><input type="text" size="3" id="polygonAckRadius" value="40"> m</div>
+      <div><label for="routePointAckRadius">Millaisella säteellä ohjepisteet kuitataan: </label><input type="text" size="3" id="routePointAckRadius" value="15"> m</div>
+    </div>
+    <hr>
+    <div class="flex-labels">
+      <div><label for="speechRate">Puhenopeus: </label><input type="text" size="3" id="speechRate" value="120"> %</div>
       <div><label for="dialectSelect">Murre: </label><select id="dialectSelect"></select></div>
       <div><label for="exampleText">Malliteksti: </label><input type="text" size="30" id="exampleText" value=""></div>
     </div>
@@ -3901,7 +3915,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     </div>
     <hr>
     <div>
-      <div><label for="simulateSpeed">Simuloinnin nopeus m/s: </label><input type="text" size="5" id="simulateSpeed" value="0"></div>
+      <div><label for="simulateSpeed">Liikkumisen nopeus simuloinnissa: </label><input type="text" size="5" id="simulateSpeed" value="0"> m/s</div>
     </div>
   </div>
 </div>

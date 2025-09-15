@@ -988,7 +988,7 @@ function checkLegsCoords(route, coord) {
       const p = route.coordinates[i];
       const pos = [p.lat, p.lng];
       let dist = WGS84_distance(pos, coord);
-      if (dist < 0.04 && !prevPos) { // 40 meters
+      if (dist < options.polygonAckRadius/1000 && !prevPos) { // 40 meters
          mapWrapper.routeMarkers[route.coordStep]?.remove();
          mapWrapper.routeMarkers[route.coordStep] = null;
          route.coordStep = i + 1;
@@ -1014,9 +1014,9 @@ function continueNavigation(coord, speed) {
    showNaviText(route, route.step, dist);
 
    // Is it time to the next instruction? More than 10s, no!
-   if (dist*1000/speed > 10) return false;
+   if (dist*1000/speed > options.instLeadTime) return false;
    // Is it near last instruction? Wait closer (20m)
-   if (route.step >= route.instructions.length - 2 && dist > 0.02) return false;
+   if (route.step >= route.instructions.length - 2 && dist > options.routePointAckRadius) return false;
    let idx = route.step+1;
    route.step = idx;
    let midx = Math.min(idx, route.instructions.length - 1);
