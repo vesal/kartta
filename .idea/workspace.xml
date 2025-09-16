@@ -55,33 +55,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;JavaScript Debug.dr.executor&quot;: &quot;Debug&quot;,
-    &quot;JavaScript Debug.k.executor&quot;: &quot;Debug&quot;,
-    &quot;JavaScript Debug.k.html.executor&quot;: &quot;Debug&quot;,
-    &quot;JavaScript Debug.k3.html.executor&quot;: &quot;Debug&quot;,
-    &quot;JavaScript Debug.meribrowser.html.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.IncrementVersion.executor&quot;: &quot;Run&quot;,
-    &quot;Python.convertFlykKartta.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/riippu/kartta/js&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\devel\\PyCharm\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "JavaScript Debug.dr.executor": "Debug",
+    "JavaScript Debug.k.executor": "Debug",
+    "JavaScript Debug.k.html.executor": "Debug",
+    "JavaScript Debug.k3.html.executor": "Debug",
+    "JavaScript Debug.meribrowser.html.executor": "Debug",
+    "Python.IncrementVersion.executor": "Run",
+    "Python.convertFlykKartta.executor": "Debug",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "E:/riippu/kartta/js",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "ts.external.directory.path": "C:\\devel\\PyCharm\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\riippu\kartta\js" />
@@ -212,7 +212,7 @@
       <workItem from="1754904718618" duration="251000" />
       <workItem from="1754904988042" duration="228616000" />
       <workItem from="1756132556973" duration="357465000" />
-      <workItem from="1757434580758" duration="83329000" />
+      <workItem from="1757434580758" duration="98100000" />
     </task>
     <servers />
   </component>
@@ -244,7 +244,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/routersLeaflet.js</url>
-          <line>491</line>
+          <line>496</line>
           <option name="timeStamp" value="347" />
         </line-breakpoint>
       </breakpoints>

@@ -3,6 +3,8 @@ Näiden reitityspalveluiden käyttö edellyttää, että olet ladannut Leaflet R
 ja että on olemassa globaali muuttuja mapWrapper, jossa on kartta ja L.Routing.
  */
 
+//#region HERE
+
 function processRouteData(text, waypoints) {
   const data = JSON.parse(text);
   if (!data.routes || data.routes.length === 0) {
@@ -313,6 +315,9 @@ function findRouteHERE(from, to, apiKey, callback, startWhenReady=false, useSamp
   return mapWrapper.routingControl;
 }
 
+//#endregion HERE
+
+//#region languages
 
 const stepToTextFunctions = {
   "suomi": routeStepToTextSuomi,
@@ -497,6 +502,9 @@ function routeStepToText(step, index= -1) {
   return stepToTextFunctions[options.dialect](step, index);
 }
 
+//#endregion Languages
+
+//#region OSRM
 
 function findRouteOSRM(from, to, callback, startWhenReady = false) {
 
@@ -566,6 +574,9 @@ function setCallbackWhenReady(callback, startWhenReady = false) {
   return mapWrapper.routingControl;
 }
 
+//#endregion OSRM
+
+//#region GraphHopper
 function findRouteGraphHopper(from, to, apiKey, callback, startWhenReady = false) {
   removeOldRoutingControl();
   let vechile = "car"
@@ -608,6 +619,8 @@ function findRouteGraphHopper(from, to, apiKey, callback, startWhenReady = false
   return mapWrapper.routingControl;
   */
 }
+
+//#endregion GraphHopper
 
 // Esimerkkidata, jos et halua oikeasti hakea netistä kopioitu HEREn vastauksesta
 // const sampleRouteData = `{"routes":[{"id":"c1aaeeb8-dba8-4dc1-bac4-09510fdf0613","sections":[{"id":"89ffd010-a160-4c14-8996-75a369680d9b","type":"vehicle","turnByTurnActions":[{"action":"depart","duration":25,"length":170,"offset":0,"nextRoad":{"name":[{"value":"Tontuntie","language":"fi"}]}},{"action":"turn","duration":55,"length":244,"offset":1,"direction":"right","severity":"quite","currentRoad":{"name":[{"value":"Tontuntie","language":"fi"}]},"nextRoad":{"name":[{"value":"Touruvuorentie","language":"fi"}]},"turnAngle":90.4643707},{"action":"turn","duration":35,"length":389,"offset":7,"direction":"left","severity":"quite","currentRoad":{"name":[{"value":"Touruvuorentie","language":"fi"}]},"nextRoad":{"name":[{"value":"Matinmäentie","language":"fi"}],"number":[{"value":"16711","language":"fi","routeType":6}]},"turnAngle":-97.47258},{"action":"turn","duration":71,"length":774,"offset":19,"direction":"right","severity":"quite","currentRoad":{"name":[{"value":"Matinmäentie","language":"fi"}],"number":[{"value":"16711","language":"fi","routeType":6}]},"nextRoad":{"name":[{"value":"Palokanorsi","language":"fi"}],"number":[{"value":"16685","language":"fi","routeType":6}]},"turnAngle":84.2601929},{"action":"roundaboutEnter","duration":4,"length":37,"offset":29,"direction":"right","currentRoad":{"name":[{"value":"Palokanorsi","language":"fi"}]},"turnAngle":37.3803978},{"action":"roundaboutExit","duration":41,"length":197,"offset":34,"direction":"right","exit":2,"nextRoad":{"name":[{"value":"Palokanorsi","language":"fi"}],"number":[{"value":"16685","language":"fi","routeType":6}]},"roundaboutAngle":175.0},{"action":"roundaboutEnter","duration":2,"length":11,"offset":42,"direction":"right","currentRoad":{"name":[{"value":"Palokanorsi","language":"fi"}],"toward":[{"value":"Jyväskylä","language":"fi"}]},"signpost":{"labels":[{"name":{"value":"Jyväskylä","language":"fi"}},{"routeNumber":{"value":"4","language":"fi"}},{"routeNumber":{"value":"13","language":"fi"}},{"routeNumber":{"value":"E75","language":"fi"}}]},"turnAngle":43.4844017},{"action":"roundaboutExit","duration":29,"length":286,"offset":43,"direction":"right","exit":1,"currentRoad":{"toward":[{"value":"Jyväskylä","language":"fi"}]},"nextRoad":{"type":"highway","name":[{"value":"Nelostie","language":"fi"}],"number":[{"value":"E75","language":"fi","routeType":1},{"value":"4","language":"fi","routeType":2},{"value":"13","language":"fi","routeType":2}]},"signpost":{"labels":[{"name":{"value":"Jyväskylä","language":"fi"}}]},"roundaboutAngle":80.0},{"action":"enterHighway","duration":204,"length":5241,"offset":63,"direction":"middle","currentRoad":{"type":"highway"},"nextRoad":{"type":"highway","name":[{"value":"Nelostie","language":"fi"}],"number":[{"value":"E75","language":"fi","routeType":1},{"value":"4","language":"fi","routeType":2},{"value":"13","language":"fi","routeType":2}]},"turnAngle":9.8007612},{"action":"keep","duration":33,"length":301,"offset":145,"direction":"right","currentRoad":{"name":[{"value":"Nelostie","language":"fi"}],"number":[{"value":"E75","language":"fi","routeType":1},{"value":"4","language":"fi","routeType":2},{"value":"13","language":"fi","routeType":2}],"toward":[{"value":"Vaajakoski","language":"fi"},{"value":"Tourula","language":"fi"},{"value":"Seppälä","language":"fi"}]},"nextRoad":{"name":[{"value":"Tourulantie","language":"fi"}],"number":[{"value":"46503","language":"fi","routeType":6}]},"signpost":{"labels":[{"name":{"value":"Vaajakoski","language":"fi"}},{"name":{"value":"Tourula","language":"fi"}},{"name":{"value":"Seppälä","language":"fi"}}]},"turnAngle":16.7577744},{"action":"turn","duration":97,"length":540,"offset":157,"direction":"left","severity":"quite","currentRoad":{"type":"highway"},"nextRoad":{"name":[{"value":"Tourulantie","language":"fi"}],"number":[{"value":"46503","language":"fi","routeType":6}]},"turnAngle":-112.4919052},{"action":"turn","duration":36,"length":206,"offset":166,"direction":"left","severity":"quite","currentRoad":{"name":[{"value":"Seppäläntie","language":"fi"}],"number":[{"value":"46503","language":"fi","routeType":6}]},"nextRoad":{"name":[{"value":"Ahjokatu","language":"fi"}]},"turnAngle":-78.2324982},{"action":"arrive","duration":0,"length":0,"offset":174,"currentRoad":{"name":[{"value":"Ahjokatu","language":"fi"}]}}],"departure":{"time":"2025-08-27T19:08:14+03:00","place":{"type":"place","location":{"lat":62.2997414,"lng":25.7322547},"originalLocation":{"lat":62.2997499,"lng":25.73228}}},"arrival":{"time":"2025-08-27T19:18:46+03:00","place":{"type":"place","location":{"lat":62.2557651,"lng":25.7773148},"originalLocation":{"lat":62.25577,"lng":25.77725}}},"polyline":"BG6lv62D-pyixBxtCi3DvlBjxD_OnpB7GjNzU_TjI_OjDjIjXw0BvCoGzjBosCrO4c3NwWrOoV_EoGrEAjXwWvbkcjDkDrEoL_EvRrJjhB_pF36QrE3NrO7uBrJriBnL_sBrErOrErTnBnQ8BvHUnGT7LjD_JvC3DnBnG_EzPzF_OjN_gCvC3NvHvqB7GzZnBnf4D_J4IvRoG_J0F7GwH7G8GrE4IjD4DT8GUoGkDgF0F4D8GgFwR8B8QAkInB4N7B0K_E0PnGwMrJ8L3S0U7pBkc3X0PzPgKvR8L_Y0PriBsYrY0P3pCgyBj5JgyGvb4Srd0UjhBoV3c0U_dkS3XwMvWsJnf0K7awH_2G84B_0C8VzoB0KrsBkNnLkDnuB0K_dsJvgBkIzPgFzyBsO7V4InagPrT4N_ToQna0ZzP8QvRwWr2B01C7kBsgCriBw-BnkB4kCze89BrdghCzUsxBrTw0BnQsxB3X01CjIkhBzFoV7GofjNslCzF8fnLkpCnG03B3IoiCvH8uBjSg1CzK4mBzFwRzF4SvMokBjS4rB7GoQ3SokBzek1BnQ0Znfw0B3N8a_JkX_O8kBjNgoBjNgyBrO8iCnVsmEnLslCzP8xCzZwrDnLwlBjI4XzKsY_JgU7LwW3IkN3I8LrJ0FnGgFnakXrT8LrJsE7L4D3I8B3IA3XjD7QvC3IU_OgFjI4DgFwR0U46B0PgoBwM8asvCk5E8GwMofk6BkmB0rC4DrJkIjNoGnGwHvC8GT8pB8QwM4DuX6H","transport":{"mode":"car"}}]}]}`;
@@ -857,6 +870,10 @@ function removeRouteMarkers() {
     }
     mapWrapper.routeMarkers = [];
   }
+  if (mapWrapper.nextStepCirce) {
+    mapWrapper.nextStepCirce.remove();
+    mapWrapper.nextStepCirce = null;
+  }
 }
 
 
@@ -930,17 +947,26 @@ function lockRoute(rc) {
   });
 } // end lockRoute
 
+function getStepCoord(route, idx=-1) {
+  if (idx < 0) idx = route.coordStep;
+  idx = Math.min(idx, route.coordinates.length);
+  const pt = route.coordinates[idx];
+  return [pt.lat, pt.lng];
+}
+
 
 function startNavigation(coord=null) {
+   
    if (!coord) coord = mapWrapper.getPinLocation(myPin);
    removeRouteMarkers();
    const rc = mapWrapper.routingControl;
    if (!rc) return false;
-
    const route = rc.currentRoutes[rc.activeRouteIndex];
    if (!route) return false;
    if (!route.instructions || route.instructions.length === 0) return false;
    if (!route.coordinates || route.coordinates.length === 0) return false;
+
+
 
    setNavigation(true);
    naviInfo = document.getElementById('naviInfo');
@@ -953,10 +979,15 @@ function startNavigation(coord=null) {
    createDebugMarkers(route);
 
    const [idx, _] = findInstruction(route, coord);
+
    route.step = idx;
    route.coordStep = route.instructions[idx].index;
    const instr = route.instructions[idx];
    if (instr.uiRow) instr.uiRow.click();
+
+   const firstStep = route.coordinates[route.coordStep];
+   mapWrapper.nextStepCirce = L.circle(getStepCoord(route),
+     {radius: options.routePointAckRadius, color: 'red'}).addTo(mapWrapper.map);
 
    showNaviText(route, idx);
    return true;
@@ -968,6 +999,7 @@ function showNaviText(route, idx  = 0, dist = -1) {
   const nextinstr = route.instructions[idx+1];
   const icon1= instr.uiRow.querySelector('td')?.innerHTML ?? '';
   let text = icon1 + instr.text + " " + instr.distance + " m " + instr.time + " s";
+  let cidx = instr.index;
   if (nextinstr) {
     let distm = ""
     if (dist >= 0) {
@@ -975,8 +1007,11 @@ function showNaviText(route, idx  = 0, dist = -1) {
     }
     const icon2= nextinstr.uiRow.querySelector('td')?.innerHTML ?? '';
     text += "<br>" + distm + icon2 + " Sitten " +  nextinstr.text;
+    if (dist >= 0) cidx = nextinstr.index;
   }
   naviText.innerHTML = "<p>" + text + "</p>";
+  mapWrapper.nextStepCirce.setLatLng(getStepCoord(route, cidx));
+  return cidx;
 }
 
 function checkLegsCoords(route, coord) {
@@ -1026,7 +1061,6 @@ function continueNavigation(coord, speed) {
    route.coordStep = route.instructions[midx].index;
    const instr = route.instructions[midx];
    if (instr.uiRow) instr.uiRow.click();
-   showNaviText(route, midx);
    if (midx === route.instructions.length-1) stopNavigation();
    return true;
 }

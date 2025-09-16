@@ -1247,7 +1247,7 @@ function setCompassRotation(heading) {
     useCompsWindow: false,
     useCache: true,
     drawDistanceLine: true,
-    calcDistanceSum: true,
+    calcDistanceSum: false,
     flipPins: isTouch,
     showZoomButtons: !isTouch,
     hereApiKey: "",
@@ -1915,12 +1915,11 @@ function setCompassRotation(heading) {
   function startGeoLocation(enable) {
     if (watcher) navigator.geolocation.clearWatch(watcher);
     watcher = null;
-    if (enable) getGeoLocation();
+    if (enable && !options.simulateSpeed) getGeoLocation();
   }
 
 
   function checkGeoLocation() {
-    if (options.simulateSpeed) return;
     startGeoLocation(document.getElementById("readGPS").checked);
   }
 
@@ -2572,19 +2571,21 @@ function setCompassRotation(heading) {
   }
 
 
-  function getOptionInt(name, editName, def) {
+  function getOptionInt(name, editName, def, callback) {
     if (!editName) editName = name;
     const edit = document.getElementById(editName);
     const val = parseInt(localStorage.getItem(name)) || def || (edit ? parseInt(edit.value) : undefined);
     options[name] = params[name] ?? val ?? def;
-    if (!edit) return;
-    if (options[name] !== "")
-      edit.value = options[name];
-    // noinspection JSUnusedLocalSymbols
-    edit.addEventListener("change", function (event) {
-      setOptionInt(name, this.value, def);
-    });
-    setOptionInt(name, edit.value, def);
+    if (edit) {
+      if (options[name] !== "")
+        edit.value = options[name];
+      // noinspection JSUnusedLocalSymbols
+      edit.addEventListener("change", function (event) {
+        setOptionInt(name, this.value, def);
+        if (callback) callback();
+      });
+      setOptionInt(name, edit.value, def);
+    }
   }
 
 
@@ -2816,7 +2817,7 @@ function setCompassRotation(heading) {
     getDDOption("showRotate", initRotate);
     getDDOption("showCompass", initCompass);
 
-    getOptionInt("simulateSpeed");
+    getOptionInt("simulateSpeed", null, null, checkGeoLocation);
     getOptionInt("lastRouter");
 
     getOptionInt("instLeadTime");
