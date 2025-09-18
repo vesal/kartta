@@ -956,7 +956,7 @@ function getStepCoord(route, idx=-1) {
 
 
 function startNavigation(coord=null) {
-   
+
    if (!coord) coord = mapWrapper.getPinLocation(myPin);
    removeRouteMarkers();
    const rc = mapWrapper.routingControl;
@@ -980,6 +980,7 @@ function startNavigation(coord=null) {
 
    const [idx, _] = findInstruction(route, coord);
 
+   route.inst2Read = false;
    route.step = idx;
    route.coordStep = route.instructions[idx].index;
    const instr = route.instructions[idx];
@@ -1003,14 +1004,20 @@ function showNaviText(route, idx  = 0, dist = -1) {
   if (nextinstr) {
     let distm = ""
     if (dist >= 0) {
-      distm = (dist*1000).toFixed(0) + " ";
+      distm = (Math.round(dist/10)*10).toFixed(0) + " ";
     }
     const icon2= nextinstr.uiRow.querySelector('td')?.innerHTML ?? '';
     text += "<br>" + distm + icon2 + " Sitten " +  nextinstr.text;
     if (dist >= 0) cidx = nextinstr.index;
   }
   naviText.innerHTML = "<p>" + text + "</p>";
+  if (cidx >= route.coordinates.length-1) {
+    mapWrapper.nextStepCirce.setStyle({color: 'green'});
+    mapWrapper.nextStepCirce.setRadius(options.routeGoalAckRadius);
+  }
   mapWrapper.nextStepCirce.setLatLng(getStepCoord(route, cidx));
+  route.nextinstr = nextinstr;
+  route.nextdist = dist;
   return cidx;
 }
 
@@ -1019,11 +1026,17 @@ function checkLegsCoords(route, coord) {
    if (route.step >= route.instructions.length - 1) return 0;
    let sum = 0;
    let prevPos = null;
-   for (let i = route.coordStep; i <= route.instructions[route.step+1].index; i++) {
+   const lastLegIdx = route.instructions[route.step+1].index;
+   for (let i = route.coordStep; i <= lastLegIdx; i++) {
       const p = route.coordinates[i];
       const pos = [p.lat, p.lng];
-      let dist = WGS84_distance(pos, coord);
-      if (dist < options.polygonAckRadius/1000 && !prevPos) { // 40 meters
+      let dist = WGS84_distance(pos, coord)*1000;
+      let ackRadius = options.polygonAckRadius;
+      if (route.coordStep === lastLegIdx)  // is last leg point
+        ackRadius = options.routePointAckRadius;
+      if (route.coordStep === route.coordinates.length-1)  // is last route point
+        ackRadius = options.routeGoalAckRadius;
+      if (dist < ackRadius && !prevPos) { // 40 meters
          mapWrapper.routeMarkers[route.coordStep]?.remove();
          mapWrapper.routeMarkers[route.coordStep] = null;
          route.coordStep = i + 1;
@@ -1031,7 +1044,7 @@ function checkLegsCoords(route, coord) {
          sum += dist;
          prevPos = pos
       } else {
-         dist = WGS84_distance(pos,prevPos);
+         dist = WGS84_distance(pos,prevPos)*1000;
          sum += dist;
          prevPos = pos;
       }
@@ -1047,9 +1060,22 @@ function continueNavigation(coord, speed) {
    const dist = checkLegsCoords(route, coord);
 
    showNaviText(route, route.step, dist);
+   const timeToTurn =  dist/speed;
+
+   if (timeToTurn < options.instLeadTime2/2) route.inst2Read = true;
+
+
+   // Is it time to the first instruction? More than 60s, no!
+   if (timeToTurn > options.instLeadTime2) return false;
+   if (!route.inst2Read) {
+     const d = routingStyleRound(route.nextdist);
+     const ds = numberToFinnishDistance(d);
+     speakText("Aja " + ds + " ja sitten " + route.nextinstr.text);
+     route.inst2Read = true;
+   }
 
    // Is it time to the next instruction? More than 10s, no!
-   if (dist*1000/speed > options.instLeadTime) return false;
+   if (timeToTurn > options.instLeadTime) return false;
    // Is it near last instruction? Wait closer (20m)
    if (route.step >= route.instructions.length - 2 && dist > options.routePointAckRadius) return false;
    let idx = route.step+1;
@@ -1060,7 +1086,10 @@ function continueNavigation(coord, speed) {
    }
    route.coordStep = route.instructions[midx].index;
    const instr = route.instructions[midx];
-   if (instr.uiRow) instr.uiRow.click();
+   if (instr.uiRow) {
+     instr.uiRow.click();
+     route.inst2Read = false;
+   }
    if (midx === route.instructions.length-1) stopNavigation();
    return true;
 }

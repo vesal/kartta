@@ -1264,8 +1264,10 @@ function setCompassRotation(heading) {
     navigate: false,
     lastRouter: 0, // 0=OSRM, 1=graphhopper, 2=here, 3=here sample
     instLeadTime: 10,
+    instLeadTime2: 60,
     polygonAckRadius: 40,
     routePointAckRadius: 15,
+    routeGoalAckRadius: 10,
 
   };
 
@@ -2821,8 +2823,10 @@ function setCompassRotation(heading) {
     getOptionInt("lastRouter");
 
     getOptionInt("instLeadTime");
+    getOptionInt("instLeadTime2");
     getOptionInt("polygonAckRadius");
     getOptionInt("routePointAckRadius");
+    getOptionInt("routeGoalAckRadius");
 
     const cb1 = document.getElementById('area1cb');
     const cb2 = document.getElementById('area1cbCopy');
@@ -3893,9 +3897,11 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   <div class="popupIn">
     <h2>Ajo-ohjeiden asetuksia</h2>
     <div class="flex-labels">
+      <div><label for="instLeadTime2">Kaunako ennen käännöstä luetaan muistutusohje: </label><input type="text" size="3" id="instLeadTime2" value="30"> s</div>
       <div><label for="instLeadTime">Kaunako ennen käännöstä luetaan ohje: </label><input type="text" size="3" id="instLeadTime" value="10"> s</div>
       <div><label for="polygonAckRadius">Millaisella säteellä reittiviivan pisteet kuitataan: </label><input type="text" size="3" id="polygonAckRadius" value="40"> m</div>
       <div><label for="routePointAckRadius">Millaisella säteellä ohjepisteet kuitataan: </label><input type="text" size="3" id="routePointAckRadius" value="15"> m</div>
+      <div><label for="routeGoalAckRadius">Millaisella säteellä maali kuitataan: </label><input type="text" size="3" id="routeGoalAckRadius" value="10"> m</div>
     </div>
     <hr>
     <div class="flex-labels">
