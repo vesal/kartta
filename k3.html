@@ -264,7 +264,7 @@
 
     /*noinspection CssUnusedSymbol*/
     #compsWindow .wb-body {
-        background: black;
+      background: black;
     }
 
     /*noinspection CssUnusedSymbol*/
@@ -274,7 +274,7 @@
 
     /*noinspection CssUnusedSymbol*/
     .winbox.min {
-        width: 100px !important;
+      width: 100px !important;
     }
 
     /*noinspection CssUnusedSymbol*/
@@ -758,30 +758,30 @@
     return "" + d;
   }
 
-function getAspectRatio(aspectRatioStr) {
-  if (!aspectRatioStr) return null;
-  const parts = aspectRatioStr.split('/');
-  if (parts.length === 2) {
-    const w = parseFloat(parts[0]);
-    const h = parseFloat(parts[1]);
-    if (!isNaN(w) && !isNaN(h) && h !== 0) return w / h;
+  function getAspectRatio(aspectRatioStr) {
+    if (!aspectRatioStr) return null;
+    const parts = aspectRatioStr.split('/');
+    if (parts.length === 2) {
+      const w = parseFloat(parts[0]);
+      const h = parseFloat(parts[1]);
+      if (!isNaN(w) && !isNaN(h) && h !== 0) return w / h;
+    }
+    const num = parseFloat(aspectRatioStr);
+    return isNaN(num) ? null : num;
   }
-  const num = parseFloat(aspectRatioStr);
-  return isNaN(num) ? null : num;
-}
 
-function setCompassRotation(heading) {
-  const svg = document.querySelector('#compass svg');
-  if (svg) {
-    svg.style.transform = `rotate(${heading}deg)`;
-    svg.style.transformOrigin = '50% 50%';
+  function setCompassRotation(heading) {
+    const svg = document.querySelector('#compass svg');
+    if (svg) {
+      svg.style.transform = `rotate(${heading}deg)`;
+      svg.style.transformOrigin = '50% 50%';
+    }
   }
-}
 
 
-//#endregion Helpper functions
+  //#endregion Helpper functions
 
-//#region MapModes
+  //#region MapModes
 
   // Simulation of C# string.Format, only {n} works.
   if (!String.format) {
@@ -1323,7 +1323,7 @@ function setCompassRotation(heading) {
     if (options.HCenter2) {
       setHitPinLoc(mapWrapper.getCenter(), -1, -1);
       displayLocPin(hitPin);
-    } else if (options.HStationary  && !simulationGoing) {
+    } else if (options.HStationary && !simulationGoing) {
       const loc = mapWrapper.getXYCoord(hitPinXY);
       setHitPinLoc(loc, -1, -1);
       displayLocPin(hitPin);
@@ -1957,7 +1957,7 @@ function setCompassRotation(heading) {
     if (options.send) postPosition(position);
     if (options.showCompass === "gps") {
       const heading = position.coords.heading;
-      if (heading !== null && !isNaN(heading)) setCompassRotation(360-heading);
+      if (heading !== null && !isNaN(heading)) setCompassRotation(360 - heading);
     }
     if (options.showRotate === "gps") {
       const heading = position.coords.heading;
@@ -1972,7 +1972,7 @@ function setCompassRotation(heading) {
 
   // noinspection JSUnusedGlobalSymbols
   function simulateGPS() {
-    simulationGoing =true;
+    simulationGoing = true;
     const loc = mapWrapper.getPinLocation(hitPin);
     const lat = loc[0]; // 62.25 + (Math.random() - 0.5) * 0.1;
     const lng = loc[1]; // 25.75 + (Math.random() - 0.5) * 0.1;
@@ -1990,7 +1990,9 @@ function setCompassRotation(heading) {
       timestamp: Date.now()
     };
     displayCurrentPosition(position);
-    setTimeout(() => {simulationGoing = false;}, 500);
+    setTimeout(() => {
+      simulationGoing = false;
+    }, 500);
   }
 
 
@@ -2039,16 +2041,16 @@ function setCompassRotation(heading) {
 
     // Safari iOS
     if (!event.absolute && evc) {
-        angle = 360 - angle;
+      angle = 360 - angle;
     }
 
     // noinspection JSDeprecatedSymbols
     const wori = window.orientation
-    let deviceOrientation =  (screen.orientation && screen.orientation.angle) || wori || 0;
+    let deviceOrientation = (screen.orientation && screen.orientation.angle) || wori || 0;
 
     // Older browsers and iOS
     if (!event.absolute && 'undefined' !== typeof wori) {
-         deviceOrientation = wori;
+      deviceOrientation = wori;
     }
     // const debug = document.getElementById('distance');
     // debug.innerText = `${angle.toFixed(0)}° / ${deviceOrientation}°`;
@@ -2059,14 +2061,14 @@ function setCompassRotation(heading) {
 
   function initCompass() {
     const compassElem = document.getElementById('compass');
-    if (options.showCompass === "none")  compassElem.style.display = 'none';
+    if (options.showCompass === "none") compassElem.style.display = 'none';
     else compassElem.style.display = 'block';
 
     let deviceOrientationEvent = null;
     if ('ondeviceorientationabsolute' in window) {
-        deviceOrientationEvent = 'deviceorientationabsolute';
-    } else if('ondeviceorientation' in window) {
-        deviceOrientationEvent = 'deviceorientation';
+      deviceOrientationEvent = 'deviceorientationabsolute';
+    } else if ('ondeviceorientation' in window) {
+      deviceOrientationEvent = 'deviceorientation';
     }
     window.removeEventListener(deviceOrientationEvent, onCompassDirection);
     if (options.showCompass !== "compass" && options.showRotate !== "compass") return;
@@ -2084,7 +2086,6 @@ function setCompassRotation(heading) {
   }
 
 
-
   function initializeMapPage() {
     showVersion()
     checkSavedValues();
@@ -2100,7 +2101,7 @@ function setCompassRotation(heading) {
     localStorage.mapName = mapName;
 
     mapWrapper = new MapWrapper('map', mapModes,
-      {useCache:options.useCache, rotate: options.showRotate !== "none"});
+      {useCache: options.useCache, rotate: options.showRotate !== "none"});
     mapWrapper.setZoomButtons(options.showZoomButtons);
     mapWrapper.setDoubleClickZoom(options.doubleClickZoom);
 
@@ -2291,8 +2292,8 @@ function setCompassRotation(heading) {
         if (pos) {
           try {
             const [left, top, width, height] = pos.split(';');
-            const w = width/2;
-            const h = height/2;
+            const w = width / 2;
+            const h = height / 2;
             const maxRight = window.innerWidth - w;
             const maxBottom = window.innerHeight - h;
             el.style.position = 'absolute';
@@ -2312,7 +2313,8 @@ function setCompassRotation(heading) {
 
       function onMouseDown(e) {
         e.preventDefault();
-        let et = e; if (e.touches) {
+        let et = e;
+        if (e.touches) {
           et = e.touches[0];
           el.classList.add('show-handle');
           setTimeout(() => el.classList.remove('show-handle'), 2000);
@@ -2331,9 +2333,10 @@ function setCompassRotation(heading) {
 
       function onMouseMove(e) {
         if (!isDragging) return;
-        let et = e; if (e.touches) et = e.touches[0];
-        const w = el.offsetWidth/2;
-        const h = el.offsetHeight/2;
+        let et = e;
+        if (e.touches) et = e.touches[0];
+        const w = el.offsetWidth / 2;
+        const h = el.offsetHeight / 2;
         const maxRight = window.innerWidth - w;
         const maxBottom = window.innerHeight - h;
         el.style.right = ''; // Remove right to allow left positioning
@@ -2360,27 +2363,29 @@ function setCompassRotation(heading) {
       const handle = el.querySelector('.resize-handle');
 
       if (handle) {
-        handle.addEventListener('mousedown', handleMouseDown, { passive: false });
-        handle.addEventListener('touchstart', handleMouseDown, { passive: false });
+        handle.addEventListener('mousedown', handleMouseDown, {passive: false});
+        handle.addEventListener('touchstart', handleMouseDown, {passive: false});
 
         function handleMouseDown(e) {
           e.stopPropagation();
           e.preventDefault();
-          let et = e; if (e.touches) et = e.touches[0];
+          let et = e;
+          if (e.touches) et = e.touches[0];
           let startX = et.clientX;
           let startY = et.clientY;
           let startW = el.offsetWidth;
           let startH = el.offsetHeight;
 
-          document.addEventListener('mousemove', onHandleMouseMove, { passive: false });
-          document.addEventListener('mouseup', onHandleMouseUp, { passive: false });
-          document.addEventListener('touchmove', onHandleMouseMove, { passive: false });
-          document.addEventListener('touchend', onHandleMouseUp, { passive: false });
+          document.addEventListener('mousemove', onHandleMouseMove, {passive: false});
+          document.addEventListener('mouseup', onHandleMouseUp, {passive: false});
+          document.addEventListener('touchmove', onHandleMouseMove, {passive: false});
+          document.addEventListener('touchend', onHandleMouseUp, {passive: false});
 
           function onHandleMouseMove(e) {
             // e.stopPropagation();
             e.preventDefault();
-            let et = e; if (e.touches) et = e.touches[0];
+            let et = e;
+            if (e.touches) et = e.touches[0];
             let newW = clamp(startW + (et.clientX - startX), 30, window.innerWidth);
             let newH = clamp(startH + (et.clientY - startY), 30, window.innerHeight);
             let aspect = getAspectRatio(el.style.aspectRatio);
@@ -2419,7 +2424,6 @@ function setCompassRotation(heading) {
 
 
   //#endregion Initialization
-
 
 
   function closeParent(element) {
@@ -2538,6 +2542,7 @@ function setCompassRotation(heading) {
 
 
   window.addEventListener('DOMContentLoaded', initializeMapPage);
+
   // window.addEventListener('DOMContentLoaded', () => showRoutePane(1));
 
   function setOption(name, value) {
@@ -3556,6 +3561,33 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     }
   }
 
+  let speedCams = [];
+
+  function speedCameras() {
+    fetch('https://www.mit.jyu.fi/demowww/cyclo/index.php?getcameras')
+      .then(response => response.text())
+      .then(text => {
+        const rows = text.trim().split('\n');
+        const data = rows.map(line => {
+          const [lat, lng, speed, dir] = line.split(';');
+          return {
+            lat: parseFloat(lat),
+            lng: parseFloat(lng),
+            speed: speed,
+            dir: dir
+          };
+        });
+        for (const cam of speedCams) {
+          mapWrapper.removePin(cam);
+        }
+        speedCams = [];
+        for (const cam of data) {
+          const pin = mapWrapper.createPin([cam.lat, cam.lng], cam.speed, 'red',null, `${cam.speed} ${cam.dir}°`);
+          speedCams.push(pin);
+        }
+      });
+  }
+
   //# endregion Routing
 
 
@@ -3581,7 +3613,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     <li><span onclick="showRoutePane(); closeNav()">Ajo-ohjeet...</span> <a class="help" data-href="#directions"></a>
     </li>
     <li><span onclick="showRoutePane(3); closeNav()">Ajo-ohjeet esimerkki</span> <a class="help"
-                                                                                 data-href="#directions"></a></li>
+                                                                                    data-href="#directions"></a></li>
     <!--<li><span onclick="showRoutePane(2); closeNav()">Ajo-ohjeet OSRM</span> <a class="help" data-href="#directions"></a></li>
     <li><span onclick="showRoutePane(3); closeNav()">Ajo-ohjeet GraphHopper</span> <a class="help" data-href="#directions"></a></li>-->
     <li><span onclick="toggleDiv('loadTrack'); ">Lataa track-tiedosto...</span> <a class="help"
@@ -3595,8 +3627,10 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     <li><span onclick="toggleDiv('routeRaport'); ">Reittiraportti...</span> <a class="help"
                                                                                data-href="#routeraport"></a></li>
     <li><span onclick="toggleDiv('loadAreas'); ">Alueet...</span> <a class="help" data-href="#areas"></a></li>
-    <li><span onclick="googleDirections();">Ajo-ohjeet Google Mapsillä</span> <a class="help"
-                                                                                 data-href="#googledirections"></a></li>
+    <li><span onclick="googleDirections();">Ajo-ohjeet Google Mapsillä</span> <a class="help" data-href="#googledirections"></a></li>
+
+    <li><span onclick="speedCameras(); ">Lataa nopeuskamerat</span></li>
+
     <li><span onclick="toggleFullscreen()">Fullscreen</span></li>
     <li><span onclick="checkMemoryUsage(); toggleDiv('about'); ">Pika-apu/Versio...</span></li>
     <li><span onclick="clearServiceWorker()">Tarkista uusi versio</span></li>
@@ -3881,7 +3915,8 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
         <button id="buttonGraphHopper" type="button" onclick="findDriving(1)"
                 title="Etsi GraphHopper-reitittimellä (antaa vain yhden)">G</button>
         <button id="buttonHERE" type="button" onclick="findDriving(2)" title="Etsi HERE-reitittimellä">H</button>
-        <label><input type="checkbox" name="navigate" id="navigate" value="navigate" onclick="checkNavigate(this.checked)"/>Aja</label>
+        <label><input type="checkbox" name="navigate" id="navigate" value="navigate"
+                      onclick="checkNavigate(this.checked)"/>Aja</label>
       </span>
     </div>
     <div class="driving">
@@ -3897,11 +3932,29 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   <div class="popupIn">
     <h2>Ajo-ohjeiden asetuksia</h2>
     <div class="flex-labels">
-      <div><label for="instLeadTime2">Kaunako ennen käännöstä luetaan muistutusohje: </label><input type="text" size="3" id="instLeadTime2" value="30"> s</div>
-      <div><label for="instLeadTime">Kaunako ennen käännöstä luetaan ohje: </label><input type="text" size="3" id="instLeadTime" value="10"> s</div>
-      <div><label for="polygonAckRadius">Millaisella säteellä reittiviivan pisteet kuitataan: </label><input type="text" size="3" id="polygonAckRadius" value="40"> m</div>
-      <div><label for="routePointAckRadius">Millaisella säteellä ohjepisteet kuitataan: </label><input type="text" size="3" id="routePointAckRadius" value="15"> m</div>
-      <div><label for="routeGoalAckRadius">Millaisella säteellä maali kuitataan: </label><input type="text" size="3" id="routeGoalAckRadius" value="10"> m</div>
+      <div><label for="instLeadTime2">Kaunako ennen käännöstä luetaan muistutusohje: </label><input type="text" size="3"
+                                                                                                    id="instLeadTime2"
+                                                                                                    value="30"> s
+      </div>
+      <div><label for="instLeadTime">Kaunako ennen käännöstä luetaan ohje: </label><input type="text" size="3"
+                                                                                          id="instLeadTime" value="10">
+        s
+      </div>
+      <div><label for="polygonAckRadius">Millaisella säteellä reittiviivan pisteet kuitataan: </label><input type="text"
+                                                                                                             size="3"
+                                                                                                             id="polygonAckRadius"
+                                                                                                             value="40">
+        m
+      </div>
+      <div><label for="routePointAckRadius">Millaisella säteellä ohjepisteet kuitataan: </label><input type="text"
+                                                                                                       size="3"
+                                                                                                       id="routePointAckRadius"
+                                                                                                       value="15"> m
+      </div>
+      <div><label for="routeGoalAckRadius">Millaisella säteellä maali kuitataan: </label><input type="text" size="3"
+                                                                                                id="routeGoalAckRadius"
+                                                                                                value="10"> m
+      </div>
     </div>
     <hr>
     <div class="flex-labels">
@@ -3922,7 +3975,9 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     </div>
     <hr>
     <div>
-      <div><label for="simulateSpeed">Liikkumisen nopeus simuloinnissa: </label><input type="text" size="5" id="simulateSpeed" value="0"> m/s</div>
+      <div><label for="simulateSpeed">Liikkumisen nopeus simuloinnissa: </label><input type="text" size="5"
+                                                                                       id="simulateSpeed" value="0"> m/s
+      </div>
     </div>
   </div>
 </div>

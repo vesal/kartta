@@ -2,10 +2,10 @@ import requests
 import json
 
 # Suomen alueen bounding box
-min_lat = 59.5
-max_lat = 70.5
-min_lon = 19.0
-max_lon = 31.5
+min_lat = 59.85
+max_lat = 67.60
+min_lon = 21.43
+max_lon = 30.38
 
 # Overpass QL -kysely
 # Haetaan kaikki node-tyyppiset nopeuskamerat bounding boxin sisällä
