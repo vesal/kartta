@@ -15,7 +15,7 @@ error_reporting(E_ALL | E_STRICT);
 ini_set("display_errors", "1");
 
 if (isset($_GET['getcameras'])) {
-    header('Content-Type: text/csv');
+    header('Content-Type: text/plain');
     header('Content-Disposition: attachment; filename="camerascsv.txt"');
     readfile('src/camerascsv.txt');
     exit;
