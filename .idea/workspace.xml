@@ -10,11 +10,7 @@
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/KeyValStore.js" beforeDir="false" afterPath="$PROJECT_DIR$/KeyValStore.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MapWrapperLeafLet.js" beforeDir="false" afterPath="$PROJECT_DIR$/MapWrapperLeafLet.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/offline-worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/offline-worker.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -221,7 +217,7 @@
       <workItem from="1758443065910" duration="2968000" />
       <workItem from="1758446846268" duration="1390000" />
       <workItem from="1758448685802" duration="4431000" />
-      <workItem from="1758453368256" duration="10023000" />
+      <workItem from="1758453368256" duration="11134000" />
     </task>
     <servers />
   </component>
