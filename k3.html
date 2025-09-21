@@ -3582,7 +3582,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
         }
         speedCams = [];
         for (const cam of data) {
-          const pin = mapWrapper.createPin([cam.lat, cam.lng], cam.speed, 'red',null, `${cam.speed} ${cam.dir}°`);
+          const pin = mapWrapper.createPin([cam.lat, cam.lng], cam.speed, 'purple', null, `${cam.speed} ${cam.dir}°`, false, 0.6);
           speedCams.push(pin);
         }
       });

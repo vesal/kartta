@@ -1,11 +1,13 @@
 import requests
-import json
+# import json
 
 # Suomen alueen bounding box
 min_lat = 59.85
 max_lat = 67.60
 min_lon = 21.43
 max_lon = 30.38
+
+rus_corner = (61, 28.5)  # lat, lon
 
 # Overpass QL -kysely
 # Haetaan kaikki node-tyyppiset nopeuskamerat bounding boxin sisällä
@@ -15,7 +17,7 @@ node["highway"="speed_camera"]({min_lat},{min_lon},{max_lat},{max_lon});
 out;
 """
 
-url = "http://overpass-api.de/api/interpreter"
+url = "https://overpass-api.de/api/interpreter"
 response = requests.post(url, data={"data": query})
 
 if response.status_code == 200:
@@ -49,6 +51,9 @@ if response.status_code == 200:
             direction = "f"
         elif direction == "backward":
             direction = "b"
+        if (lat < rus_corner[0]) and (lon > rus_corner[1]):
+            # kamera on lähellä Venäjän rajaa, jätä se pois
+            continue
         s = f"{float(lat):.6f};{float(lon):.6f};{maxspeed};{direction}"
         camerascsv.append(s)
         # cameras.append(camera_info)

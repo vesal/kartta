@@ -10,6 +10,7 @@
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MapWrapperLeafLet.js" beforeDir="false" afterPath="$PROJECT_DIR$/MapWrapperLeafLet.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/suomenkamerat.py" beforeDir="false" afterPath="$PROJECT_DIR$/suomenkamerat.py" afterDir="false" />
     </list>
@@ -98,83 +99,14 @@
       <recent name="E:\riippu\kartta\src" />
     </key>
   </component>
-  <component name="RunManager" selected="JavaScript Debug.k3.html">
+  <component name="RunManager" selected="Python.suomenkamerat">
     <configuration name="dr" type="JavascriptDebugType" uri="http://localhost:63342/kartta/src/dr.html">
       <method v="2" />
     </configuration>
     <configuration name="k" type="JavascriptDebugType" uri="http://localhost:8080/k.html">
       <method v="2" />
     </configuration>
-    <configuration name="k3.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/kartta/k3.html" useBuiltInWebServerPort="true">
-      <method v="2" />
-    </configuration>
-    <configuration name="coord" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="kartta" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/download/speed" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/download/speed/coord.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="osrmcameras" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="kartta" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/download/speed" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/download/speed/osrmcameras.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="osrmspeed" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="kartta" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/download/speed" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/download/speed/osrmspeed.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
+    <configuration name="k3.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:8080/k3.html">
       <method v="2" />
     </configuration>
     <configuration name="suomenkamerat" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
@@ -205,18 +137,12 @@
       <item itemvalue="JavaScript Debug.dr" />
       <item itemvalue="JavaScript Debug.k" />
       <item itemvalue="JavaScript Debug.k3.html" />
-      <item itemvalue="Python.coord" />
-      <item itemvalue="Python.osrmcameras" />
-      <item itemvalue="Python.osrmspeed" />
       <item itemvalue="Python.suomenkamerat" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="JavaScript Debug.k3.html" />
         <item itemvalue="Python.suomenkamerat" />
-        <item itemvalue="Python.osrmcameras" />
-        <item itemvalue="Python.coord" />
-        <item itemvalue="Python.osrmspeed" />
+        <item itemvalue="JavaScript Debug.k3.html" />
       </list>
     </recent_temporary>
   </component>
@@ -265,6 +191,7 @@
       <workItem from="1758441333057" duration="1439000" />
       <workItem from="1758443065910" duration="2968000" />
       <workItem from="1758446846268" duration="1390000" />
+      <workItem from="1758448685802" duration="2974000" />
     </task>
     <servers />
   </component>
@@ -318,6 +245,6 @@
     <SUITE FILE_PATH="coverage/kartta$osrmspeed.coverage" NAME="osrmspeed Coverage Results" MODIFIED="1758392302271" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/download/speed" />
     <SUITE FILE_PATH="coverage/kartta$osrmcameras.coverage" NAME="osrmcameras Coverage Results" MODIFIED="1758394057051" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/download/speed" />
     <SUITE FILE_PATH="coverage/kartta$speed.coverage" NAME="speed Coverage Results" MODIFIED="1758390035865" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/download/speed" />
-    <SUITE FILE_PATH="coverage/kartta$suomenkamerat.coverage" NAME="suomenkamerat Coverage Results" MODIFIED="1758445772281" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/kartta$suomenkamerat.coverage" NAME="suomenkamerat Coverage Results" MODIFIED="1758451680002" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
   </component>
 </project>

@@ -225,7 +225,7 @@ class MapWrapper {
     return tsize;
   }
 
-  customPin(label = 'I', color = 'green', baseColor = 'black', flip = false) {
+  customPin(label = 'I', color = 'green', baseColor = 'black', flip = false, scale = 1) {
     label = label.trim();
     let textY = 16;
     let trY = 0;
@@ -239,9 +239,8 @@ class MapWrapper {
     }
     const tsize = this.calcPinFontSize(label);
     const svg = `
-      <svg width="32" height="48" viewBox="0 0 32 48" xmlns="http://www.w3.org/2000/svg">
-        <g transform="scale(1,${scaleY}) translate(0,${trY})">
-          <!-- Kolmion muotoinen jalka -->
+      <svg width="${32}" height="${48}" viewBox="0 0 32 48" xmlns="http://www.w3.org/2000/svg">
+        <g transform="scale(${scale},${scaleY*scale}) translate(0,${trY})">          <!-- Kolmion muotoinen jalka -->
           <path d="M 3 16 L 16 48 L 29 16 Z" fill="${baseColor}" />
           <!-- Eri värinen valinta-alue -->
           <path id="pin-foot" d="M 4 15 L 16 47 L 28 15 Z" fill="red" style="visibility:hidden;" />
@@ -251,7 +250,9 @@ class MapWrapper {
           <circle cx="16" cy="16" r="14" fill="${color}" />
         </g>
         <!-- Valkoinen teksti keskellä -->
-        <text x="16" y="${textY}" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="${tsize}" fill="white" dominant-baseline="middle">
+        <text x="${16*scale}" y="${textY*scale}" text-anchor="middle"
+              font-family="Arial" font-weight="bold" font-size="${tsize*scale}"
+              fill="white" dominant-baseline="middle">
           ${label}
         </text>
       </svg>
@@ -260,9 +261,9 @@ class MapWrapper {
     return this.L.divIcon({
       className: '',
       html: svg,
-      iconSize: [32, 48],
-      iconAnchor: iconAnchor, // kärki osoittaa koordinaattiin
-      popupAnchor: [0, -48]
+      iconSize: [32*scale, 48*scale],
+      iconAnchor: [iconAnchor[0]*scale, iconAnchor[1]*scale], // kärki osoittaa koordinaattiin
+      popupAnchor: [0, -48*scale]
     });
   }  // customPin ends
 
@@ -279,14 +280,14 @@ class MapWrapper {
   }
 
 
-  createPin(coord, label, color, click, text = null, flip = false) {
-    const pin = this.L.marker(coord, {icon: this.customPin(label, color, 'black', flip)});
+  createPin(coord, label, color, click=null, text = null, flip = false, scale = 1) {
+    const pin = this.L.marker(coord, {icon: this.customPin(label, color, 'black', flip, scale)});
     pin.flip = flip;
     pin.addTo(this.map);
     if (text) {
       pin.bindPopup(text);
     }
-    pin.on('click', function() {
+    if (click) pin.on('click', function() {
       click(pin);
     });
 
