@@ -878,6 +878,8 @@ function removeRouteMarkers() {
 
 
 function createDebugMarkers(route) {
+  if (!route || !route.coordinates) return;
+  let prevPt = route.coordinates[0]
   for (let idx = 0; idx < route.coordinates.length; idx++) {
     const coord = route.coordinates[idx];
     const icon = mapWrapper.L.divIcon({
@@ -887,6 +889,9 @@ function createDebugMarkers(route) {
     });
     const marker = mapWrapper.L.marker([coord.lat, coord.lng], {icon}).addTo(mapWrapper.map);
     mapWrapper.routeMarkers.push(marker);
+    const d = WGS84_distance([prevPt.lat, prevPt.lng], [coord.lat, coord.lng]);
+    prevPt = coord;
+    coord.dist = d * 1000; // in meters
   }
 } // end debug markers
 
@@ -1044,7 +1049,7 @@ function checkLegsCoords(route, coord) {
          sum += dist;
          prevPos = pos
       } else {
-         dist = WGS84_distance(pos,prevPos)*1000;
+         dist = p.dist; // precalculated distance
          sum += dist;
          prevPos = pos;
       }

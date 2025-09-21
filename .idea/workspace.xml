@@ -10,7 +10,6 @@
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routersLeaflet.js" beforeDir="false" afterPath="$PROJECT_DIR$/routersLeaflet.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -21,9 +20,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
         <option value="JavaScript File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -55,33 +54,40 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;JavaScript Debug.dr.executor&quot;: &quot;Debug&quot;,
-    &quot;JavaScript Debug.k.executor&quot;: &quot;Debug&quot;,
-    &quot;JavaScript Debug.k.html.executor&quot;: &quot;Debug&quot;,
-    &quot;JavaScript Debug.k3.html.executor&quot;: &quot;Debug&quot;,
-    &quot;JavaScript Debug.meribrowser.html.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.IncrementVersion.executor&quot;: &quot;Run&quot;,
-    &quot;Python.convertFlykKartta.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/riippu/kartta/js&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\devel\\PyCharm\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "JavaScript Debug.dr.executor": "Debug",
+    "JavaScript Debug.k.executor": "Debug",
+    "JavaScript Debug.k.html.executor": "Debug",
+    "JavaScript Debug.k3.html.executor": "Debug",
+    "JavaScript Debug.meribrowser.html.executor": "Debug",
+    "Notification.DisplayName-DoNotAsk-Vcs Important Messages": "VCS important messages",
+    "Notification.DoNotAsk-Vcs Important Messages": "true",
+    "Python.IncrementVersion.executor": "Run",
+    "Python.convertFlykKartta.executor": "Debug",
+    "Python.coord.executor": "Run",
+    "Python.osrmcameras.executor": "Run",
+    "Python.osrmspeed.executor": "Run",
+    "Python.speed.executor": "Run",
+    "Python.suomenkamerat.executor": "Debug",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "E:/riippu/kartta/js",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
+    "ts.external.directory.path": "C:\\devel\\PyCharm\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\riippu\kartta\js" />
@@ -91,23 +97,14 @@
       <recent name="E:\riippu\kartta\src" />
     </key>
   </component>
-  <component name="RunManager" selected="JavaScript Debug.k3.html">
+  <component name="RunManager" selected="Python.suomenkamerat">
     <configuration name="dr" type="JavascriptDebugType" uri="http://localhost:63342/kartta/src/dr.html">
       <method v="2" />
     </configuration>
     <configuration name="k" type="JavascriptDebugType" uri="http://localhost:8080/k.html">
       <method v="2" />
     </configuration>
-    <configuration name="k3.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:8080/k3.html">
-      <method v="2" />
-    </configuration>
-    <configuration name="k.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:8080/k.html?lat=61.88961&amp;lon=25.94575&amp;zoom=15&amp;mapName=Google%20satellite&amp;route=!havu/81,!havu/82,!havu/83,!havu/8r34&amp;readGPS=false&amp;routeoptions=c:red,w:10">
-      <method v="2" />
-    </configuration>
-    <configuration name="meribrowser.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/kartta/meribrowser.html" useBuiltInWebServerPort="true">
-      <method v="2" />
-    </configuration>
-    <configuration name="IncrementVersion" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="coord" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="kartta" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -116,12 +113,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/download/speed" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/IncrementVersion.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/download/speed/coord.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -130,7 +127,76 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="convertFlykKartta" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="osrmcameras" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="kartta" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/download/speed" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/download/speed/osrmcameras.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="osrmspeed" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="kartta" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/download/speed" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/download/speed/osrmspeed.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="speed" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="kartta" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/download/speed" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/download/speed/speed.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="suomenkamerat" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="kartta" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -140,13 +206,13 @@
       </envs>
       <option name="SDK_HOME" value="" />
       <option name="SDK_NAME" value="Python 3.11" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/download/speed" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/convertFlykKartta.py" />
-      <option name="PARAMETERS" value="&lt; flyk.json" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/download/speed/suomenkamerat.py" />
+      <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -157,19 +223,19 @@
     <list>
       <item itemvalue="JavaScript Debug.dr" />
       <item itemvalue="JavaScript Debug.k" />
-      <item itemvalue="JavaScript Debug.meribrowser.html" />
-      <item itemvalue="JavaScript Debug.k3.html" />
-      <item itemvalue="JavaScript Debug.k.html" />
-      <item itemvalue="Python.IncrementVersion" />
-      <item itemvalue="Python.convertFlykKartta" />
+      <item itemvalue="Python.coord" />
+      <item itemvalue="Python.osrmcameras" />
+      <item itemvalue="Python.osrmspeed" />
+      <item itemvalue="Python.speed" />
+      <item itemvalue="Python.suomenkamerat" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="JavaScript Debug.k3.html" />
-        <item itemvalue="Python.IncrementVersion" />
-        <item itemvalue="JavaScript Debug.meribrowser.html" />
-        <item itemvalue="JavaScript Debug.k.html" />
-        <item itemvalue="Python.convertFlykKartta" />
+        <item itemvalue="Python.suomenkamerat" />
+        <item itemvalue="Python.osrmcameras" />
+        <item itemvalue="Python.coord" />
+        <item itemvalue="Python.osrmspeed" />
+        <item itemvalue="Python.speed" />
       </list>
     </recent_temporary>
   </component>
@@ -213,7 +279,10 @@
       <workItem from="1754904988042" duration="228616000" />
       <workItem from="1756132556973" duration="357465000" />
       <workItem from="1757434580758" duration="99322000" />
-      <workItem from="1758225986574" duration="4491000" />
+      <workItem from="1758225986574" duration="12722000" />
+      <workItem from="1758440909667" duration="354000" />
+      <workItem from="1758441333057" duration="1439000" />
+      <workItem from="1758443065910" duration="1693000" />
     </task>
     <servers />
   </component>
@@ -263,5 +332,10 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/kartta$convertFlykKartta.coverage" NAME="convertFlykKartta Coverage Results" MODIFIED="1750688971217" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/kartta$IncrementVersion.coverage" NAME="IncrementVersion Coverage Results" MODIFIED="1757014631117" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/kartta$coord.coverage" NAME="coord Coverage Results" MODIFIED="1758393819982" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/download/speed" />
+    <SUITE FILE_PATH="coverage/kartta$osrmspeed.coverage" NAME="osrmspeed Coverage Results" MODIFIED="1758392302271" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/download/speed" />
+    <SUITE FILE_PATH="coverage/kartta$osrmcameras.coverage" NAME="osrmcameras Coverage Results" MODIFIED="1758394057051" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/download/speed" />
+    <SUITE FILE_PATH="coverage/kartta$speed.coverage" NAME="speed Coverage Results" MODIFIED="1758390035865" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/download/speed" />
+    <SUITE FILE_PATH="coverage/kartta$suomenkamerat.coverage" NAME="suomenkamerat Coverage Results" MODIFIED="1758443861441" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/download/speed" />
   </component>
 </project>
