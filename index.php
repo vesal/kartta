@@ -14,6 +14,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 error_reporting(E_ALL | E_STRICT);
 ini_set("display_errors", "1");
 
+if (isset($_GET['getcameras'])) {
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="camerascsv.txt"');
+    readfile('src/camerascsv.txt');
+    exit;
+}
+
 if (isset($_GET['getredirect'])) {
     $targetUrl = urldecode($_GET['getredirect']);
 

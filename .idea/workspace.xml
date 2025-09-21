@@ -9,8 +9,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routersLeaflet.js" beforeDir="false" afterPath="$PROJECT_DIR$/routersLeaflet.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.php" beforeDir="false" afterPath="$PROJECT_DIR$/index.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -282,7 +283,7 @@
       <workItem from="1758225986574" duration="12722000" />
       <workItem from="1758440909667" duration="354000" />
       <workItem from="1758441333057" duration="1439000" />
-      <workItem from="1758443065910" duration="1693000" />
+      <workItem from="1758443065910" duration="2004000" />
     </task>
     <servers />
   </component>
