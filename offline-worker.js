@@ -1,10 +1,10 @@
-const CACHE_NAME = "k3-cache-v0.4.29";
+const CACHE_NAME = "k3-cache-v0.4.30";
 const DEBUG = false;
 const FILES_TO_CACHE = [
   "k3.html",
   "js/winbox.bundle.min.js",
   "js/leaflet.js",
-  "js/leaflet-rotate.js",
+  "js/leaflet-rotate-src.js",
   "js/leaflet.textpath.js",
   "js/leaflet.css",
   "KeyValStore.js",
