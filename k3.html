@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <title>Kartta 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.27">
+  <link id="manifest-link" rel="manifest" href="manifest.json?v=0.4.28">
   <link rel="icon" href="data:,">
   <!-- Leaflet CSS -->
   <!--<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>-->
@@ -2024,7 +2024,7 @@
   //#region Initialization
   function showVersion() {
     const manifestLink = document.getElementById('manifest-link');
-    const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.25"
+    const href = manifestLink.getAttribute('href'); // esim. "manifest.json?v=0.4.26"
 
     // Parsitaan query-parametri
     const url = new URL(href, window.location.href);
@@ -3563,29 +3563,48 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
 
   let speedCams = [];
 
-  function speedCameras() {
-    fetch('https://www.mit.jyu.fi/demowww/cyclo/index.php?getcameras')
-      .then(response => response.text())
-      .then(text => {
-        const rows = text.trim().split('\n');
-        const data = rows.map(line => {
-          const [lat, lng, speed, dir] = line.split(';');
-          return {
-            lat: parseFloat(lat),
-            lng: parseFloat(lng),
-            speed: speed,
-            dir: dir
-          };
-        });
-        for (const cam of speedCams) {
-          mapWrapper.removePin(cam);
-        }
-        speedCams = [];
-        for (const cam of data) {
-          const pin = mapWrapper.createPin([cam.lat, cam.lng], cam.speed, 'purple', null, `${cam.speed} ${cam.dir}°`, false, 0.6);
-          speedCams.push(pin);
-        }
-      });
+  function createCameras(text) {
+    const rows = text.trim().split('\n');
+    const data = rows.map(line => {
+      const [lat, lng, speed, dir] = line.split(';');
+      return {
+        lat: parseFloat(lat),
+        lng: parseFloat(lng),
+        speed: speed,
+        dir: dir
+      };
+    });
+    for (const cam of speedCams) {
+      mapWrapper.removePin(cam);
+    }
+    speedCams = [];
+    for (const cam of data) {
+      const pin = mapWrapper.createPin([cam.lat, cam.lng], cam.speed, 'purple', null, `${cam.speed} ${cam.dir}°`, false, 0.6);
+      speedCams.push(pin);
+    }
+  }
+
+
+  async function speedCameras() {
+    let speedCamStore = mapWrapper.mapDB.getStoreAccessor("speedcams")
+    const text = await speedCamStore.get('camerasData');
+    if (text) {
+      const timestamp = await speedCamStore.get('camerasTimestamp');
+      const now = Date.now();
+      // Check if data is newer than 7 days
+      if (timestamp && now - timestamp < 7 * 24 * 60 * 60 * 1000) {
+        // Fetch new data in the background
+        createCameras(text);
+      }
+      return;
+    }
+
+   // Fetch from server if not in IndexedDB or too old
+    const response = await fetch('https://www.mit.jyu.fi/demowww/cyclo/index.php?getcameras');
+    const newText = await response.text();
+    await speedCamStore.set('camerasData', newText);
+    await speedCamStore.set('camerasTimestamp', Date.now());
+    createCameras(newText);
   }
 
   //# endregion Routing

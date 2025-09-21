@@ -11,7 +11,8 @@ class MapWrapper {
       const defaultOptions = { useCache: true, rotate: false };
       options = { ...defaultOptions, ...options };
       // noinspection TypeScriptUMDGlobal
-      this.tileStore = new KeyValStore('kartta-db', 'tiles');
+      this.mapDB = new KeyValStore('kartta-db', ['tiles', 'settings', 'speedcams'], 2 );
+      this.tileStore = this.mapDB.getStoreAccessor('tiles');
       this.useCache = options.useCache;
       // noinspection TypeScriptUMDGlobal
       this.L = L;
