@@ -365,6 +365,13 @@ class MapWrapper {
     return [latLng.lat, latLng.lng];
   }
 
+  setPinZ(pin, z) {
+    if (!pin || !pin.getElement) {
+      return;
+    }
+    pin.setZIndexOffset(z);
+  }
+
   setPinLabel(pin, label) {
     const element = pin.getElement();
     if (!element) {

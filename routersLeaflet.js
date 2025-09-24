@@ -860,6 +860,7 @@ function distToNextInstruction(route, coord, lastIdx = -1) {
 }
 
 mapWrapper.routeMarkers = [];
+mapWrapper.projMarkers = [];
 let naviInfo = null;
 let naviText = null;
 
@@ -876,26 +877,58 @@ function removeRouteMarkers() {
   }
 }
 
+function drawProjectedPoints(p, coords) {
+  for (const m of mapWrapper.projMarkers) {
+    if (m) m.remove();
+  }
+
+  mapWrapper.projMarkers = [];
+
+  for (let i = 0; i < coords.length-1; i++) {
+    const p1 = coords[i];
+    const p2 = coords[i+1];
+    const d = distanceFromSegment(p, p1, p2);
+  }
+
+}
+
+
+function createDebugMarker(coord, text) {
+    const icon = mapWrapper.L.divIcon({
+      className: 'route-index-marker',
+      html: `<div style="background:blue;color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:12px;">${text}</div>`,
+      iconSize: [18, 18]
+    });
+    if (coord.lat) coord = [coord.lat, coord.lng];
+    const marker = mapWrapper.L.marker(coord, {icon}).addTo(mapWrapper.map);
+    return marker;
+}
+
 
 function createDebugMarkers(route) {
   if (!route || !route.coordinates) return;
   let prevPt = route.coordinates[0]
   for (let idx = 0; idx < route.coordinates.length; idx++) {
     const coord = route.coordinates[idx];
-    const icon = mapWrapper.L.divIcon({
-      className: 'route-index-marker',
-      html: `<div style="background:blue;color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:12px;">${idx}</div>`,
-      iconSize: [18, 18]
-    });
-    const marker = mapWrapper.L.marker([coord.lat, coord.lng], {icon}).addTo(mapWrapper.map);
-    mapWrapper.routeMarkers.push(marker);
+    const m = createDebugMarker(coord, idx.toString());
+    mapWrapper.routeMarkers.push(m);
     const d = WGS84_distance([prevPt.lat, prevPt.lng], [coord.lat, coord.lng]);
     prevPt = coord;
     coord.dist = d * 1000; // in meters
   }
+
+  for (let i = 0; i < route.instructions.length; i++) {
+    const instr = route.instructions[i];
+    const pos = route.coordinates[instr.index];
+    pos.instrIndex = i;
+  }
+
 } // end debug markers
 
-
+function unlockRoute() {
+  const routeAlts = document.getElementById("routeAlts")
+  if (routeAlts) routeAlts.style.pointerEvents = 'auto';
+}
 
 function lockRoute(rc) {
   // Tämä on vähän ruma tapa estää reitin muokkaus,
@@ -931,7 +964,15 @@ function lockRoute(rc) {
     }
   });
 
-  rc.getContainer().style.pointerEvents = 'none';
+  // Mieti pitääkö ajo-ohjeiden klikkauksetkin poistaa käytöstä?
+  // rc.getContainer().style.pointerEvents = 'none';
+  const routeAlts = document.getElementById("routeAlts")
+  // Mutta ainakin reittivaihtoehdot pois käytöstä
+  if (routeAlts) routeAlts.style.pointerEvents = 'none';
+
+  rc.getContainer().querySelectorAll(".leaflet-routing-alt-minimized").forEach(el => {
+    el.style.pointerEvents = 'none';
+  });
 
   // Disable alternative route selection
   // plan.setWaypoints(rc.getWaypoints());
@@ -953,12 +994,59 @@ function lockRoute(rc) {
 } // end lockRoute
 
 function getStepCoord(route, idx=-1) {
-  if (idx < 0) idx = route.coordStep;
+  if (idx < 0) idx = route.coordIndex;
   idx = Math.min(idx, route.coordinates.length);
   const pt = route.coordinates[idx];
   return [pt.lat, pt.lng];
 }
 
+function distanceFromSegment(gps, p1, p2) {
+  // const R = 6371000; // Maan säde metreinä
+  const toRad = Math.PI / 180;
+  const toDeg = 1/toRad;
+  const lat0 = gps[0] * toRad; // käytetään GPS-pisteen leveysastetta keskellä
+  const cosLat0 = Math.cos(lat0);
+
+  // Muunnos WGS84 → "paikallinen tasokoordinaatti" (metriä)
+  function project(lat, lng) {
+    const x = (lng * toRad) * cosLat0;
+    const y = lat * toRad;
+    return [x, y];
+  }
+
+  // Projektoi kaikki pisteet
+  const [Px, Py] = project(gps[0], gps[1]);
+  const [Ax, Ay] = project(p1.lat, p1.lng);
+  const [Bx, By] = project(p2.lat, p2.lng);
+
+  // Vektoreita
+  const ABx = Bx - Ax;
+  const ABy = By - Ay;
+  const APx = Px - Ax;
+  const APy = Py - Ay;
+
+  const dotAPAB = APx * ABx + APy * ABy;
+  const dotABAB = ABx * ABx + ABy * ABy;
+
+  // projektiokerroin t (0–1)
+  let t = dotABAB === 0 ? 0 : dotAPAB / dotABAB;
+  t = Math.max(0, Math.min(1, t));
+
+  // lähin piste segmentillä tasokoordinaateissa
+  const Cx = Ax + t * ABx;
+  const Cy = Ay + t * ABy;
+
+  // takaisin lat/lon (vain debug-visualisointiin)
+  const C = [Cy * toDeg, (Cx / (cosLat0)) * toDeg];
+
+  // Etäisyys gps → C metreinä
+  const d = WGS84_distance(gps, C) * 1000;
+
+  // Debug-markkeri
+  mapWrapper.projMarkers.push(createDebugMarker(C, fixed(d,0)));
+
+  return d;
+}
 
 function startNavigation(coord=null) {
 
@@ -972,7 +1060,7 @@ function startNavigation(coord=null) {
    if (!route.coordinates || route.coordinates.length === 0) return false;
 
 
-
+   drawProjectedPoints(coord, route.coordinates);
    setNavigation(true);
    naviInfo = document.getElementById('naviInfo');
    naviText = document.getElementById('naviInfoText');
@@ -987,11 +1075,12 @@ function startNavigation(coord=null) {
 
    route.inst2Read = false;
    route.step = idx;
-   route.coordStep = route.instructions[idx].index;
+   // route.coordIndex = Math.max(route.instructions[idx].index,1);
+   route.coordIndex = route.instructions[idx].index;
    const instr = route.instructions[idx];
    if (instr.uiRow) instr.uiRow.click();
 
-   const firstStep = route.coordinates[route.coordStep];
+   const firstStep = route.coordinates[route.coordIndex];
    mapWrapper.nextStepCirce = L.circle(getStepCoord(route),
      {radius: options.routePointAckRadius, color: 'red'}).addTo(mapWrapper.map);
 
@@ -1027,24 +1116,24 @@ function showNaviText(route, idx  = 0, dist = -1) {
 }
 
 function checkLegsCoords(route, coord) {
-   if (route.coordStep > route.coordinates.length) return 0;
+   if (route.coordIndex > route.coordinates.length) return 0;
    if (route.step >= route.instructions.length - 1) return 0;
    let sum = 0;
    let prevPos = null;
    const lastLegIdx = route.instructions[route.step+1].index;
-   for (let i = route.coordStep; i <= lastLegIdx; i++) {
+   for (let i = route.coordIndex; i <= lastLegIdx; i++) {
       const p = route.coordinates[i];
       const pos = [p.lat, p.lng];
       let dist = WGS84_distance(pos, coord)*1000;
       let ackRadius = options.polygonAckRadius;
-      if (route.coordStep === lastLegIdx)  // is last leg point
+      if (route.coordIndex === lastLegIdx)  // is last leg point
         ackRadius = options.routePointAckRadius;
-      if (route.coordStep === route.coordinates.length-1)  // is last route point
+      if (route.coordIndex === route.coordinates.length-1)  // is last route point
         ackRadius = options.routeGoalAckRadius;
       if (dist < ackRadius && !prevPos) { // 40 meters
-         mapWrapper.routeMarkers[route.coordStep]?.remove();
-         mapWrapper.routeMarkers[route.coordStep] = null;
-         route.coordStep = i + 1;
+         mapWrapper.routeMarkers[route.coordIndex]?.remove();
+         mapWrapper.routeMarkers[route.coordIndex] = null;
+         route.coordIndex = i + 1;
       } else if (!prevPos) {
          sum += dist;
          prevPos = pos
@@ -1063,6 +1152,7 @@ function continueNavigation(coord, speed) {
    const route = rc.currentRoutes[rc.activeRouteIndex];
    if (!route) return false;
    const dist = checkLegsCoords(route, coord);
+   drawProjectedPoints(coord, route.coordinates);
 
    showNaviText(route, route.step, dist);
    const timeToTurn =  dist/speed;
@@ -1086,10 +1176,10 @@ function continueNavigation(coord, speed) {
    let idx = route.step+1;
    route.step = idx;
    let midx = Math.min(idx, route.instructions.length - 1);
-   for (let i = route.coordStep; i<route.instructions[midx].index; i++) {
+   for (let i = route.coordIndex; i<route.instructions[midx].index; i++) {
       mapWrapper.routeMarkers[i].remove();
    }
-   route.coordStep = route.instructions[midx].index;
+   route.coordIndex = route.instructions[midx].index;
    const instr = route.instructions[midx];
    if (instr.uiRow) {
      instr.uiRow.click();
@@ -1107,6 +1197,7 @@ function setNavigation(enable) {
     naviInfo.style.visibility = 'visible';
   else
     naviInfo.style.visibility = 'hidden';
+    unlockRoute();
   options.navigate = enable;
 }
 
