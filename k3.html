@@ -2896,8 +2896,19 @@
     checkRouterButtons();
   }
 
+  async function isReallyOnline() {
+      try {
+          const response = await fetch("https://example.com/ping.txt", {cache: "no-store"});
+          return response.ok;
+      } catch(e) {
+          return false;
+      }
+  }
+
+
   async function clearServiceWorker() {
-    if (!navigator.onLine) {
+    const online = await isReallyOnline();
+    if (!online) {
       alert("Päivitys vaatii verkkoyhteyden. Yritä myöhemmin.");
       return;
     }
