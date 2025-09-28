@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>GPS Web Fetch</title>
+</head>
+<body>
+<h1>GPS-data PowerShell API:sta</h1>
+<pre id="output">Odota...</pre>
+<script>
+async function getGPS() {
+    try {
+        const res = await fetch("http://localhost:8080/");
+        const data = await res.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+    } catch(e) {
+        document.getElementById('output').textContent = "Virhe: " + e;
+    }
+}
+
+// Päivitä data joka sekunti
+setInterval(getGPS, 1000);
+getGPS();
+</script>
+</body>
+</html>
