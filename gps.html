@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<title>GPS Test Edge</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  pre { background: #f0f0f0; padding: 10px; }
+</style>
+</head>
+<body>
+<h1>GPS Test (High Accuracy)</h1>
+<button id="startBtn">Aloita seuranta</button>
+<pre id="output">Ei dataa vielä...</pre>
+
+<script>
+let watcher = null;
+
+function startGPS() {
+    const output = document.getElementById('output');
+    if (watcher) navigator.geolocation.clearWatch(watcher);
+    watcher = navigator.geolocation.watchPosition(
+        pos => {
+            const coords = pos.coords;
+            let source = coords.accuracy && coords.accuracy < 100 ? "Todellinen GPS" : "IP/verkko fallback";
+            output.textContent = `
+Latitude:  ${coords.latitude}
+Longitude: ${coords.longitude}
+Altitude:  ${coords.altitude}
+HorizontalAccuracy: ${coords.accuracy}
+AltitudeAccuracy:   ${coords.altitudeAccuracy}
+Speed:             ${coords.speed}
+Heading:           ${coords.heading}
+Timestamp:         ${new Date(pos.timestamp).toLocaleString()}
+Source:            ${source}
+            `;
+        },
+        err => {
+            output.textContent = `Virhe: ${err.code} - ${err.message}`;
+        },
+        {
+            enableHighAccuracy: true, // pakottaa GPS:n
+            maximumAge: 0,
+            timeout: 10000
+        }
+    );
+}
+
+document.getElementById('startBtn').addEventListener('click', startGPS);
+</script>
+</body>
+</html>
