@@ -11,6 +11,9 @@
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/offline-worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/offline-worker.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routersLeaflet.js" beforeDir="false" afterPath="$PROJECT_DIR$/routersLeaflet.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +66,7 @@
     "JavaScript Debug.meribrowser.html.executor": "Debug",
     "Notification.DisplayName-DoNotAsk-Vcs Important Messages": "VCS important messages",
     "Notification.DoNotAsk-Vcs Important Messages": "true",
-    "Python.IncrementVersion.executor": "Run",
+    "Python.IncrementVersion.executor": "Debug",
     "Python.convertFlykKartta.executor": "Debug",
     "Python.coord.executor": "Run",
     "Python.osrmcameras.executor": "Run",
@@ -217,7 +220,7 @@
       <workItem from="1758443065910" duration="2968000" />
       <workItem from="1758446846268" duration="1390000" />
       <workItem from="1758448685802" duration="4431000" />
-      <workItem from="1758453368256" duration="52748000" />
+      <workItem from="1758453368256" duration="108076000" />
     </task>
     <servers />
   </component>
@@ -253,17 +256,11 @@
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="108" />
         </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/routersLeaflet.js</url>
-          <line>1053</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="109" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/k3.html</url>
-          <line>2900</line>
+          <url>file://$PROJECT_DIR$/routersLeaflet.js</url>
+          <line>1217</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="122" />
+          <option name="timeStamp" value="142" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -283,7 +280,7 @@
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/kartta$IncrementVersion.coverage" NAME="IncrementVersion Coverage Results" MODIFIED="1758466471765" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/kartta$IncrementVersion.coverage" NAME="IncrementVersion Coverage Results" MODIFIED="1758788005126" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/kartta$coord.coverage" NAME="coord Coverage Results" MODIFIED="1758393819982" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/download/speed" />
     <SUITE FILE_PATH="coverage/kartta$convertFlykKartta.coverage" NAME="convertFlykKartta Coverage Results" MODIFIED="1750688971217" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/kartta$osrmspeed.coverage" NAME="osrmspeed Coverage Results" MODIFIED="1758392302271" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/download/speed" />

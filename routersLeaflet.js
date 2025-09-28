@@ -274,6 +274,12 @@ function createHereRouter() {
   return hereRouter;
 } // createHereRouter
 
+const sharedPointMarkerStyle = {
+  radius: 16, // default is 7
+  color: 'red',
+  fillColor: 'yellow',
+  fillOpacity: 0.8
+};
 
 function findRouteHERE(from, to, apiKey, callback, startWhenReady=false, useSample = false) {
   // Poista vanha reitti, jos se on olemassa
@@ -298,7 +304,8 @@ function findRouteHERE(from, to, apiKey, callback, startWhenReady=false, useSamp
     },
     altLineOptions: {
       styles: [{color: 'gray', opacity: 0.5, weight: 5}]
-    }
+    },
+    pointMarkerStyle: sharedPointMarkerStyle,
   }).addTo(mapWrapper.map);
   mapWrapper.routingControl.on('routesfound', function (e) {
     mapWrapper.routingControl.currentRoutes = e.routes; // talletetaan kaikki reitit
@@ -554,7 +561,8 @@ function findRouteOSRM(from, to, callback, startWhenReady = false) {
     },
     altLineOptions: {
       styles: [{color: 'gray', opacity: 0.5, weight: 5}]
-    }
+    },
+    pointMarkerStyle: sharedPointMarkerStyle,
   });
 
   return setCallbackWhenReady(callback, startWhenReady);
@@ -599,6 +607,7 @@ function findRouteGraphHopper(from, to, apiKey, callback, startWhenReady = false
     lineOptions: { // free version has only one route :-(
       styles: [{ color: 'blue', opacity: 0.7, weight: 5 }]
     },
+    pointMarkerStyle: sharedPointMarkerStyle,
     showAlternatives: true,
     routeWhileDragging: true
   });
@@ -707,7 +716,9 @@ function numberToFinnishDistance(n) {
 
 function initRoutingEvents(routingControl, startWhenReady = false) {
   if (!routingControl) return;
-  removeRouteMarkers()
+  for (const route of routingControl.currentRoutes) {
+    removeRouteMarkers(route.coordinates)
+  }
   const itineraryDiv = document.getElementById('itineraryDiv');
   const routingContainer = document.querySelector('.leaflet-routing-container');
   itineraryDiv.innerHTML = '';
@@ -830,73 +841,82 @@ function initRoutingOptions() {
   routingOptionsLoaded = true;
 }
 
-function findInstruction(route, coord, lastIdx = -1) {
+function findInstruction(route, pt, lastIdx = -1) {
   if (!route || !route.instructions || route.instructions.length === 0) return null;
   let closestInstr = 0;
   let closestDist = Infinity;
   for (let idx = lastIdx+1; idx <route.instructions.length; idx++) {
     const instr = route.instructions[idx];
     const ipos = route.coordinates[instr.index];
-    const dist = WGS84_distance([ipos.lat, ipos.lng], coord);
+    const dist = WGS84_distance(ipos, pt);
     if (dist < closestDist) {
       closestDist = dist;
       closestInstr = idx;
     }
-    if (dist < 0.1) break; // very close
+    if (dist*1000 < options.routePointAckRadius) break; // very close
   }
-  for (let i = 0; i < closestInstr; i++) {
-      mapWrapper.routeMarkers[i]?.remove();
-      mapWrapper.routeMarkers[i] = null;
+  const coords = route.coordinates;
+  for (let i = 0; i < route.instructions[closestInstr].index; i++) {
+    const coord = coords[i];
+    coord?.marker?.remove();
+    coord[i] = null;
   }
   return [closestInstr, closestDist];
 }
 
+/*
 function distToNextInstruction(route, coord, lastIdx = -1) {
   if (!route || !route.instructions || route.instructions.length === 0) return null;
   const ic1 = route.instructions[lastIdx].index;
   const ic2 = route.instructions[lastIdx+1].index;
-
-
 }
+*/
 
-mapWrapper.routeMarkers = [];
+mapWrapper.coordsMarkers = []; // This is for making removing easier
 mapWrapper.projMarkers = [];
 let naviInfo = null;
 let naviText = null;
 
-function removeRouteMarkers() {
-  if (mapWrapper.routeMarkers) {
-    for (const m of mapWrapper.routeMarkers) {
-      if (m) m.remove();
-    }
-    mapWrapper.routeMarkers = [];
+function removeRouteMarkers(coords) {
+  for (const coord of coords) {
+    coord.marker = null;
   }
+  for (const m of mapWrapper.coordsMarkers) {
+    if (m) m.remove();
+  }
+  mapWrapper.coordsMarkers = [];
+
   if (mapWrapper.nextStepCirce) {
     mapWrapper.nextStepCirce.remove();
     mapWrapper.nextStepCirce = null;
   }
 }
 
-function drawProjectedPoints(p, coords) {
+function removeProjectedMarkers() {
   for (const m of mapWrapper.projMarkers) {
     if (m) m.remove();
   }
+  mapWrapper.projMarkers = [];
+}
+
+function drawProjectedPoints(p, coords) {
+  removeProjectedMarkers();
 
   mapWrapper.projMarkers = [];
 
   for (let i = 0; i < coords.length-1; i++) {
-    const p1 = coords[i];
-    const p2 = coords[i+1];
-    const d = distanceFromSegment(p, p1, p2);
+    const c1 = coords[i];
+    const c2 = coords[i+1];
+    const d = distanceFromSegment(p, c1, c2);
   }
 
 }
 
 
-function createDebugMarker(coord, text) {
+function createDebugMarker(coord, text, bg='blue') {
     const icon = mapWrapper.L.divIcon({
       className: 'route-index-marker',
-      html: `<div style="background:blue;color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:12px;">${text}</div>`,
+      html: `<div style="background:${bg};color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:12px;">${text}</div>`,
       iconSize: [18, 18]
     });
     if (coord.lat) coord = [coord.lat, coord.lng];
@@ -907,11 +927,13 @@ function createDebugMarker(coord, text) {
 
 function createDebugMarkers(route) {
   if (!route || !route.coordinates) return;
-  let prevPt = route.coordinates[0]
-  for (let idx = 0; idx < route.coordinates.length; idx++) {
-    const coord = route.coordinates[idx];
+  const coords = route.coordinates;
+  let prevPt = coords[0]
+  for (let idx = 0; idx < coords.length; idx++) {
+    const coord = coords[idx];
     const m = createDebugMarker(coord, idx.toString());
-    mapWrapper.routeMarkers.push(m);
+    coord.marker = m;
+    mapWrapper.coordsMarkers.push(m);
     const d = WGS84_distance([prevPt.lat, prevPt.lng], [coord.lat, coord.lng]);
     prevPt = coord;
     coord.dist = d * 1000; // in meters
@@ -922,8 +944,8 @@ function createDebugMarkers(route) {
     const pos = route.coordinates[instr.index];
     pos.instrIndex = i;
   }
-
 } // end debug markers
+
 
 function unlockRoute() {
   const routeAlts = document.getElementById("routeAlts")
@@ -1027,51 +1049,57 @@ function distanceFromSegment(gps, p1, p2) {
 
   const dotAPAB = APx * ABx + APy * ABy;
   const dotABAB = ABx * ABx + ABy * ABy;
+  let tf = 2; // 2 = ulkopuolella
+  let C = p1;
+  let inside = false;
 
-  // projektiokerroin t (0–1)
-  let t = dotABAB === 0 ? 0 : dotAPAB / dotABAB;
-  t = Math.max(0, Math.min(1, t));
+  if ( dotABAB !== 0) {
+    tf = 0; // A ja B samat pisteet
+    // projektiokerroin t (0–1)
+    tf = dotABAB === 0 ? 0 : dotAPAB / dotABAB;
+    const t = Math.max(0, Math.min(1, tf));
 
-  // lähin piste segmentillä tasokoordinaateissa
-  const Cx = Ax + t * ABx;
-  const Cy = Ay + t * ABy;
+    // lähin piste segmentillä tasokoordinaateissa
+    const Cx = Ax + t * ABx;
+    const Cy = Ay + t * ABy;
 
-  // takaisin lat/lon (vain debug-visualisointiin)
-  const C = [Cy * toDeg, (Cx / (cosLat0)) * toDeg];
-
+    // takaisin lat/lon (vain debug-visualisointiin)
+    C = [Cy * toDeg, (Cx / (cosLat0)) * toDeg];
+    inside = 0 <= tf && tf <= 1;
+  }
   // Etäisyys gps → C metreinä
   const d = WGS84_distance(gps, C) * 1000;
 
   // Debug-markkeri
-  mapWrapper.projMarkers.push(createDebugMarker(C, fixed(d,0)));
+  mapWrapper.projMarkers.push(createDebugMarker(C, fixed(d,0), "gray"));
 
-  return d;
+  return [d, tf, inside];
 }
 
-function startNavigation(coord=null) {
+function startNavigation(pt=null) {
 
-   if (!coord) coord = mapWrapper.getPinLocation(myPin);
-   removeRouteMarkers();
+   if (!pt) pt = mapWrapper.getPinLocation(myPin);
    const rc = mapWrapper.routingControl;
    if (!rc) return false;
    const route = rc.currentRoutes[rc.activeRouteIndex];
    if (!route) return false;
+   removeRouteMarkers(route.coordinates);
    if (!route.instructions || route.instructions.length === 0) return false;
    if (!route.coordinates || route.coordinates.length === 0) return false;
 
 
-   drawProjectedPoints(coord, route.coordinates);
+   // drawProjectedPoints(pt, route.coordinates);
    setNavigation(true);
    naviInfo = document.getElementById('naviInfo');
    naviText = document.getElementById('naviInfoText');
-
-   mapWrapper.routeMarkers = []
 
    lockRoute(rc);
 
    createDebugMarkers(route);
 
-   const [idx, _] = findInstruction(route, coord);
+
+   // const [idx, _] = findInstruction(route, pt);
+   const idx = 0;
 
    route.inst2Read = false;
    route.step = idx;
@@ -1080,8 +1108,8 @@ function startNavigation(coord=null) {
    const instr = route.instructions[idx];
    if (instr.uiRow) instr.uiRow.click();
 
-   const firstStep = route.coordinates[route.coordIndex];
-   mapWrapper.nextStepCirce = L.circle(getStepCoord(route),
+   // const firstStep = route.coordinates[route.coordIndex];
+   mapWrapper.nextStepCirce = mapWrapper.L.circle(getStepCoord(route),
      {radius: options.routePointAckRadius, color: 'red'}).addTo(mapWrapper.map);
 
    showNaviText(route, idx);
@@ -1115,46 +1143,82 @@ function showNaviText(route, idx  = 0, dist = -1) {
   return cidx;
 }
 
-function checkLegsCoords(route, coord) {
-   if (route.coordIndex > route.coordinates.length) return 0;
-   if (route.step >= route.instructions.length - 1) return 0;
+function checkLegsCoords(route, step, coordIndex, pt) {
+   const coords = route.coordinates;
+   if (coordIndex > coords.length) return [0, false];
+   if (step >= route.instructions.length - 1) return [0, false];
    let sum = 0;
    let prevPos = null;
-   const lastLegIdx = route.instructions[route.step+1].index;
-   for (let i = route.coordIndex; i <= lastLegIdx; i++) {
-      const p = route.coordinates[i];
+   removeProjectedMarkers();
+   const i0 = coordIndex;
+   const [prevProjDist, prevT  , prevInside] =
+     distanceFromSegment(pt, coords[Math.max(0, i0-1)], coords[i0]);
+   console.log("\nprevDist", i0-1, fixed(prevProjDist,0), fixed(prevT,2), prevInside);
+   let ok = prevInside || prevProjDist < options.polygonAckRadius;
+   const lastLegIdx = route.instructions[step+1].index;
+   for (let i = coordIndex; i <= lastLegIdx; i++) {
+      const p = coords[i];
+      let [projDist, t, inside] = [0, 0, false];
+      if (!ok) {
+        [projDist, t, inside] =
+          distanceFromSegment(pt, coords[i], coords[Math.min(i + 1, coords.length - 1)]);
+      }
+      console.log("nextDist", i, fixed(projDist,0), fixed(t,2), inside);
       const pos = [p.lat, p.lng];
-      let dist = WGS84_distance(pos, coord)*1000;
+      let dist = WGS84_distance(pos, pt)*1000;
       let ackRadius = options.polygonAckRadius;
-      if (route.coordIndex === lastLegIdx)  // is last leg point
+      if (coordIndex === lastLegIdx)  // is last leg point
         ackRadius = options.routePointAckRadius;
-      if (route.coordIndex === route.coordinates.length-1)  // is last route point
+      if (coordIndex === coords.length-1)  // is last route point
         ackRadius = options.routeGoalAckRadius;
-      if (dist < ackRadius && !prevPos) { // 40 meters
-         mapWrapper.routeMarkers[route.coordIndex]?.remove();
-         mapWrapper.routeMarkers[route.coordIndex] = null;
-         route.coordIndex = i + 1;
+      if ((!ok && inside && projDist < options.polygonAckRadius) ||
+        (dist < ackRadius && !prevPos)) { // 40 meters
+         ok = true;
+         coordIndex = i + 1;
       } else if (!prevPos) {
-         sum += dist;
+         if (ok) sum += dist;
          prevPos = pos
       } else {
          dist = p.dist; // precalculated distance
-         sum += dist;
+         if (ok) sum += dist;
          prevPos = pos;
       }
    }
-   return sum;
+   return [sum, coordIndex, ok];
 }
 
-function continueNavigation(coord, speed) {
-   const rc = mapWrapper.routingControl;
-   if (!rc) return false;
-   const route = rc.currentRoutes[rc.activeRouteIndex];
-   if (!route) return false;
-   const dist = checkLegsCoords(route, coord);
-   drawProjectedPoints(coord, route.coordinates);
+function continueNavigation(pt, speed) {
+  const rc = mapWrapper.routingControl;
+  if (!rc) return false;
+  const route = rc.currentRoutes[rc.activeRouteIndex];
+  if (!route) return false;
+  const coords = route.coordinates;
+  let ok = false;
+  let dist;
+  let step = route.step;
+  let coordIndex = route.coordIndex;
+  while (step < route.instructions.length - 1 && !ok) {
+    [dist, coordIndex, ok] = checkLegsCoords(route, step, coordIndex, pt);
+    if (ok) {
+      route.step = step;
+      for (let i = route.coordIndex; i<coordIndex; i++) {
+         coords[i]?.marker?.remove();
+         coords[i].marker = null;
+      }
+      route.coordIndex = coordIndex;
+    }
+    else {
+      step++;
+      coordIndex = route.instructions[step].index;
+      route.inst2read = false;
+    }
+  }
+   // drawProjectedPoints(pt, route.coordinates);
 
    showNaviText(route, route.step, dist);
+
+    if (!ok) return false; // not on route
+
    const timeToTurn =  dist/speed;
 
    if (timeToTurn < options.instLeadTime2/2) route.inst2Read = true;
@@ -1177,7 +1241,11 @@ function continueNavigation(coord, speed) {
    route.step = idx;
    let midx = Math.min(idx, route.instructions.length - 1);
    for (let i = route.coordIndex; i<route.instructions[midx].index; i++) {
-      mapWrapper.routeMarkers[i].remove();
+      const coord = route.coordinates[i];
+      if (coord.marker) {
+        coord.marker.remove();
+        coord.marker = null;
+      }
    }
    route.coordIndex = route.instructions[midx].index;
    const instr = route.instructions[midx];
