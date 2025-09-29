@@ -441,6 +441,12 @@
       margin: 5px 20px 15px 5px;
     }
 
+    /*noinspection CssUnusedSymbol*/
+    .navi-big {
+      font-size: 3em;
+      font-weight: bold;
+    }
+
     .inner {
       display: flex;
       align-items: center;
@@ -3535,6 +3541,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
       },
       onclose: function () {
         routingWindow = null;
+        removeAllRouting();
         removeOldRoutingControl();
         return false;
       },

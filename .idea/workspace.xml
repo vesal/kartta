@@ -11,8 +11,6 @@
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/offline-worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/offline-worker.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routersLeaflet.js" beforeDir="false" afterPath="$PROJECT_DIR$/routersLeaflet.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -220,7 +218,7 @@
       <workItem from="1758443065910" duration="2968000" />
       <workItem from="1758446846268" duration="1390000" />
       <workItem from="1758448685802" duration="4431000" />
-      <workItem from="1758453368256" duration="108076000" />
+      <workItem from="1758453368256" duration="147236000" />
     </task>
     <servers />
   </component>
@@ -252,15 +250,21 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/k3.html</url>
-          <line>3613</line>
+          <line>3620</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="108" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/routersLeaflet.js</url>
-          <line>1217</line>
+        <line-breakpoint type="javascript">
+          <url>http://localhost:8080/routersLeaflet.js?v=1759131536787</url>
+          <line>1199</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="142" />
+          <option name="timeStamp" value="143" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>http://localhost:8080/routersLeaflet.js?v=1759131536787</url>
+          <line>1242</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="144" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

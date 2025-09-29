@@ -886,9 +886,13 @@ function removeRouteMarkers(coords) {
   }
   mapWrapper.coordsMarkers = [];
 
-  if (mapWrapper.nextStepCirce) {
-    mapWrapper.nextStepCirce.remove();
-    mapWrapper.nextStepCirce = null;
+  if (mapWrapper.nextStepCircle) {
+    mapWrapper.nextStepCircle.remove();
+    mapWrapper.nextStepCircle = null;
+  }
+  if (mapWrapper.nextCoordCircle) {
+    mapWrapper.nextCoordCircle.remove();
+    mapWrapper.nextCoordCircle = null;
   }
 }
 
@@ -937,14 +941,64 @@ function createDebugMarkers(route) {
     const d = WGS84_distance([prevPt.lat, prevPt.lng], [coord.lat, coord.lng]);
     prevPt = coord;
     coord.dist = d * 1000; // in meters
+    coord.toNextInstr = 0;
   }
 
   for (let i = 0; i < route.instructions.length; i++) {
     const instr = route.instructions[i];
-    const pos = route.coordinates[instr.index];
-    pos.instrIndex = i;
+    const coord = route.coordinates[instr.index];
+    coord.instrIndex = i;
+    if (i === 0) continue;
+    let cPrev = coord;
+    for (let j = instr.index-1; j > route.instructions[i-1].index; j--) {
+      const c = route.coordinates[j];
+      c.toNextInstr += cPrev.dist + cPrev.toNextInstr;
+      cPrev = c;
+    }
   }
 } // end debug markers
+
+
+// coordIndex is index from coordinates that we are aiming to
+function setCoordIndex(route, idx) {
+  const coords = route.coordinates;
+  if (idx < 0 ) return false;
+  if (idx < route.coordIndex) return false;
+  if (!mapWrapper.nextCoordCircle)
+    mapWrapper.nextCoordCircle = mapWrapper.L.circle([0,0],
+     {radius: options.polygonAckRadius, color: 'blue'}).addTo(mapWrapper.map);
+  if (idx > coords.length) idx = coords.length;
+  for (let i = route.coordIndex; i<idx; i++) {
+     const coord = route.coordinates[i];
+     if ( coord?.marker ) {
+       coord.marker.remove();
+       coord.marker = null;
+     }
+  }
+  route.coordIndex = idx;
+  mapWrapper.nextCoordCircle.setLatLng(coords[idx]);
+  return true;
+}
+
+
+// stepIndex is index from instructions that we are aiming to
+function setStepIndex(route, idx, nidx = -1) {
+  if (idx < 0 ) return false;
+  if (nidx < 0) nidx = idx+1;
+  if (!mapWrapper.nextStepCircle)
+    mapWrapper.nextStepCircle = mapWrapper.L.circle(getCoord(route,0),
+     {radius: options.routePointAckRadius, color: 'red'}).addTo(mapWrapper.map);
+
+  if (idx >= route.instructions.length) idx = route.instructions.length - 1;
+  if (idx >= route.instructions.length-1) {
+    mapWrapper.nextStepCircle.setStyle({color: 'green'});
+    mapWrapper.nextStepCircle.setRadius(options.routeGoalAckRadius);
+  }
+  if (nidx >= route.instructions.length) nidx = route.instructions.length - 1;
+  mapWrapper.nextStepCircle.setLatLng(getCoord(route, route.instructions[idx].index));
+  route.stepIndex = idx;
+  return true;
+}
 
 
 function unlockRoute() {
@@ -1015,9 +1069,9 @@ function lockRoute(rc) {
   });
 } // end lockRoute
 
-function getStepCoord(route, idx=-1) {
+function getCoord(route, idx=-1) {
   if (idx < 0) idx = route.coordIndex;
-  idx = Math.min(idx, route.coordinates.length);
+  idx = Math.min(idx, route.coordinates.length-1);
   const pt = route.coordinates[idx];
   return [pt.lat, pt.lng];
 }
@@ -1095,6 +1149,8 @@ function startNavigation(pt=null) {
 
    lockRoute(rc);
 
+   route.coordIndex = 0;
+   route.stepIndex = 0;
    createDebugMarkers(route);
 
 
@@ -1102,27 +1158,34 @@ function startNavigation(pt=null) {
    const idx = 0;
 
    route.inst2Read = false;
-   route.step = idx;
+   setStepIndex(route, idx, idx);
    // route.coordIndex = Math.max(route.instructions[idx].index,1);
-   route.coordIndex = route.instructions[idx].index;
+   setCoordIndex(route, route.instructions[idx].index);
    const instr = route.instructions[idx];
    if (instr.uiRow) instr.uiRow.click();
 
    // const firstStep = route.coordinates[route.coordIndex];
-   mapWrapper.nextStepCirce = mapWrapper.L.circle(getStepCoord(route),
-     {radius: options.routePointAckRadius, color: 'red'}).addTo(mapWrapper.map);
 
    showNaviText(route, idx);
    return true;
 }
 
-function showNaviText(route, idx  = 0, dist = -1) {
+function showNaviText(route, idx  = 0, dist = -1, onRoute = true) {
   if (!naviText) return;
+  if (!onRoute) {
+    naviText.innerHTML = '<p><span class="navi-big" onclick="showRoutePane()">Hukassa</span></p>';
+    return -1;
+  }
   const instr = route.instructions[idx];
   const nextinstr = route.instructions[idx+1];
   const icon1= instr.uiRow.querySelector('td')?.innerHTML ?? '';
-  let text = icon1 + instr.text + " " + instr.distance + " m " + instr.time + " s";
+  let distm = ""
+  if (dist >= 0) {
+    distm = '<span class="navi-big">' + (Math.round(dist/10)*10).toFixed(0) + "</span> ";
+  }
+  let text =  distm + icon1 + instr.text + " " + instr.distance + " m " + instr.time + " s";
   let cidx = instr.index;
+  /*
   if (nextinstr) {
     let distm = ""
     if (dist >= 0) {
@@ -1132,21 +1195,17 @@ function showNaviText(route, idx  = 0, dist = -1) {
     text += "<br>" + distm + icon2 + " Sitten " +  nextinstr.text;
     if (dist >= 0) cidx = nextinstr.index;
   }
+  */
   naviText.innerHTML = "<p>" + text + "</p>";
-  if (cidx >= route.coordinates.length-1) {
-    mapWrapper.nextStepCirce.setStyle({color: 'green'});
-    mapWrapper.nextStepCirce.setRadius(options.routeGoalAckRadius);
-  }
-  mapWrapper.nextStepCirce.setLatLng(getStepCoord(route, cidx));
-  route.nextinstr = nextinstr;
+  route.comingInstruction = instr;
   route.nextdist = dist;
   return cidx;
 }
 
-function checkLegsCoords(route, step, coordIndex, pt) {
+function checkLegsCoords(route, stepIndex, coordIndex, pt) {
    const coords = route.coordinates;
-   if (coordIndex > coords.length) return [0, false];
-   if (step >= route.instructions.length - 1) return [0, false];
+   if (coordIndex >= coords.length) return [0, coords.length-1, false];
+   if (stepIndex >= route.instructions.length) return [0, coords.length-1, false];
    let sum = 0;
    let prevPos = null;
    removeProjectedMarkers();
@@ -1154,8 +1213,9 @@ function checkLegsCoords(route, step, coordIndex, pt) {
    const [prevProjDist, prevT  , prevInside] =
      distanceFromSegment(pt, coords[Math.max(0, i0-1)], coords[i0]);
    console.log("\nprevDist", i0-1, fixed(prevProjDist,0), fixed(prevT,2), prevInside);
-   let ok = prevInside || prevProjDist < options.polygonAckRadius;
-   const lastLegIdx = route.instructions[step+1].index;
+   let ok = prevInside && prevProjDist < options.polygonAckRadius;
+   let onRoute = ok;
+   const lastLegIdx = route.instructions[stepIndex].index;
    for (let i = coordIndex; i <= lastLegIdx; i++) {
       const p = coords[i];
       let [projDist, t, inside] = [0, 0, false];
@@ -1167,14 +1227,18 @@ function checkLegsCoords(route, step, coordIndex, pt) {
       const pos = [p.lat, p.lng];
       let dist = WGS84_distance(pos, pt)*1000;
       let ackRadius = options.polygonAckRadius;
-      if (coordIndex === lastLegIdx)  // is last leg point
+      if (i === lastLegIdx) { // is last leg point
         ackRadius = options.routePointAckRadius;
-      if (coordIndex === coords.length-1)  // is last route point
+        if (!ok) prevPos = pos; // to get dist from last point
+      }
+      if (i === coords.length-1)  // is last route point
         ackRadius = options.routeGoalAckRadius;
       if ((!ok && inside && projDist < options.polygonAckRadius) ||
-        (dist < ackRadius && !prevPos)) { // 40 meters
+        (dist < ackRadius && (!prevPos || i === lastLegIdx))) { // 40 meters
          ok = true;
-         coordIndex = i + 1;
+         onRoute = true;
+         if (i < lastLegIdx) coordIndex = i + 1;
+         else sum = dist;  // no previus sum because no ok
       } else if (!prevPos) {
          if (ok) sum += dist;
          prevPos = pos
@@ -1184,8 +1248,25 @@ function checkLegsCoords(route, step, coordIndex, pt) {
          prevPos = pos;
       }
    }
-   return [sum, coordIndex, ok];
+   if (!ok && !onRoute) { // are we inside last segment?
+     const ip = route.instructions[stepIndex-1]?.index ?? 0;
+     for (let i = ip; i < i0; i++) {
+       const [d,t,inside] =
+         distanceFromSegment(pt, coords[ip], coords[i0]);
+        if (inside && d < options.polygonAckRadius) {
+          onRoute = true;
+          break;
+        }
+     }
+   }
+   if (!ok && sum === 0) { // recalculate from last point
+     const d = WGS84_distance(pt, coords[i0])*1000;
+     sum += d + coords[i0].toNextInstr;
+   }
+   return [sum, coordIndex, ok, onRoute];
 }
+
+
 
 function continueNavigation(pt, speed) {
   const rc = mapWrapper.routingControl;
@@ -1194,30 +1275,34 @@ function continueNavigation(pt, speed) {
   if (!route) return false;
   const coords = route.coordinates;
   let ok = false;
+  let onRoute = false;
   let dist;
-  let step = route.step;
+  let stepIndex = route.stepIndex;
   let coordIndex = route.coordIndex;
-  while (step < route.instructions.length - 1 && !ok) {
-    [dist, coordIndex, ok] = checkLegsCoords(route, step, coordIndex, pt);
+  let stepChanged = false;
+  while (stepIndex < route.instructions.length && !ok && !onRoute) {
+    [dist, coordIndex, ok, onRoute] =
+      checkLegsCoords(route, stepIndex, coordIndex, pt);
     if (ok) {
-      route.step = step;
-      for (let i = route.coordIndex; i<coordIndex; i++) {
-         coords[i]?.marker?.remove();
-         coords[i].marker = null;
+      if (route.stepIndex !== stepIndex) {
+        stepChanged = true;
+        route.inst2Read = false;
       }
-      route.coordIndex = coordIndex;
+      setStepIndex(route,stepIndex);
+      setCoordIndex(route, coordIndex);
     }
     else {
-      step++;
-      coordIndex = route.instructions[step].index;
+      coordIndex = Math.max(route.instructions[stepIndex].index, coordIndex);
+      stepIndex++;
+      stepChanged = true;
       route.inst2read = false;
     }
   }
    // drawProjectedPoints(pt, route.coordinates);
 
-   showNaviText(route, route.step, dist);
+   showNaviText(route, route.stepIndex, dist, onRoute);
 
-    if (!ok) return false; // not on route
+   if (!ok) return false; // not on route
 
    const timeToTurn =  dist/speed;
 
@@ -1225,35 +1310,29 @@ function continueNavigation(pt, speed) {
 
 
    // Is it time to the first instruction? More than 60s, no!
-   if (timeToTurn > options.instLeadTime2) return false;
+   if (!stepChanged && timeToTurn > options.instLeadTime2) return false;
+
    if (!route.inst2Read) {
      const d = routingStyleRound(route.nextdist);
      const ds = numberToFinnishDistance(d);
-     speakText("Aja " + ds + " ja sitten " + route.nextinstr.text);
+     speakText("Aja " + ds + " ja sitten " + route.comingInstruction.text);
      route.inst2Read = true;
    }
 
    // Is it time to the next instruction? More than 10s, no!
    if (timeToTurn > options.instLeadTime) return false;
    // Is it near last instruction? Wait closer (20m)
-   if (route.step >= route.instructions.length - 2 && dist > options.routePointAckRadius) return false;
-   let idx = route.step+1;
-   route.step = idx;
-   let midx = Math.min(idx, route.instructions.length - 1);
-   for (let i = route.coordIndex; i<route.instructions[midx].index; i++) {
-      const coord = route.coordinates[i];
-      if (coord.marker) {
-        coord.marker.remove();
-        coord.marker = null;
-      }
-   }
-   route.coordIndex = route.instructions[midx].index;
-   const instr = route.instructions[midx];
+   if (route.stepIndex >= route.instructions.length - 1 && dist > options.routePointAckRadius) return false;
+   const instr = route.instructions[route.stepIndex];
    if (instr.uiRow) {
      instr.uiRow.click();
      route.inst2Read = false;
    }
-   if (midx === route.instructions.length-1) stopNavigation();
+   if (route.stepIndex === route.instructions.length-1) {
+     removeRouteMarkers(coords);
+     stopNavigation();
+   }
+   setStepIndex(route, route.stepIndex+1);
    return true;
 }
 
@@ -1270,5 +1349,19 @@ function setNavigation(enable) {
 }
 
 function stopNavigation() {
-    setNavigation(false);
+    removeAllRouting();
+}
+
+function removeAllRouting() {
+  setNavigation(false);
+  const rc = mapWrapper.routingControl;
+  if (rc) {
+    if (rc.currentRoutes) {
+      const route = rc.currentRoutes[rc.activeRouteIndex];
+      removeRouteMarkers(route.coordinates);
+    }
+    removeProjectedMarkers();
+    // rc.remove();
+    // mapWrapper.routingControl = null;
+  }
 }
