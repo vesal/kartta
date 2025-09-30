@@ -1277,7 +1277,10 @@
     polygonAckRadius: 40,
     routePointAckRadius: 15,
     routeGoalAckRadius: 10,
-
+    drawPolygonPoints: false,
+    drawNextPolygonPoint: false,
+    drawNextStepPoint: true,
+    drawDistancePoints: false,
   };
 
   const areaDatas = [
@@ -2843,6 +2846,11 @@
     getOptionInt("routePointAckRadius");
     getOptionInt("routeGoalAckRadius");
 
+    getCBOption("drawPolygonPoints");
+    getCBOption("drawNextPolygonPoint");
+    getCBOption("drawNextStepPoint");
+    getCBOption("drawDistancePoints");
+
     const cb1 = document.getElementById('area1cb');
     const cb2 = document.getElementById('area1cbCopy');
 
@@ -4028,12 +4036,15 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     </div>
     <hr>
     <div>
-      <div><label for="simulateSpeed">Liikkumisen nopeus simuloinnissa: </label><input type="text" size="5"
-                                                                                       id="simulateSpeed" value="0"> m/s
+      <h3>Simulointiasetuksia</h3>
+      <div><label for="simulateSpeed">Liikkumisen nopeus simuloinnissa: </label><input type="text" size="5" id="simulateSpeed" value="0"> m/s</div>
+      <label><input type="checkbox"  id="drawPolygonPoints"/>Piirrä reitin murtoviivan kulmapisteet</label><br>
+      <label><input type="checkbox"  id="drawNextPolygonPoint"/>Piirrä seuraavan kulampisteen ympyrä</label><br>
+      <label><input type="checkbox"  id="drawNextStepPoint"/>Piirrä seuraavan ohjeen ympyrä</label><br>
+      <label><input type="checkbox"  id="drawDistancePoints"/>Piirrä välin etsinnän etäisyydet</label><br>
       </div>
     </div>
   </div>
-</div>
 
 <div id="naviInfo" class="draggable noselect" style="background-color: white; position:absolute; padding: 5px; border: 1px solid black;
   min-width: 120px;top:10px;right:200px;width: unset; height: unset; z-index:1031; visibility: hidden">

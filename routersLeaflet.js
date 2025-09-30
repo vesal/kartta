@@ -935,9 +935,11 @@ function createDebugMarkers(route) {
   let prevPt = coords[0]
   for (let idx = 0; idx < coords.length; idx++) {
     const coord = coords[idx];
-    const m = createDebugMarker(coord, idx.toString());
-    coord.marker = m;
-    mapWrapper.coordsMarkers.push(m);
+    if (options.drawPolygonPoints) {
+      const m = createDebugMarker(coord, idx.toString());
+      coord.marker = m;
+      mapWrapper.coordsMarkers.push(m);
+    }
     const d = WGS84_distance([prevPt.lat, prevPt.lng], [coord.lat, coord.lng]);
     prevPt = coord;
     coord.dist = d * 1000; // in meters
@@ -964,18 +966,24 @@ function setCoordIndex(route, idx) {
   const coords = route.coordinates;
   if (idx < 0 ) return false;
   if (idx < route.coordIndex) return false;
+  route.coordIndex = idx;
+
+  if (options.drawPolygonPoints) {
+    if (idx > coords.length) idx = coords.length;
+    for (let i = route.coordIndex; i < idx; i++) {
+      const coord = route.coordinates[i];
+      if (coord?.marker) {
+        coord.marker.remove();
+        coord.marker = null;
+      }
+    }
+  }
+
+  if (!options.drawNextPolygonPoint) return true;
+
   if (!mapWrapper.nextCoordCircle)
     mapWrapper.nextCoordCircle = mapWrapper.L.circle([0,0],
      {radius: options.polygonAckRadius, color: 'blue'}).addTo(mapWrapper.map);
-  if (idx > coords.length) idx = coords.length;
-  for (let i = route.coordIndex; i<idx; i++) {
-     const coord = route.coordinates[i];
-     if ( coord?.marker ) {
-       coord.marker.remove();
-       coord.marker = null;
-     }
-  }
-  route.coordIndex = idx;
   mapWrapper.nextCoordCircle.setLatLng(coords[idx]);
   return true;
 }
@@ -984,19 +992,20 @@ function setCoordIndex(route, idx) {
 // stepIndex is index from instructions that we are aiming to
 function setStepIndex(route, idx, nidx = -1) {
   if (idx < 0 ) return false;
-  if (nidx < 0) nidx = idx+1;
-  if (!mapWrapper.nextStepCircle)
-    mapWrapper.nextStepCircle = mapWrapper.L.circle(getCoord(route,0),
-     {radius: options.routePointAckRadius, color: 'red'}).addTo(mapWrapper.map);
-
   if (idx >= route.instructions.length) idx = route.instructions.length - 1;
-  if (idx >= route.instructions.length-1) {
+  route.stepIndex = idx;
+  if (!options.drawNextStepPoint) return true;
+
+  if (!mapWrapper.nextStepCircle)
+    mapWrapper.nextStepCircle = mapWrapper.L.circle(getCoord(route, 0),
+      {radius: options.routePointAckRadius, color: 'red'}).addTo(mapWrapper.map);
+
+  if (idx >= route.instructions.length - 1) {
     mapWrapper.nextStepCircle.setStyle({color: 'green'});
     mapWrapper.nextStepCircle.setRadius(options.routeGoalAckRadius);
   }
-  if (nidx >= route.instructions.length) nidx = route.instructions.length - 1;
   mapWrapper.nextStepCircle.setLatLng(getCoord(route, route.instructions[idx].index));
-  route.stepIndex = idx;
+
   return true;
 }
 
@@ -1125,8 +1134,10 @@ function distanceFromSegment(gps, p1, p2) {
   const d = WGS84_distance(gps, C) * 1000;
 
   // Debug-markkeri
-  mapWrapper.projMarkers.push(createDebugMarker(C, fixed(d,0), "gray"));
 
+  if (options.drawDistancePoints) {
+    mapWrapper.projMarkers.push(createDebugMarker(C, fixed(d, 0), "gray"));
+  }
   return [d, tf, inside];
 }
 
@@ -1212,7 +1223,7 @@ function checkLegsCoords(route, stepIndex, coordIndex, pt) {
    const i0 = coordIndex;
    const [prevProjDist, prevT  , prevInside] =
      distanceFromSegment(pt, coords[Math.max(0, i0-1)], coords[i0]);
-   console.log("\nprevDist", i0-1, fixed(prevProjDist,0), fixed(prevT,2), prevInside);
+   // console.log("\nprevDist", i0-1, fixed(prevProjDist,0), fixed(prevT,2), prevInside);
    let ok = prevInside && prevProjDist < options.polygonAckRadius;
    let onRoute = ok;
    const lastLegIdx = route.instructions[stepIndex].index;
@@ -1223,7 +1234,7 @@ function checkLegsCoords(route, stepIndex, coordIndex, pt) {
         [projDist, t, inside] =
           distanceFromSegment(pt, coords[i], coords[Math.min(i + 1, coords.length - 1)]);
       }
-      console.log("nextDist", i, fixed(projDist,0), fixed(t,2), inside);
+      // console.log("nextDist", i, fixed(projDist,0), fixed(t,2), inside);
       const pos = [p.lat, p.lng];
       let dist = WGS84_distance(pos, pt)*1000;
       let ackRadius = options.polygonAckRadius;
