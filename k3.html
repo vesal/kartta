@@ -564,6 +564,15 @@
       background-repeat: no-repeat;
     }
 
+    /*noinspection CssUnusedSymbol*/
+    div#naviInfoToGoal {
+        /* float: right; */
+        top: 0;
+        position: absolute;
+        right: 0;
+        font-size: 1.5em;
+    }
+
   </style>
   <script src="KeyValStore.js" defer></script>
   <script>
@@ -4047,8 +4056,8 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   </div>
 
 <div id="naviInfo" class="draggable noselect" style="background-color: white; position:absolute; padding: 5px; border: 1px solid black;
-  min-width: 120px;top:10px;right:200px;width: unset; height: unset; z-index:1031; visibility: hidden">
-  <div id="naviInfoText" style="background-color: white; ">
+  min-width: 120px;top:10px;right:200px;width: 380px; height: 90px; z-index:1031; visibility: hidden">
+  <div id="naviInfoMsgDiv" style="background-color: white; ">
   </div>
   <div class="resize-handle"></div>
 </div>

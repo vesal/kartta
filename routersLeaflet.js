@@ -875,7 +875,7 @@ function distToNextInstruction(route, coord, lastIdx = -1) {
 mapWrapper.coordsMarkers = []; // This is for making removing easier
 mapWrapper.projMarkers = [];
 let naviInfo = null;
-let naviText = null;
+let naviInfoMsgDiv = null;
 
 function removeRouteMarkers(coords) {
   for (const coord of coords) {
@@ -901,19 +901,6 @@ function removeProjectedMarkers() {
     if (m) m.remove();
   }
   mapWrapper.projMarkers = [];
-}
-
-function drawProjectedPoints(p, coords) {
-  removeProjectedMarkers();
-
-  mapWrapper.projMarkers = [];
-
-  for (let i = 0; i < coords.length-1; i++) {
-    const c1 = coords[i];
-    const c2 = coords[i+1];
-    const d = distanceFromSegment(p, c1, c2);
-  }
-
 }
 
 
@@ -958,6 +945,16 @@ function createDebugMarkers(route) {
       cPrev = c;
     }
   }
+
+  let iPrev = route.instructions.at(-1);
+  iPrev.toGoalDist = 0;
+  iPrev.toGoalTime = 0;
+  for (let j = route.instructions.length-1; j >= 0; j--) {
+    const instr = route.instructions[j];
+    instr.toGoalDist = iPrev.toGoalDist + instr.distance;
+    instr.toGoalTime = iPrev.toGoalTime + instr.time;
+    iPrev = instr;
+  }
 } // end debug markers
 
 
@@ -990,7 +987,7 @@ function setCoordIndex(route, idx) {
 
 
 // stepIndex is index from instructions that we are aiming to
-function setStepIndex(route, idx, nidx = -1) {
+function setStepIndex(route, idx) {
   if (idx < 0 ) return false;
   if (idx >= route.instructions.length) idx = route.instructions.length - 1;
   route.stepIndex = idx;
@@ -1156,7 +1153,7 @@ function startNavigation(pt=null) {
    // drawProjectedPoints(pt, route.coordinates);
    setNavigation(true);
    naviInfo = document.getElementById('naviInfo');
-   naviText = document.getElementById('naviInfoText');
+   naviInfoMsgDiv = document.getElementById('naviInfoMsgDiv');
 
    lockRoute(rc);
 
@@ -1169,7 +1166,7 @@ function startNavigation(pt=null) {
    const idx = 0;
 
    route.inst2Read = false;
-   setStepIndex(route, idx, idx);
+   setStepIndex(route, idx);
    // route.coordIndex = Math.max(route.instructions[idx].index,1);
    setCoordIndex(route, route.instructions[idx].index);
    const instr = route.instructions[idx];
@@ -1181,20 +1178,144 @@ function startNavigation(pt=null) {
    return true;
 }
 
-function showNaviText(route, idx  = 0, dist = -1, onRoute = true) {
-  if (!naviText) return;
+function formatTime(totalTime) {
+    const hours = Math.floor(totalTime / 3600);
+    const minutes = Math.floor((totalTime % 3600) / 60);
+    const seconds = Math.floor(totalTime % 60);
+
+    // Lisätään etunolla tarvittaessa
+    const hh = String(hours).padStart(2, '0');
+    const mm = String(minutes).padStart(2, '0');
+    const ss = String(seconds).padStart(2, '0');
+
+    return `${hh}:${mm}:${ss}`;
+}
+
+
+function speakNext(route) {
+  let text = route.comingInstruction.text;
+  if (route.nextdist && route.nextdist > 0) {
+    const d = routingStyleRound(route.nextdist);
+    const ds = numberToFinnishDistance(d);
+    text = "Aja " + ds + " ja sitten " + text;
+  }
+  speakText(text);
+}
+
+
+let goalFlagHtml = null;
+
+function goalFlag() {
+  if (goalFlagHtml) return goalFlagHtml;
+  const style = document.createElement("style");
+  style.id = "flag-styles"; // tunniste, jolla voi tarkistaa myöhemmin
+  style.textContent = `
+    .flag-container {
+      display: inline-block;
+      width: 3em;
+    }
+    .flag-svg {
+      transform-origin: left center;
+      animation: sway 1s infinite alternate ease-in-out;
+    }
+    @keyframes sway {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(30deg); }
+    }
+  `;
+  document.head.appendChild(style);
+
+  let flag = "";
+  let c = 0;
+  const colors = ["black", "white"];
+  for (let y=0; y<=9; y+=3) {
+    let dy = 0;
+    for (let x =1; x<=13; x+=3) {
+      flag += `<rect x="${x}" y="${y+dy}" width="3" height="3" fill="${colors[c]}"/>\n`
+      dy += 0.5;
+      c = (c+1) % colors.length;
+    }
+  }
+  goalFlagHtml = `
+<div class="flag-container">
+  <svg class="flag-svg" width="100%" height="100%" viewBox="0 0 30 24">
+    <!-- Varsi -->
+    <rect x="0" y="0" width="1" height="24" fill="#333" />
+    ${flag}
+  </svg>
+</div>
+  `;
+  return goalFlagHtml;
+}
+
+let naviInfoLostButton = null;
+let naviInfoText = null;
+let naviInfoToGoal = null;
+
+function showNaviText(route, idx  = 0, dist = -1, onRoute = true, timeToTurn = 0) {
+  function reCalculate(e) {
+    e.preventDefault(); // ettei tule tuplaklikkiä
+    showRoutePane();
+  }
+  function reRead(e) {
+    e.preventDefault(); // ettei tule tuplaklikkiä
+    speakNext(route);
+  }
+
+  if (!naviInfoMsgDiv) return;
   if (!onRoute) {
-    naviText.innerHTML = '<p><span class="navi-big" onclick="showRoutePane()">Hukassa</span></p>';
+    if (!naviInfoLostButton) {
+      naviInfoLostButton = document.createElement("button");
+      naviInfoLostButton.id = "msgLost";
+      naviInfoLostButton.className = "navi-big";
+      naviInfoLostButton.innerText = "Hukassa";
+      naviInfoLostButton.addEventListener("click", reCalculate);
+      naviInfoLostButton.addEventListener("touchstart", reCalculate);
+      naviInfoLostButton.dataset.listenerAdded = "true"; // merkki ettei lisätä uudelleen
+      naviInfoMsgDiv.appendChild(naviInfoLostButton);
+    }
+    naviInfoText && (naviInfoText.style.display = "none");
+    naviInfoLostButton.style.display = "block";
     return -1;
   }
+  naviInfoLostButton && (naviInfoLostButton.style.display = "none");
+  if (!naviInfoText) {
+    naviInfoText = document.createElement("div");
+    naviInfoText.id = "naviInfoText";
+    naviInfoMsgDiv.appendChild(naviInfoText);
+    naviInfoText.addEventListener("click", reRead);
+    naviInfoText.addEventListener("touchstart", reRead);
+  }
+
+  if (!naviInfoToGoal) {
+    naviInfoToGoal = document.createElement("div");
+    naviInfoToGoal.id = "naviInfoToGoal";
+    naviInfoMsgDiv.appendChild(naviInfoToGoal);
+  }
+
   const instr = route.instructions[idx];
-  const nextinstr = route.instructions[idx+1];
-  const icon1= instr.uiRow.querySelector('td')?.innerHTML ?? '';
+  let totalTime = timeToTurn + instr.toGoalTime;
+  let totalDist = dist + instr.toGoalDist;
+
+  totalDist = totalDist.toFixed(0);
+  totalTime = totalTime.toFixed(0);
+
+  let icon1= instr.uiRow.querySelector('td')?.innerHTML ?? '';
+  if (idx === route.instructions.length-1) {
+    // icon1 = '<span class="navi-big finish-flag">🏁⚐</span>';
+    icon1 = goalFlag();
+  }
   let distm = ""
   if (dist >= 0) {
-    distm = '<span class="navi-big">' + (Math.round(dist/10)*10).toFixed(0) + "</span> ";
+    distm = '<span class="navi-big">' + (Math.round(dist/10)*10).toFixed(0) + " </span> ";
   }
-  let text =  distm + icon1 + instr.text + " " + instr.distance + " m " + instr.time + " s";
+
+  const arrival = new Date(new Date().getTime() + totalTime * 1000);
+  const arrivalText = arrival.toTimeString().slice(0, 8);;
+  totalTime = formatTime(totalTime);
+
+  naviInfoToGoal.innerHTML =  totalDist + " m " + totalTime + " " + arrivalText;
+  let text =  distm + icon1 + instr.text;
   let cidx = instr.index;
   /*
   if (nextinstr) {
@@ -1207,7 +1328,8 @@ function showNaviText(route, idx  = 0, dist = -1, onRoute = true) {
     if (dist >= 0) cidx = nextinstr.index;
   }
   */
-  naviText.innerHTML = "<p>" + text + "</p>";
+  naviInfoText.innerHTML = "<span>" + text + "</span>";
+  naviInfoText && (naviInfoText.style.display = "block");
   route.comingInstruction = instr;
   route.nextdist = dist;
   return cidx;
@@ -1221,7 +1343,7 @@ function checkLegsCoords(route, stepIndex, coordIndex, pt) {
    let prevPos = null;
    removeProjectedMarkers();
    const i0 = coordIndex;
-   const [prevProjDist, prevT  , prevInside] =
+   const [prevProjDist, _  , prevInside] =
      distanceFromSegment(pt, coords[Math.max(0, i0-1)], coords[i0]);
    // console.log("\nprevDist", i0-1, fixed(prevProjDist,0), fixed(prevT,2), prevInside);
    let ok = prevInside && prevProjDist < options.polygonAckRadius;
@@ -1262,7 +1384,7 @@ function checkLegsCoords(route, stepIndex, coordIndex, pt) {
    if (!ok && !onRoute) { // are we inside last segment?
      const ip = route.instructions[stepIndex-1]?.index ?? 0;
      for (let i = ip; i < i0; i++) {
-       const [d,t,inside] =
+       const [d,_,inside] =
          distanceFromSegment(pt, coords[ip], coords[i0]);
         if (inside && d < options.polygonAckRadius) {
           onRoute = true;
@@ -1310,12 +1432,14 @@ function continueNavigation(pt, speed) {
     }
   }
    // drawProjectedPoints(pt, route.coordinates);
+   if (speed < 0.1) speed = 1;
 
-   showNaviText(route, route.stepIndex, dist, onRoute);
+   const timeToTurn =  dist/speed;
+
+   showNaviText(route, route.stepIndex, dist, onRoute, timeToTurn);
 
    if (!ok) return false; // not on route
 
-   const timeToTurn =  dist/speed;
 
    if (timeToTurn < options.instLeadTime2/2) route.inst2Read = true;
 
@@ -1324,9 +1448,7 @@ function continueNavigation(pt, speed) {
    if (!stepChanged && timeToTurn > options.instLeadTime2) return false;
 
    if (!route.inst2Read) {
-     const d = routingStyleRound(route.nextdist);
-     const ds = numberToFinnishDistance(d);
-     speakText("Aja " + ds + " ja sitten " + route.comingInstruction.text);
+     speakNext(route);
      route.inst2Read = true;
    }
 

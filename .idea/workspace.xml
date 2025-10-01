@@ -9,7 +9,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate-src.js" beforeDir="false" afterPath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate-src.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate-src.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate-src.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate.js" beforeDir="false" afterPath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/download/rotate/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/download/rotate/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routersLeaflet.js" beforeDir="false" afterPath="$PROJECT_DIR$/routersLeaflet.js" afterDir="false" />
     </list>
@@ -54,43 +60,43 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "JavaScript Debug.dr.executor": "Debug",
-    "JavaScript Debug.k.executor": "Debug",
-    "JavaScript Debug.k.html.executor": "Debug",
-    "JavaScript Debug.k3.html.executor": "Debug",
-    "JavaScript Debug.meribrowser.html.executor": "Debug",
-    "Notification.DisplayName-DoNotAsk-Vcs Important Messages": "VCS important messages",
-    "Notification.DoNotAsk-Vcs Important Messages": "true",
-    "Python.IncrementVersion.executor": "Debug",
-    "Python.convertFlykKartta.executor": "Debug",
-    "Python.coord.executor": "Run",
-    "Python.osrmcameras.executor": "Run",
-    "Python.osrmspeed.executor": "Run",
-    "Python.speed.executor": "Run",
-    "Python.suomenkamerat.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "WebServerToolWindowFactoryState": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "E:/riippu/kartta/js",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
-    "to.speed.mode.migration.done": "true",
-    "ts.external.directory.path": "C:\\devel\\PyCharm25\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;JavaScript Debug.dr.executor&quot;: &quot;Debug&quot;,
+    &quot;JavaScript Debug.k.executor&quot;: &quot;Debug&quot;,
+    &quot;JavaScript Debug.k.html.executor&quot;: &quot;Debug&quot;,
+    &quot;JavaScript Debug.k3.html.executor&quot;: &quot;Debug&quot;,
+    &quot;JavaScript Debug.meribrowser.html.executor&quot;: &quot;Debug&quot;,
+    &quot;Notification.DisplayName-DoNotAsk-Vcs Important Messages&quot;: &quot;VCS important messages&quot;,
+    &quot;Notification.DoNotAsk-Vcs Important Messages&quot;: &quot;true&quot;,
+    &quot;Python.IncrementVersion.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.convertFlykKartta.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.coord.executor&quot;: &quot;Run&quot;,
+    &quot;Python.osrmcameras.executor&quot;: &quot;Run&quot;,
+    &quot;Python.osrmspeed.executor&quot;: &quot;Run&quot;,
+    &quot;Python.speed.executor&quot;: &quot;Run&quot;,
+    &quot;Python.suomenkamerat.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/riippu/kartta/js&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\devel\\PyCharm25\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\riippu\kartta\js" />
@@ -218,7 +224,8 @@
       <workItem from="1758443065910" duration="2968000" />
       <workItem from="1758446846268" duration="1390000" />
       <workItem from="1758448685802" duration="4431000" />
-      <workItem from="1758453368256" duration="149702000" />
+      <workItem from="1758453368256" duration="160202000" />
+      <workItem from="1759305456522" duration="12065000" />
     </task>
     <servers />
   </component>
@@ -250,20 +257,17 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/k3.html</url>
-          <line>3628</line>
-          <properties lambdaOrdinal="-1" />
+          <line>3637</line>
           <option name="timeStamp" value="108" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>http://localhost:8080/routersLeaflet.js?v=1759131536787</url>
           <line>1199</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="143" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>http://localhost:8080/routersLeaflet.js?v=1759131536787</url>
           <line>1242</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="144" />
         </line-breakpoint>
       </breakpoints>
