@@ -1286,6 +1286,7 @@
     polygonAckRadius: 40,
     routePointAckRadius: 15,
     routeGoalAckRadius: 10,
+    timeToReroute: 10,
     drawPolygonPoints: false,
     drawNextPolygonPoint: false,
     drawNextStepPoint: true,
@@ -2854,6 +2855,8 @@
     getOptionInt("polygonAckRadius");
     getOptionInt("routePointAckRadius");
     getOptionInt("routeGoalAckRadius");
+    getOptionInt("routePointAckRadius");
+    getOptionInt("timeToReroute");
 
     getCBOption("drawPolygonPoints");
     getCBOption("drawNextPolygonPoint");
@@ -4002,28 +4005,23 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
   <div class="popupIn">
     <h2>Ajo-ohjeiden asetuksia</h2>
     <div class="flex-labels">
-      <div><label for="instLeadTime2">Kaunako ennen käännöstä luetaan muistutusohje: </label><input type="text" size="3"
-                                                                                                    id="instLeadTime2"
-                                                                                                    value="30"> s
+      <div><label for="instLeadTime2">Kaunako ennen käännöstä luetaan muistutusohje: </label>
+        <input type="text" size="3" id="instLeadTime2" value="30"> s
       </div>
-      <div><label for="instLeadTime">Kaunako ennen käännöstä luetaan ohje: </label><input type="text" size="3"
-                                                                                          id="instLeadTime" value="10">
-        s
+      <div><label for="instLeadTime">Kaunako ennen käännöstä luetaan ohje: </label>
+        <input type="text" size="3" id="instLeadTime" value="10"> s
       </div>
-      <div><label for="polygonAckRadius">Millaisella säteellä reittiviivan pisteet kuitataan: </label><input type="text"
-                                                                                                             size="3"
-                                                                                                             id="polygonAckRadius"
-                                                                                                             value="40">
-        m
+      <div><label for="polygonAckRadius">Millaisella säteellä reittiviivan pisteet kuitataan: </label>
+        <input type="text" size="3" id="polygonAckRadius" value="40"> m
       </div>
-      <div><label for="routePointAckRadius">Millaisella säteellä ohjepisteet kuitataan: </label><input type="text"
-                                                                                                       size="3"
-                                                                                                       id="routePointAckRadius"
-                                                                                                       value="15"> m
+      <div><label for="routePointAckRadius">Millaisella säteellä ohjepisteet kuitataan: </label>
+        <input type="text" size="3" id="routePointAckRadius" value="15"> m
       </div>
-      <div><label for="routeGoalAckRadius">Millaisella säteellä maali kuitataan: </label><input type="text" size="3"
-                                                                                                id="routeGoalAckRadius"
-                                                                                                value="10"> m
+      <div><label for="timeToReroute">Minkä ajan kuluttua uusi laskenta: </label>
+        <input type="text" size="3"  id="timeToReroute" value="10"> s (0=ei automaattista laskentaa vaikka hukassa)
+      </div>
+      <div><label for="routeGoalAckRadius">Millaisella säteellä maali kuitataan: </label>
+        <input type="text" size="3"  id="routeGoalAckRadius" value="10"> m
       </div>
     </div>
     <hr>

@@ -1184,11 +1184,13 @@ function formatTime(totalTime) {
     const seconds = Math.floor(totalTime % 60);
 
     // Lisätään etunolla tarvittaessa
-    const hh = String(hours).padStart(2, '0');
+    let hh = "";
+    let ss = "";
+    if (totalTime > 5*60) hh = String(hours).padStart(2, '0') + ":";
+    else ss = ":"+String(seconds).padStart(2, '0');
     const mm = String(minutes).padStart(2, '0');
-    const ss = String(seconds).padStart(2, '0');
 
-    return `${hh}:${mm}:${ss}`;
+    return `${hh}${mm}${ss}`;
 }
 
 
@@ -1254,12 +1256,12 @@ let naviInfoToGoal = null;
 
 function showNaviText(route, idx  = 0, dist = -1, onRoute = true, timeToTurn = 0) {
   function reCalculate(e) {
-    e.preventDefault(); // ettei tule tuplaklikkiä
+    if (e) e.preventDefault(); // ettei tule tuplaklikkiä
     showRoutePane();
   }
   function reRead(e) {
-    e.preventDefault(); // ettei tule tuplaklikkiä
-    speakNext(route);
+    if (e) e.preventDefault(); // ettei tule tuplaklikkiä
+    speakNext(getRoute());
   }
 
   if (!naviInfoMsgDiv) return;
@@ -1276,8 +1278,16 @@ function showNaviText(route, idx  = 0, dist = -1, onRoute = true, timeToTurn = 0
     }
     naviInfoText && (naviInfoText.style.display = "none");
     naviInfoLostButton.style.display = "block";
+    if (options.timeToReroute) {
+      if (!route.lastCall) route.lastCall = Date.now();
+      if (Date.now() - route.lastCall > options.timeToReroute*1000) {
+        reCalculate();
+        route.lastCall = Date.now();
+      }
+    }
     return -1;
   }
+  route.lastCall = Date.now();
   naviInfoLostButton && (naviInfoLostButton.style.display = "none");
   if (!naviInfoText) {
     naviInfoText = document.createElement("div");
@@ -1311,7 +1321,7 @@ function showNaviText(route, idx  = 0, dist = -1, onRoute = true, timeToTurn = 0
   }
 
   const arrival = new Date(new Date().getTime() + totalTime * 1000);
-  const arrivalText = arrival.toTimeString().slice(0, 8);;
+  const arrivalText = arrival.toTimeString().slice(0, 5);
   totalTime = formatTime(totalTime);
 
   naviInfoToGoal.innerHTML =  totalDist + " m " + totalTime + " " + arrivalText;
@@ -1400,11 +1410,17 @@ function checkLegsCoords(route, stepIndex, coordIndex, pt) {
 }
 
 
+function getRoute() {
+  const rc = mapWrapper.routingControl;
+  if (!rc) return null;
+  const route = rc.currentRoutes[rc.activeRouteIndex];
+  if (!route) return null;
+  return route;
+}
+
 
 function continueNavigation(pt, speed) {
-  const rc = mapWrapper.routingControl;
-  if (!rc) return false;
-  const route = rc.currentRoutes[rc.activeRouteIndex];
+  const route = getRoute();
   if (!route) return false;
   const coords = route.coordinates;
   let ok = false;
@@ -1428,7 +1444,7 @@ function continueNavigation(pt, speed) {
       coordIndex = Math.max(route.instructions[stepIndex].index, coordIndex);
       stepIndex++;
       stepChanged = true;
-      route.inst2read = false;
+      route.inst2Read = false;
     }
   }
    // drawProjectedPoints(pt, route.coordinates);

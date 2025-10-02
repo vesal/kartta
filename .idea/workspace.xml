@@ -9,7 +9,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate-src.js" beforeDir="false" afterPath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate-src.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate-src.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate-src.js.map" afterDir="false" />
@@ -225,7 +224,7 @@
       <workItem from="1758446846268" duration="1390000" />
       <workItem from="1758448685802" duration="4431000" />
       <workItem from="1758453368256" duration="160202000" />
-      <workItem from="1759305456522" duration="12065000" />
+      <workItem from="1759305456522" duration="17908000" />
     </task>
     <servers />
   </component>
@@ -257,7 +256,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/k3.html</url>
-          <line>3637</line>
+          <line>3640</line>
           <option name="timeStamp" value="108" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -269,6 +268,12 @@
           <url>http://localhost:8080/routersLeaflet.js?v=1759131536787</url>
           <line>1242</line>
           <option name="timeStamp" value="144" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/routersLeaflet.js</url>
+          <line>1283</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="157" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
