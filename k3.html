@@ -924,28 +924,28 @@
      */
     "MML maasto": {
       f: function (tile) {
-        return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/maastokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445", tile.zoom, tile.x, tile.y);
+        return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/maastokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=" + MML_API, tile.zoom, tile.x, tile.y);
       },
       c: '(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>',
       mz: 18
     },
     "MML tausta": {
       f: function (tile) {
-        return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445", tile.zoom, tile.x, tile.y);
+        return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/taustakartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=" + MML_API, tile.zoom, tile.x, tile.y);
       },
       c: '(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>',
       mz: 18
     },
     "MML selko": {
       f: function (tile) {
-        return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/selkokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445", tile.zoom, tile.x, tile.y);
+        return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/selkokartta/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=" + MML_API, tile.zoom, tile.x, tile.y);
       },
       c: '(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>',
       mz: 18
     },
     "MML ilma": {
       f: function (tile) {
-        return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=4c0b6a7d-aa24-4b2c-913c-66d3823d7445", tile.zoom, tile.x, tile.y);
+        return String.format("https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/ortokuva/default/WGS84_Pseudo-Mercator/{0}/{2}/{1}.png?api-key=" + MML_API, tile.zoom, tile.x, tile.y);
       },
       c: '(c) <a href="https://www.maanmittauslaitos.fi/avoindata_lisenssi_versio1_20120501" target="_blank">Maanmittauslaitos</a>',
       mz: 18
@@ -1174,6 +1174,56 @@
     */
   } // crsdist_ell ends
 
+  function wgs84ToEtrsTm35(p) {
+    // Tekoälyn antama versio
+    const latDeg = p[0];
+    const lonDeg = p[1];
+    const a = 6378137.0;
+    const f = 1 / 298.257222101;
+    const k0 = 0.9996;
+    const lon0 = 27 * Math.PI / 180;
+    const FE = 500000.0;
+    const FN = 0.0;
+
+    const e = Math.sqrt(2 * f - f * f);
+    const lat = latDeg * Math.PI / 180;
+    const lon = lonDeg * Math.PI / 180;
+
+    const N = a / Math.sqrt(1 - e * e * Math.sin(lat) * Math.sin(lat));
+    const T = Math.tan(lat) * Math.tan(lat);
+    const C = (e * e / (1 - e * e)) * Math.cos(lat) * Math.cos(lat);
+    const A = Math.cos(lat) * (lon - lon0);
+
+    const M =
+      a *
+      ((1 - e * e / 4 - (3 * e ** 4) / 64 - (5 * e ** 6) / 256) * lat -
+       ((3 * e * e) / 8 + (3 * e ** 4) / 32 + (45 * e ** 6) / 1024) * Math.sin(2 * lat) +
+       ((15 * e ** 4) / 256 + (45 * e ** 6) / 1024) * Math.sin(4 * lat) -
+       ((35 * e ** 6) / 3072) * Math.sin(6 * lat));
+
+    const x =
+      FE +
+      k0 *
+        N *
+        (A +
+         ((1 - T + C) * A ** 3) / 6 +
+         ((5 - 18 * T + T * T + 72 * C - 58 * (e ** 2 / (1 - e * e))) *
+          A ** 5) / 120);
+
+    const y =
+      FN +
+      k0 *
+        (M +
+         N *
+           Math.tan(lat) *
+           (A * A / 2 +
+            ((5 - T + 9 * C + 4 * C * C) * A ** 4) / 24 +
+            ((61 - 58 * T + T * T + 600 * C - 330 * (e ** 2 / (1 - e * e))) *
+             A ** 6) / 720));
+
+    return { E: x, N: y };
+  }
+
 
   let distanceLines = [];
   let lastHeading = 0;
@@ -1224,6 +1274,7 @@
 
 
   //#region Globals
+  const MML_API = "4c0b6a7d-aa24-4b2c-913c-66d3823d7445";
   // let lastSelected = null;
   let myPin = null;
   let hitPin = null;
@@ -2108,6 +2159,19 @@
     mapWrapper.setRotateControl(options.showRotate);
   }
 
+  function parseAsciiGrid(text) {
+    const lines = text.trim().split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+    const dataStartIndex = 6;
+    const space = /\s+/;
+
+    const ncols = parseInt(lines[0].split(space)[1],10);
+    const nrows = parseInt(lines[1].split(space)[1],10);
+    const midix = Math.floor(ncols/2);
+    const midiy = Math.floor(nrows/2);
+    const elevStr = lines[dataStartIndex+midiy].split(space)[midix];
+    return parseFloat(elevStr);
+  }
+
 
   function initializeMapPage() {
     showVersion()
@@ -2151,10 +2215,36 @@
 
     checkGeoLocation();
 
+    async function get2mElevation(loc) {
+      const p = wgs84ToEtrsTm35(loc);
+      const dx = 5;
+      const dy = 5;
+      const url = `https://avoin-karttakuva.maanmittauslaitos.fi/ortokuvat-ja-korkeusmallit/wcs/v2?api-key=${MML_API}&service=WCS&version=2.0.1&request=GetCoverage&CoverageID=korkeusmalli_2m&SUBSET=E(${p.E-dx},${p.E+dx})&SUBSET=N(${p.N-dy},${p.N+dy})&format=text/plain&`
+      let elevation = '';
+      try {
+        const response = await fetch(url);
+        const data = await response.text();
+        const ndata = parseAsciiGrid(data);
+
+        if (!isNaN(ndata)) {
+          elevation = ndata.toFixed(1) + " m";
+          // console.log("Korkeus:", elevation);
+
+          // Päivitä pinin teksti näyttämään korkeus (pyöristetty)
+          // hitPin.setIcon(customPin(`${Math.round(elevation)}m`, 'red', 'black'));
+        }
+      } catch (err) {
+        // console.error("Korkeuden haku epäonnistui:", err);
+      }
+      return elevation;
+    }
+
     async function getElevation(loc) {
+      let elevation = await get2mElevation(loc);
+      if (elevation) return elevation;
+
       // Hae korkeus OpenTopoDatasta
       const url = cycloServerUrl + `/index.php?elev=${loc[0]},${loc[1]}`;
-      let elevation = ''
 
       try {
         const response = await fetch(url);

@@ -16,7 +16,6 @@
       <change beforePath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate.js.map" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/download/rotate/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/download/rotate/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routersLeaflet.js" beforeDir="false" afterPath="$PROJECT_DIR$/routersLeaflet.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -224,7 +223,7 @@
       <workItem from="1758446846268" duration="1390000" />
       <workItem from="1758448685802" duration="4431000" />
       <workItem from="1758453368256" duration="160202000" />
-      <workItem from="1759305456522" duration="17908000" />
+      <workItem from="1759305456522" duration="23495000" />
     </task>
     <servers />
   </component>
@@ -256,7 +255,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/k3.html</url>
-          <line>3640</line>
+          <line>3730</line>
           <option name="timeStamp" value="108" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -274,6 +273,12 @@
           <line>1283</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="157" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/k3.html</url>
+          <line>2228</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="168" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
