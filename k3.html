@@ -46,7 +46,7 @@
     .popup {
       padding: 5%;
       position: absolute;
-      z-index: 1030;
+      z-index: 1035;
       background-color: lightyellow;
       visibility: hidden;
       top: 30pt;
@@ -438,12 +438,18 @@
     /*noinspection CssUnusedSymbol*/
     #naviInfoText .leaflet-routing-icon {
       transform: scale(3);
-      margin: 5px 20px 15px 5px;
+      margin: 10px 20px 0 5px;
     }
 
     /*noinspection CssUnusedSymbol*/
     .navi-big {
-      font-size: 3em;
+      font-size: 40px;
+      font-weight: bold;
+    }
+
+    /*noinspection CssUnusedSymbol*/
+    .navi-medium {
+      font-size: 25px;
       font-weight: bold;
     }
 
@@ -571,6 +577,7 @@
         position: absolute;
         right: 0;
         font-size: 1.5em;
+        background-color: white;
     }
 
   </style>
@@ -1175,10 +1182,16 @@
   } // crsdist_ell ends
 
   function wgs84ToEtrsTm35(p) {
-    // Tekoälyn antama versio
+    // Tekoälyn antama versio, voisi olla kunnon silmukkakin, mutta
+    // tälläkin pääsee alle millimetrien tarkkuuteen, jotan ehkä jonkin
+    // termin voisi jättää poiskin sarjasta.
+    // Esimerkiksi 62.18.192',25.44.954' eli [62.30321,25.74923]
+    // = 6908584.804, 435142.961
+    // Voi kokeilla pisteitä esim: https://asiointi.maanmittauslaitos.fi/karttapaikka
+    // ja siellä painaa XY, jolloin saa koordinaatit esille
     const latDeg = p[0];
     const lonDeg = p[1];
-    const a = 6378137.0;
+    const a = 6378137.0;  // miksi eri säde kuin ellipse-tietueessa?
     const f = 1 / 298.257222101;
     const k0 = 0.9996;
     const lon0 = 27 * Math.PI / 180;
@@ -1342,6 +1355,7 @@
     drawNextPolygonPoint: false,
     drawNextStepPoint: true,
     drawDistancePoints: false,
+    routeInfoInWindow: false,
   };
 
   const areaDatas = [
@@ -2172,6 +2186,150 @@
     return parseFloat(elevStr);
   }
 
+  function makeDraggable(el) {
+    let isDragging = false, offsetX = 0, offsetY = 0;
+    restorePos(el);
+
+    function clamp(val, min, max) {
+      return Math.max(min, Math.min(val, max));
+    }
+
+    function savePos(el) {
+      const rect = el.getBoundingClientRect();
+      localStorage[el.id + '_pos'] = `${Math.trunc(rect.left)};${Math.trunc(rect.top)};${Math.trunc(rect.width)};${Math.trunc(rect.height)}`;
+    }
+
+    function restorePos(el) {
+      const pos = localStorage[el.id + '_pos'];
+      if (pos) {
+        try {
+          const [left, top, width, height] = pos.split(';');
+          const w = width / 2;
+          const h = height / 2;
+          const maxRight = window.innerWidth - w;
+          const maxBottom = window.innerHeight - h;
+          el.style.position = 'absolute';
+          el.style.width = width + 'px';
+          if (!el.style.aspectRatio) el.style.height = height + 'px';
+          el.style.right = ''; // Remove right to allow left positioning
+          el.style.left = clamp(left, -w, maxRight) + 'px';
+          el.style.top = clamp(top, -h, maxBottom) + 'px';
+        } catch (e) {
+          // Ignore JSON parse errors
+        }
+      }
+    }
+
+    el.addEventListener('mousedown', onMouseDown);
+    el.addEventListener('touchstart', onMouseDown);
+
+    function onMouseDown(e) {
+      if (e.nodrag) return;
+      e.preventDefault();
+      let et = e;
+      if (e.touches) {
+        et = e.touches[0];
+        el.classList.add('show-handle');
+        setTimeout(() => el.classList.remove('show-handle'), 2000);
+      }
+      isDragging = true;
+      const rect = el.getBoundingClientRect();
+      offsetX = et.clientX - rect.left; // el.offsetLeft;
+      offsetY = et.clientY - rect.top; // el.offsetTop;
+      el.style.cursor = 'move';
+      el.style.position = 'absolute';
+      document.addEventListener('mousemove', onMouseMove, {passive: false});
+      document.addEventListener('mouseup', onMouseUp, {passive: false});
+      document.addEventListener('touchmove', onMouseMove, {passive: false});
+      document.addEventListener('touchend', onMouseUp);
+    }
+
+    function onMouseMove(e) {
+      if (!isDragging) return;
+      let et = e;
+      if (e.touches) et = e.touches[0];
+      const w = el.offsetWidth / 2;
+      const h = el.offsetHeight / 2;
+      const maxRight = window.innerWidth - w;
+      const maxBottom = window.innerHeight - h;
+      el.style.right = ''; // Remove right to allow left positioning
+      el.style.left = clamp(et.clientX - offsetX, -w, maxRight) + 'px';
+      el.style.top = clamp(et.clientY - offsetY, -h, maxBottom) + 'px';
+      el.position = 'absolute';
+      // const debug = document.getElementById('distance');
+      // debug.innerText = `${window.innerWidth} ${el.style.left}`;
+      e.preventDefault();
+    }
+
+    function onMouseUp(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('touchmove', onMouseMove);
+      document.removeEventListener('touchend', onMouseUp);
+      isDragging = false;
+      el.style.cursor = 'pointer';
+      savePos(el);
+    }
+
+    const handle = el.querySelector('.resize-handle');
+
+    if (handle) {
+      handle.addEventListener('mousedown', handleMouseDown, {passive: false});
+      handle.addEventListener('touchstart', handleMouseDown, {passive: false});
+
+      function handleMouseDown(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        let et = e;
+        if (e.touches) et = e.touches[0];
+        let startX = et.clientX;
+        let startY = et.clientY;
+        let startW = el.offsetWidth;
+        let startH = el.offsetHeight;
+
+        document.addEventListener('mousemove', onHandleMouseMove, {passive: false});
+        document.addEventListener('mouseup', onHandleMouseUp, {passive: false});
+        document.addEventListener('touchmove', onHandleMouseMove, {passive: false});
+        document.addEventListener('touchend', onHandleMouseUp, {passive: false});
+
+        function onHandleMouseMove(e) {
+          // e.stopPropagation();
+          e.preventDefault();
+          let et = e;
+          if (e.touches) et = e.touches[0];
+          let newW = clamp(startW + (et.clientX - startX), 30, window.innerWidth);
+          let newH = clamp(startH + (et.clientY - startY), 30, window.innerHeight);
+          let aspect = getAspectRatio(el.style.aspectRatio);
+          if (aspect) {
+            newH = newW / aspect;
+            if (newH > window.innerHeight) {
+              newH = window.innerHeight;
+              newW = newH * aspect;
+            } else {
+              newH = clamp(startH + (et.clientY - startY), 30, window.innerHeight);
+            }
+          }
+          el.style.width = newW + 'px';
+          if (!el.style.aspectRatio) {
+            el.style.height = newH + 'px';
+          }
+        }
+
+        function onHandleMouseUp(e) {
+          // e.stopPropagation();
+          e.preventDefault();
+          document.removeEventListener('mousemove', onHandleMouseMove);
+          document.removeEventListener('mouseup', onHandleMouseUp);
+          document.removeEventListener('touchmove', onHandleMouseMove);
+          document.removeEventListener('touchend', onHandleMouseUp);
+          savePos(el);
+        }
+      }
+    } // if handle
+  } // makeDraggable
+
 
   function initializeMapPage() {
     showVersion()
@@ -2224,9 +2382,10 @@
       try {
         const response = await fetch(url);
         const data = await response.text();
-        const ndata = parseAsciiGrid(data);
+        let ndata = parseAsciiGrid(data);
 
         if (!isNaN(ndata)) {
+          if (ndata < -9000) return ''; // ndata = -1;
           elevation = ndata.toFixed(1) + " m";
           // console.log("Korkeus:", elevation);
 
@@ -2387,149 +2546,7 @@
 
 
     // Make all elements with class "draggable" movable / resizable
-    document.querySelectorAll('.draggable').forEach(el => {
-      let isDragging = false, offsetX = 0, offsetY = 0;
-      restorePos(el);
-
-      function clamp(val, min, max) {
-        return Math.max(min, Math.min(val, max));
-      }
-
-      function savePos(el) {
-        const rect = el.getBoundingClientRect();
-        localStorage[el.id + '_pos'] = `${Math.trunc(rect.left)};${Math.trunc(rect.top)};${Math.trunc(rect.width)};${Math.trunc(rect.height)}`;
-      }
-
-      function restorePos(el) {
-        const pos = localStorage[el.id + '_pos'];
-        if (pos) {
-          try {
-            const [left, top, width, height] = pos.split(';');
-            const w = width / 2;
-            const h = height / 2;
-            const maxRight = window.innerWidth - w;
-            const maxBottom = window.innerHeight - h;
-            el.style.position = 'absolute';
-            el.style.width = width + 'px';
-            if (!el.style.aspectRatio) el.style.height = height + 'px';
-            el.style.right = ''; // Remove right to allow left positioning
-            el.style.left = clamp(left, -w, maxRight) + 'px';
-            el.style.top = clamp(top, -h, maxBottom) + 'px';
-          } catch (e) {
-            // Ignore JSON parse errors
-          }
-        }
-      }
-
-      el.addEventListener('mousedown', onMouseDown);
-      el.addEventListener('touchstart', onMouseDown);
-
-      function onMouseDown(e) {
-        e.preventDefault();
-        let et = e;
-        if (e.touches) {
-          et = e.touches[0];
-          el.classList.add('show-handle');
-          setTimeout(() => el.classList.remove('show-handle'), 2000);
-        }
-        isDragging = true;
-        const rect = el.getBoundingClientRect();
-        offsetX = et.clientX - rect.left; // el.offsetLeft;
-        offsetY = et.clientY - rect.top; // el.offsetTop;
-        el.style.cursor = 'move';
-        el.style.position = 'absolute';
-        document.addEventListener('mousemove', onMouseMove, {passive: false});
-        document.addEventListener('mouseup', onMouseUp, {passive: false});
-        document.addEventListener('touchmove', onMouseMove, {passive: false});
-        document.addEventListener('touchend', onMouseUp);
-      }
-
-      function onMouseMove(e) {
-        if (!isDragging) return;
-        let et = e;
-        if (e.touches) et = e.touches[0];
-        const w = el.offsetWidth / 2;
-        const h = el.offsetHeight / 2;
-        const maxRight = window.innerWidth - w;
-        const maxBottom = window.innerHeight - h;
-        el.style.right = ''; // Remove right to allow left positioning
-        el.style.left = clamp(et.clientX - offsetX, -w, maxRight) + 'px';
-        el.style.top = clamp(et.clientY - offsetY, -h, maxBottom) + 'px';
-        el.position = 'absolute';
-        // const debug = document.getElementById('distance');
-        // debug.innerText = `${window.innerWidth} ${el.style.left}`;
-        e.preventDefault();
-      }
-
-      function onMouseUp(e) {
-        if (!isDragging) return;
-        e.preventDefault();
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-        document.removeEventListener('touchmove', onMouseMove);
-        document.removeEventListener('touchend', onMouseUp);
-        isDragging = false;
-        el.style.cursor = 'pointer';
-        savePos(el);
-      }
-
-      const handle = el.querySelector('.resize-handle');
-
-      if (handle) {
-        handle.addEventListener('mousedown', handleMouseDown, {passive: false});
-        handle.addEventListener('touchstart', handleMouseDown, {passive: false});
-
-        function handleMouseDown(e) {
-          e.stopPropagation();
-          e.preventDefault();
-          let et = e;
-          if (e.touches) et = e.touches[0];
-          let startX = et.clientX;
-          let startY = et.clientY;
-          let startW = el.offsetWidth;
-          let startH = el.offsetHeight;
-
-          document.addEventListener('mousemove', onHandleMouseMove, {passive: false});
-          document.addEventListener('mouseup', onHandleMouseUp, {passive: false});
-          document.addEventListener('touchmove', onHandleMouseMove, {passive: false});
-          document.addEventListener('touchend', onHandleMouseUp, {passive: false});
-
-          function onHandleMouseMove(e) {
-            // e.stopPropagation();
-            e.preventDefault();
-            let et = e;
-            if (e.touches) et = e.touches[0];
-            let newW = clamp(startW + (et.clientX - startX), 30, window.innerWidth);
-            let newH = clamp(startH + (et.clientY - startY), 30, window.innerHeight);
-            let aspect = getAspectRatio(el.style.aspectRatio);
-            if (aspect) {
-              newH = newW / aspect;
-              if (newH > window.innerHeight) {
-                newH = window.innerHeight;
-                newW = newH * aspect;
-              } else {
-                newH = clamp(startH + (et.clientY - startY), 30, window.innerHeight);
-              }
-            }
-            el.style.width = newW + 'px';
-            if (!el.style.aspectRatio) {
-              el.style.height = newH + 'px';
-            }
-          }
-
-          function onHandleMouseUp(e) {
-            // e.stopPropagation();
-            e.preventDefault();
-            document.removeEventListener('mousemove', onHandleMouseMove);
-            document.removeEventListener('mouseup', onHandleMouseUp);
-            document.removeEventListener('touchmove', onHandleMouseMove);
-            document.removeEventListener('touchend', onHandleMouseUp);
-            savePos(el);
-          }
-        }
-      } // if handle
-
-    });
+    document.querySelectorAll('.draggable').forEach(el => makeDraggable(el));
     // draggable end
 
     initRotate(); // calls also initCompass
@@ -2952,6 +2969,7 @@
     getCBOption("drawNextPolygonPoint");
     getCBOption("drawNextStepPoint");
     getCBOption("drawDistancePoints");
+    getCBOption("routeInfoInWindow");
 
     const cb1 = document.getElementById('area1cb');
     const cb2 = document.getElementById('area1cbCopy');
@@ -3803,6 +3821,16 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
 
 <div class="layout-container">
   <!--suppress HtmlFormInputWithoutLabel -->
+  <div id="naviInfo" class="noselect"
+       style="display: none; background-color: white;
+        padding: 0; border: 1px solid black;
+        margin-left: 35px;
+        min-width: 120px;top:10px;right:200px;
+        width: 420px; height: 35px; z-index:1031;">
+    <div id="naviInfoMsgDiv" style="max-height: 100% ">
+    </div>
+    <div class="resize-handle"></div>
+  </div>
   <div id="findDiv" class="ui-layout-north">
     <label class="closebtn" style="top: -10px" onclick=closeParent(this)>&times;</label>
     <div id="pinDiv" style="margin-left: 35px">
@@ -4067,6 +4095,7 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
         <!-- <button class="inner" type="button" title="Etsi tämä paikka" onclick='searchFrom("editTo")'>E</button> -->
       <label><input type="text" name="editTo" id="editTo" value=""/></label><br>
       </span>
+    </div>
       <span class="inner">
         <span id="transportChoices">
           <span class="transport-choice" data-mode="car">🚗</span>
@@ -4081,7 +4110,6 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
         <label><input type="checkbox" name="navigate" id="navigate" value="navigate"
                       onclick="checkNavigate(this.checked)"/>Aja</label>
       </span>
-    </div>
     <div class="driving">
       <div id="routeAlts">
       </div>
@@ -4113,6 +4141,8 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
       <div><label for="routeGoalAckRadius">Millaisella säteellä maali kuitataan: </label>
         <input type="text" size="3"  id="routeGoalAckRadius" value="10"> m
       </div>
+      <label><input type="checkbox"  id="routeInfoInWindow"/>Ajo-ohjeen näkymä ikkunassa</label><br>
+
     </div>
     <hr>
     <div class="flex-labels">
@@ -4134,6 +4164,10 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     <hr>
     <div>
       <h3>Simulointiasetuksia</h3>
+      <p>Simuloinnilla voit kokeilla reityksen toimintaa ja ajo-ohjeita.
+        Laita alle joku nopeus, esim 15 ms/s jos haluatkokeilla simuloitia.  Muista vaihtaa
+        0 m/s sitten kun haluat käyttää oikeasti.
+      </p>
       <div><label for="simulateSpeed">Liikkumisen nopeus simuloinnissa: </label><input type="text" size="5" id="simulateSpeed" value="0"> m/s</div>
       <label><input type="checkbox"  id="drawPolygonPoints"/>Piirrä reitin murtoviivan kulmapisteet</label><br>
       <label><input type="checkbox"  id="drawNextPolygonPoint"/>Piirrä seuraavan kulampisteen ympyrä</label><br>
@@ -4143,12 +4177,6 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
     </div>
   </div>
 
-<div id="naviInfo" class="draggable noselect" style="background-color: white; position:absolute; padding: 5px; border: 1px solid black;
-  min-width: 120px;top:10px;right:200px;width: 380px; height: 90px; z-index:1031; visibility: hidden">
-  <div id="naviInfoMsgDiv" style="background-color: white; ">
-  </div>
-  <div class="resize-handle"></div>
-</div>
 
 <div id="compass" class="draggable noselect" style="position:absolute;
   top:10px;right:10px;z-index:1030;

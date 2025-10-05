@@ -1152,6 +1152,7 @@ function startNavigation(pt=null) {
 
    // drawProjectedPoints(pt, route.coordinates);
    setNavigation(true);
+   route.lastCoordinate = pt;
    naviInfo = document.getElementById('naviInfo');
    naviInfoMsgDiv = document.getElementById('naviInfoMsgDiv');
 
@@ -1269,7 +1270,7 @@ function showNaviText(route, idx  = 0, dist = -1, onRoute = true, timeToTurn = 0
     if (!naviInfoLostButton) {
       naviInfoLostButton = document.createElement("button");
       naviInfoLostButton.id = "msgLost";
-      naviInfoLostButton.className = "navi-big";
+      naviInfoLostButton.className = "navi-medium";
       naviInfoLostButton.innerText = "Hukassa";
       naviInfoLostButton.addEventListener("click", reCalculate);
       naviInfoLostButton.addEventListener("touchstart", reCalculate);
@@ -1280,18 +1281,23 @@ function showNaviText(route, idx  = 0, dist = -1, onRoute = true, timeToTurn = 0
     naviInfoLostButton.style.display = "block";
     if (options.timeToReroute) {
       if (!route.lastCall) route.lastCall = Date.now();
-      if (Date.now() - route.lastCall > options.timeToReroute*1000) {
+      if (!route.lastCoordinateOnRoute) route.lastCoordinateOnRoute = route.lastCoordinate;
+      if (Date.now() - route.lastCall > options.timeToReroute*1000 &&
+          WGS84_distance(route.lastCoordinateOnRoute,route.lastCoordinate)*1000 > options.polygonAckRadius) {
         reCalculate();
         route.lastCall = Date.now();
+        route.lastCoordinateOnRoute = route.lastCoordinate;
       }
     }
     return -1;
   }
   route.lastCall = Date.now();
+  route.lastCoordinateOnRoute = route.lastCoordinate;
   naviInfoLostButton && (naviInfoLostButton.style.display = "none");
   if (!naviInfoText) {
     naviInfoText = document.createElement("div");
     naviInfoText.id = "naviInfoText";
+    naviInfoText.style.overflow = "hidden";
     naviInfoMsgDiv.appendChild(naviInfoText);
     naviInfoText.addEventListener("click", reRead);
     naviInfoText.addEventListener("touchstart", reRead);
@@ -1310,10 +1316,16 @@ function showNaviText(route, idx  = 0, dist = -1, onRoute = true, timeToTurn = 0
   totalDist = totalDist.toFixed(0);
   totalTime = totalTime.toFixed(0);
 
-  let icon1= instr.uiRow.querySelector('td')?.innerHTML ?? '';
+  let icon1;
   if (idx === route.instructions.length-1) {
     // icon1 = '<span class="navi-big finish-flag">🏁⚐</span>';
     icon1 = goalFlag();
+  }
+  else if (idx === -1) {
+    icon1 = '<span class="navi-big">A</span>';
+  }
+  else {
+    icon1= instr.uiRow.querySelector('td')?.innerHTML ?? '';
   }
   let distm = ""
   if (dist >= 0) {
@@ -1429,6 +1441,9 @@ function continueNavigation(pt, speed) {
   let stepIndex = route.stepIndex;
   let coordIndex = route.coordIndex;
   let stepChanged = false;
+
+  route.lastCoordinate = pt;
+
   while (stepIndex < route.instructions.length && !ok && !onRoute) {
     [dist, coordIndex, ok, onRoute] =
       checkLegsCoords(route, stepIndex, coordIndex, pt);
@@ -1485,15 +1500,50 @@ function continueNavigation(pt, speed) {
    return true;
 }
 
+let visibilityStyle = null;
+
+function toggleAltsVisibility(show) {
+  if (!visibilityStyle) {
+    visibilityStyle = document.createElement('style');
+    document.head.appendChild(visibilityStyle);
+  }
+  visibilityStyle.textContent = show
+    ? `.leaflet-routing-alt-minimized { display: block !important; }`
+    : `.leaflet-routing-alt-minimized { display: none !important; }`;
+}
+
 function setNavigation(enable) {
   const cb = document.getElementById('navigate');
   if (cb) cb.checked = enable;
   const naviInfo = document.getElementById('naviInfo');
-  if (enable)
-    naviInfo.style.visibility = 'visible';
-  else
-    naviInfo.style.visibility = 'hidden';
+  const routeAlts = document.getElementById("routeAlts")
+  const addressDiv = document.getElementById("addressDiv")
+  if (enable) {
+    naviInfo.style.display = 'block';
+    routeAlts.style.display = 'none';
+    addressDiv.style.display = 'none';
+    toggleAltsVisibility(false);
+    if (options.routeInfoInWindow) {
+      naviInfo.classList.add('draggable');
+      if (naviInfo.nodrag === undefined) makeDraggable(naviInfo);
+      naviInfo.nodrag = false;
+      naviInfo.style.position = 'absolute';
+      naviInfo.style.marginLeft = '0';
+    } else {
+      naviInfo.nodrag = true;
+      naviInfo.style.position = 'unset';
+      naviInfo.style.marginLeft = '35px'; // space for hamburger
+      naviInfo.classList.remove('draggable');
+      naviInfo.style.height = '35px';
+    }
+  }
+  else {
+    toggleAltsVisibility(true);
+    routeAlts.style.display = 'unset';
+    addressDiv.style.display = 'unset';
+    naviInfo.style.display = 'none';
     unlockRoute();
+  }
   options.navigate = enable;
 }
 

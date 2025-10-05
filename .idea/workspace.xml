@@ -16,6 +16,7 @@
       <change beforePath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/download/rotate/dist/leaflet-rotate.js.map" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/download/rotate/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/download/rotate/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k3.html" beforeDir="false" afterPath="$PROJECT_DIR$/k3.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routersLeaflet.js" beforeDir="false" afterPath="$PROJECT_DIR$/routersLeaflet.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,43 +59,43 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;JavaScript Debug.dr.executor&quot;: &quot;Debug&quot;,
-    &quot;JavaScript Debug.k.executor&quot;: &quot;Debug&quot;,
-    &quot;JavaScript Debug.k.html.executor&quot;: &quot;Debug&quot;,
-    &quot;JavaScript Debug.k3.html.executor&quot;: &quot;Debug&quot;,
-    &quot;JavaScript Debug.meribrowser.html.executor&quot;: &quot;Debug&quot;,
-    &quot;Notification.DisplayName-DoNotAsk-Vcs Important Messages&quot;: &quot;VCS important messages&quot;,
-    &quot;Notification.DoNotAsk-Vcs Important Messages&quot;: &quot;true&quot;,
-    &quot;Python.IncrementVersion.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.convertFlykKartta.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.coord.executor&quot;: &quot;Run&quot;,
-    &quot;Python.osrmcameras.executor&quot;: &quot;Run&quot;,
-    &quot;Python.osrmspeed.executor&quot;: &quot;Run&quot;,
-    &quot;Python.speed.executor&quot;: &quot;Run&quot;,
-    &quot;Python.suomenkamerat.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/riippu/kartta/js&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\devel\\PyCharm25\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "JavaScript Debug.dr.executor": "Debug",
+    "JavaScript Debug.k.executor": "Debug",
+    "JavaScript Debug.k.html.executor": "Debug",
+    "JavaScript Debug.k3.html.executor": "Debug",
+    "JavaScript Debug.meribrowser.html.executor": "Debug",
+    "Notification.DisplayName-DoNotAsk-Vcs Important Messages": "VCS important messages",
+    "Notification.DoNotAsk-Vcs Important Messages": "true",
+    "Python.IncrementVersion.executor": "Debug",
+    "Python.convertFlykKartta.executor": "Debug",
+    "Python.coord.executor": "Run",
+    "Python.osrmcameras.executor": "Run",
+    "Python.osrmspeed.executor": "Run",
+    "Python.speed.executor": "Run",
+    "Python.suomenkamerat.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "WebServerToolWindowFactoryState": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "E:/riippu/kartta/js",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "to.speed.mode.migration.done": "true",
+    "ts.external.directory.path": "C:\\devel\\PyCharm\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\riippu\kartta\js" />
@@ -179,8 +180,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-PY-252.25557.178" />
-        <option value="bundled-python-sdk-ce6832f46686-7b97d883f26b-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.25557.178" />
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-PY-241.19416.19" />
+        <option value="bundled-python-sdk-337b0a7a993a-2767605e8bc2-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.19416.19" />
       </set>
     </attachedChunks>
   </component>
@@ -223,7 +224,8 @@
       <workItem from="1758446846268" duration="1390000" />
       <workItem from="1758448685802" duration="4431000" />
       <workItem from="1758453368256" duration="160202000" />
-      <workItem from="1759305456522" duration="23495000" />
+      <workItem from="1759305456522" duration="36549000" />
+      <workItem from="1759669463685" duration="11704000" />
     </task>
     <servers />
   </component>
@@ -255,7 +257,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/k3.html</url>
-          <line>3730</line>
+          <line>3929</line>
           <option name="timeStamp" value="108" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -270,15 +272,9 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/routersLeaflet.js</url>
-          <line>1283</line>
+          <line>1319</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="157" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/k3.html</url>
-          <line>2228</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="168" />
+          <option name="timeStamp" value="180" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -291,7 +287,7 @@
     </breakpoint-manager>
     <watches-manager>
       <configuration name="JavascriptDebugType">
-        <watch expression="options.lastRouter" language="JavaScript" />
+        <watch expression="el.style.height" language="JavaScript" />
         <watch expression="window.osrmTextInstructions" language="JavaScript" />
         <watch expression="line.parent" language="JavaScript" />
       </configuration>
