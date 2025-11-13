@@ -3747,11 +3747,11 @@ Tilaa: ${(estimate.quota / 1e6).toFixed(2)} MB`;
       const now = Date.now();
       // Check if data is newer than 7 days
       if (timestamp && now - timestamp < 7 * 24 * 60 * 60 * 1000) {
-        // Fetch new data in the background
+        // Less than 7 days old, use cached data
         createCameras(text);
+        return;
       }
-      return;
-    }
+   }
 
    // Fetch from server if not in IndexedDB or too old
    let newText = null;
