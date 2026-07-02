@@ -67,7 +67,7 @@ def to_json(lines):
         outer_str = parts[4] if len(parts) > 4 else "0"
         lat = dms_round(float(lat_str))
         lon = dms_round(float(lon_str))
-        radius = float(radius_str) * 1000
+        radius = int(float(radius_str) * 1000)
         outer = int(outer_str)
 
         point = {

@@ -9,7 +9,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c22cc7d3-634c-4e40-9869-dd431723b3d8" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/xc2.py" beforeDir="false" afterPath="$PROJECT_DIR$/xc2.py" afterDir="false" />
     </list>
@@ -74,6 +73,65 @@
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0" />
+      <entry key="M2" value="1.0" />
+      <entry key="M5" value="1.0" />
+      <entry key="M10" value="1.0" />
+      <entry key="M15" value="1.0" />
+      <entry key="M30" value="1.0" />
+      <entry key="H1" value="1.0" />
+      <entry key="H2" value="1.0" />
+      <entry key="H4" value="1.0" />
+      <entry key="D1" value="1.0" />
+      <entry key="W1" value="1.0" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="0.0" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="0.0" />
+      <entry key="M15" value="0.0" />
+      <entry key="M30" value="0.0" />
+      <entry key="H1" value="0.0" />
+      <entry key="H2" value="0.0" />
+      <entry key="H4" value="0.0" />
+      <entry key="D1" value="0.0" />
+      <entry key="W1" value="0.0" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.011438169499575197" />
+      <entry key="MS500" value="0.40895102927889054" />
+      <entry key="S2" value="0.7996829313163526" />
+      <entry key="S5" value="0.9144650894999015" />
+      <entry key="S10" value="0.956276680412056" />
+      <entry key="S30" value="0.9852078307492012" />
+      <entry key="S60" value="0.9925763601603663" />
+      <entry key="M2" value="0.9962812655873673" />
+      <entry key="M5" value="0.9985108434574094" />
+      <entry key="M10" value="0.9992551443237154" />
+      <entry key="M15" value="0.999503367883174" />
+      <entry key="M30" value="0.9997516531034965" />
+      <entry key="H1" value="0.9998758188412682" />
+      <entry key="H2" value="0.9999379074928944" />
+      <entry key="H4" value="0.9999689532644973" />
+      <entry key="D1" value="0.9999948254771441" />
+      <entry key="W1" value="0.9999992607808098" />
+    </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -263,7 +321,7 @@
       <workItem from="1775553069695" duration="30000" />
       <workItem from="1779178415930" duration="93000" />
       <workItem from="1782666742519" duration="572000" />
-      <workItem from="1782974937444" duration="566000" />
+      <workItem from="1782974937444" duration="1538000" />
     </task>
     <servers />
   </component>
