@@ -123,10 +123,11 @@ def main():
     lines = read_input()
     result = to_json(lines)
     # Muutetaan tulos unicodeksi, jos se ei ole sitä
-    output = json.dumps(result, indent=2, ensure_ascii=False)
+    # output = json.dumps(result, indent=2, ensure_ascii=False)
+    output = json.dumps(result, ensure_ascii=False, separators=(",", ":"))
     if not isinstance(output, unicode):
         output = output.decode('utf-8')
     print output.encode('utf-8')
-	
+
 if __name__ == "__main__":
     main()
