@@ -26,7 +26,7 @@ def to_json(lines):
     lat_str, lon_str, name, radius_str = parts[0], parts[1], parts[2], parts[3]
     lat = dms_round(float(lat_str))
     lon = dms_round(float(lon_str))
-    radius = float(radius_str) * 1000
+    radius = int(float(radius_str) * 1000)
 
     takeoff_point = {
         "radius": radius,
@@ -88,7 +88,7 @@ def to_json(lines):
     lat_str, lon_str, name, radius_str = parts[0], parts[1], parts[2], parts[3]
     lat = dms_round(float(lat_str))
     lon = dms_round(float(lon_str))
-    radius = float(radius_str) * 1000
+    radius = int(float(radius_str) * 1000)
 
     ess_point = {
         "radius": radius,
