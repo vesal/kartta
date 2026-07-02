@@ -69,8 +69,12 @@ def to_json(lines):
         lon = dms_round(float(lon_str))
         radius = int(float(radius_str) * 1000)
         outer = int(outer_str)
+        type = "ENTER"
+        if outer:
+          type = "EXIT"
 
         point = {
+            "type": type,
             "radius": radius,
             "waypoint": {
                 "lat": lat,
