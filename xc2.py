@@ -79,7 +79,7 @@ def to_json(lines):
                 "name": name,
                 "description": ""
             },
-            # "outer": bool(outer)
+            "outer": bool(outer)
         }
         turnpoints.append(point)
 
