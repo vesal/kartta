@@ -304,7 +304,7 @@ function getElevation($coords) {
 function uparam($name) {
 // gets the GET or POST parameter with name $name and urlencode it
 // also saves the request info for log-file
-   return urlencode(param($name));
+   return urlencode(param($name) ?? "");
 }
 
 
@@ -312,7 +312,7 @@ function uparam($name) {
 function udparam($name) {
 // gets the GET or POST parameter with name $name and urldecode it
 // also saves the request info for log-file
-   return urldecode(param($name));
+   return urldecode(param($name) ?? "");
 }
 
 
@@ -874,7 +874,7 @@ function sendId($email) {
   $email = purifyEmail($email);
   checkHtaccess();
   $newid = rand(10000,99999) . "" . rand(10000,99999);
-  $crNewid = crypt($newid);
+  $crNewid = password_hash($newid, PASSWORD_DEFAULT);
   $name = tryCreate($email,"user.txt");
   $lines = rfile("$name");
   $crUserid = $crNewid;
