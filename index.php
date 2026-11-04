@@ -349,10 +349,39 @@ function cycdir($email) {
 // try vesal@jyu.fi/user.txt, if exists return "vesal@jyu.fi/" (urlencoded)
 // otherwise return "temp/vesal@jyu.fi " (urlencoded)
    $uencEmail = atreplace(urlencode($email));
-   $dir = "$uencEmail/";
-   // if ( file_exists("$dir" ."user.txt") ) return $dir;
+   $dir = userDirBase() . "$uencEmail/";
    if ( file_exists("$dir" ) ) return $dir;
+   if ( file_exists("$uencEmail/") ) return "$uencEmail/"; // old users dir on the root level
    return "temp/$uencEmail ";
+}
+
+
+// =============================================================================================
+function userDirBase() {
+// directory where the user directories are created
+   return "users/";
+}
+
+
+// =============================================================================================
+function ensureUsersDir() {
+// creates the users directory if it does not exist
+   $base = userDirBase();
+   if ( !file_exists($base) ) {
+       mkdir($base,0777,true);
+       chmod($base,0777);
+   }
+}
+
+
+// =============================================================================================
+function routePath($routename) {
+// maps the route name from client (vesal@jyu.fi/x.txt) to the real path (users/vesal@jyu.fi/x.txt).
+// Open routes (!...) and old user dirs in the root level are not mapped.
+   if ( startsWith($routename,"!") ) return $routename;
+   $first = strstr($routename,"/",true);
+   if ( $first !== false && !file_exists(userDirBase() . $first) && file_exists($first) ) return $routename;
+   return userDirBase() . $routename;
 }
 
 
@@ -362,10 +391,12 @@ function tryCreate($email,$filename) {
 // if the dir does not exist, create the dir and try to create the file,
 // if ok, return the name, if not ok, return temp file
    $uencEmail = atreplace(urlencode($email));
-   $dir = "$uencEmail/";
+   $dir = userDirBase() . "$uencEmail/";
    $name = "$dir$filename";
    if ( file_exists("$name") ) return "$name";
+   if ( file_exists("$uencEmail/$filename") ) return "$uencEmail/$filename"; // old users dir on the root level
    if ( !file_exists($dir) ) {
+       ensureUsersDir();
        if ( !mkdir($dir) ) error("Can not make $email");
        if ( chmod($dir,0777) ) {
 	   }
@@ -552,12 +583,13 @@ function getLogName($email,$getlogname, $ufollow)
 	   print("ERROR: No rights for " . $getlogname);
 	   exit;
    }
-   if ( !file_exists($getlogname . ".cyc") ) {
+   $logfile = cycdir($followEmail) . $logname . ".cyc";
+   if ( !file_exists($logfile) ) {
 	   print("ERROR: No log " . $getlogname);
 	   exit;
    }
 
-   $result = rfile($getlogname . ".cyc");
+   $result = rfile($logfile);
    foreach( $result as $key => $value )
 	  print($value . "\n");
    exit;
@@ -631,10 +663,12 @@ function saveRoute($email,$routename,$file) {
   if (preg_match('/[^!a-zA-Z0-9_\-\/]/', $check) || strpos($check, '.') !== false) {
       error("Invalid directory name: $dir");
   }
-  if (!is_dir($dir)) {
-      mkdir($dir, 0777, true);
+  $path = routePath($routename);
+  $realDir = dirname($path);
+  if (!is_dir($realDir)) {
+      mkdir($realDir, 0777, true);
   }
-  if ( !writefile("$routename","$file") ) error("Could be not write $routename");
+  if ( !writefile($path,"$file") ) error("Could be not write $routename");
   ok("$routename");
 }
 
@@ -648,7 +682,7 @@ function getRoute($email,$routename) {
   }
   if (strrpos($routename,".txt") === false ) error("Only .txt can be read: $routename");
   // print("filename: $routename\n");
-  $result = rfile($routename);
+  $result = rfile(routePath($routename));
   // print("result: $result \n");
   foreach( $result as $key => $value )
 	  print($value . "\n");
@@ -741,9 +775,14 @@ function getReplyName($email) {
 // =============================================================================================
 function checkEmailDir($email) {
 // Check if dir exists and if not, create one
-   if ( !file_exists($email) ) {
-     mkdir($email,0777);
-     chmod($email,0777);
+   $dir = rtrim(cycdir($email),"/");
+   if ( startsWith($dir,"temp/") ) {
+     ensureUsersDir();
+     $dir = userDirBase() . $email;
+     if ( !file_exists($dir) ) {
+       mkdir($dir,0777);
+       chmod($dir,0777);
+     }
    }
    return true;
 }
@@ -924,15 +963,18 @@ function commandline($argv) {
 	   print "Creating temp-directory\n";
 	   mkdir("temp") or die ("temp allready exists");
 	   chmod("temp",0777);
+	   ensureUsersDir();
 	   chmod(".",0777);
 	   exit;
     }
 
 	print "$dir\n";
 	// remove the dir made by Apache-user and create it again.
-	rmdir($dir);
-	mkdir($dir);
-	chmod($dir,0777);
+	ensureUsersDir();
+	$userDir = userDirBase() . $dir;
+	rmdir($userDir);
+	mkdir($userDir);
+	chmod($userDir,0777);
 
 	// rename("temp/$dir *","$dir/*");
 	$files = scandir("temp");
@@ -941,8 +983,8 @@ function commandline($argv) {
 	foreach( $files as $key => $file ) {
 	  if ( strpos($file,$dir) === false ) continue;
 	  $name = substr($file,$n+1);
-	  rename("temp/$file","$dir/$name");
-	  print "temp/$file => $dir/$name\n";
+	  rename("temp/$file","$userDir/$name");
+	  print "temp/$file => $userDir/$name\n";
 	}
 	exit;
 }
