@@ -775,10 +775,10 @@ function getReplyName($email) {
 // =============================================================================================
 function checkEmailDir($email) {
 // Check if dir exists and if not, create one
-   $dir = rtrim(cycdir($email),"/");
-   if ( startsWith($dir,"temp/") ) {
+   $email = purifyEmail($email);
+   if ( startsWith(cycdir($email),"temp/") ) {
      ensureUsersDir();
-     $dir = userDirBase() . $email;
+     $dir = userDirBase() . atreplace(urlencode($email));
      if ( !file_exists($dir) ) {
        mkdir($dir,0777);
        chmod($dir,0777);
