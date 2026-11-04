@@ -17,3 +17,6 @@ camerascsv.txt
 
 # Paikalliset asetukset
 config.local.js
+
+# Käyttäjän kotihakemisto
+users/
