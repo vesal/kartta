@@ -2,6 +2,7 @@ const CACHE_NAME = "k3-cache-v0.4.32";
 const DEBUG = false;
 const FILES_TO_CACHE = [
   "k3.html",
+  "config.local.js",
   "js/winbox.bundle.min.js",
   "js/leaflet.js",
   "js/leaflet-rotate-src.js",
