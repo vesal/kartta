@@ -47,6 +47,7 @@ div#missingCredential {
 
 <script type="text/javascript">
 
+const cycloServerUrl = window.APP_CONFIG.cycloServerUrl;
 const helpServerUrl = "https://tim.jyu.fi/view/users/vesal/riippu/cyclo/kartta";
 
 function prefixHelpLinks() {
@@ -613,7 +614,7 @@ const belectro = {
     if (this.ok) return;
     this.ok = true;
     $.ajax({
-      url: "https://www.mit.jyu.fi/demowww/cyclo/bbark.php",
+      url: cycloServerUrl + "/bbark.php",
       success: function (data) {
         const bbarkObj = JSON.parse(data);
         let url = bbarkObj.base_map_groups[0].maps[0].url;
@@ -1116,7 +1117,7 @@ function sendCyclo(command,f, extra) {
   /*
     $.ajax({
     type: 'POST',
-    url: "https://www.mit.jyu.fi/demowww/cyclo/",
+    url: cycloServerUrl + "/index.php",
     contentType: 'text/plain',
     xhrFields: { withCredentials: false },
      success: function() {
@@ -1126,7 +1127,7 @@ function sendCyclo(command,f, extra) {
   clearError();
   options.id = cleanNumbers(options.id);
   const params = $.extend({}, command, {id: options.id, e: getEmailTag()});
-  $.post( "https://www.mit.jyu.fi/demowww/cyclo/index.php", params )
+  $.post( cycloServerUrl + "/index.php", params )
   .done(function( data ) {
     f(data, extra)
   } );
@@ -1160,7 +1161,7 @@ function postPosition(position) {
      /*
         $.ajax({
         type: 'POST',
-        url: "https://www.mit.jyu.fi/demowww/cyclo/",
+        url: cycloServerUrl + "/",
         contentType: 'text/plain',
         xhrFields: { withCredentials: false },
          success: function() {
@@ -1192,7 +1193,7 @@ function postPosition(position) {
       sending = false;
       return;
    }
-   $.post( "https://www.mit.jyu.fi/demowww/cyclo/", { id: options.id, e: getEmailTag(), d : pos, log:getLogname()  })
+   $.post( cycloServerUrl + "/index.php", { id: options.id, e: getEmailTag(), d : pos, log:getLogname()  })
     .done(function( data ) {
       setError(data);
       // timers["send"].interval = options.interval;
@@ -2208,7 +2209,7 @@ function getfollow()  {
   /*
     $.ajax({
     type: 'POST',
-    url: "https://www.mit.jyu.fi/demowww/cyclo/",
+    url: cycloServerUrl + "/index.php",
     contentType: 'text/plain',
     xhrFields: { withCredentials: false },
      success: function() {
@@ -2218,7 +2219,7 @@ function getfollow()  {
   if ( !options.id || !options.email ) return;
 
   clearError();
-  $.post( "https://www.mit.jyu.fi/demowww/cyclo/", { id: options.id, e: getEmailTag(), f : options.usersTofollow  })
+  $.post( cycloServerUrl + "/index.php", { id: options.id, e: getEmailTag(), f : options.usersTofollow  })
   .done(function( data ) {
     setPins(data)
   });
@@ -2561,7 +2562,7 @@ function updateXctrackLink(routename) {
   const link = document.getElementById("xctrackLink");
   if (!link) return;
   routename = forcePathToRouteName(routename);
-  link.href = "https://www.mit.jyu.fi/demowww/cyclo/xc.php?t=" + routename;
+  link.href = cycloServerUrl + "/xc.php?t=" + routename;
   link.innerText = "XCTrack: " + stripRouteName(routename);
 }
 
@@ -3185,7 +3186,7 @@ function handleURLTrack() {
     if ( urlTrack.substr(ind+1) === "*" ) continue;
     let url = urlTrack;
     if (urlTrack.indexOf("@") >= 0) {
-      // url = "https://www.mit.jyu.fi/demowww/cyclo/index.php?e=" + options.email + "&id=" + options.id + "&getlog=" + urlTrack;
+      // url = cycloServerUrl + "/index.php?e=" + options.email + "&id=" + options.id + "&getlog=" + urlTrack;
       //url = encodeURI(url);
       ext = "cyc"
       sendCyclo({getlog: urlTrack, f: options.usersTofollow}, function (data, extra) {
@@ -3194,7 +3195,7 @@ function handleURLTrack() {
       continue;
      }
     if ( ind < 0 ) url = lastpath + "/" + urlTrack;
-    url = "https://www.mit.jyu.fi/demowww/cyclo/igc.php?u=" + url;
+    url = cycloServerUrl + "/igc.php?u=" + url;
     const re = /(?:\.([^.]+))?$/;
     ext = re.exec(url)[1];
     if ( !ext ) ext = "igc";
@@ -3239,7 +3240,7 @@ function handleURLRoute(froute) {
       continue;
     }
     if ( ind < 0 ) url = lastpath + "/" + urlTrack;
-    url = "https://www.mit.jyu.fi/demowww/cyclo/igc.php?u=" + url;
+    url = cycloServerUrl + "/igc.php?u=" + url;
     getQuery(url, {colors:colors, name: name}, function (data, extra) {
       const n = getName(extra.name);
       showRoute(n, data, "txt", extra.colors, false, froute);
