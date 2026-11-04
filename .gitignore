@@ -10,6 +10,7 @@ bbark.php
 camerascsv.txt
 # PyCharm
 .idea/
+.ai/
 
 # Varmuuskopiot
 *.bak
