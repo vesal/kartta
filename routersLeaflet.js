@@ -254,8 +254,9 @@ function createHereRouter() {
         // console.log("HERE URL:", hereUrl);
 
         // Käytä PHP-proxya
-        const proxyUrl = "https://www.mit.jyu.fi/demowww/cyclo/index.php?getredirect=" + encodeURIComponent(hereUrl);
-
+        // const proxyUrl = "https://www.mit.jyu.fi/demowww/cyclo/index.php?getredirect=" + encodeURIComponent(hereUrl);
+        const proxyUrl = window.APP_CONFIG.cycloServerUrl
+          + "/index.php?getredirect=" + encodeURIComponent(hereUrl);
         // Hae HERE API:sta
         fetch(proxyUrl)
           .then(res => res.text())
