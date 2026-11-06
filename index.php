@@ -32,7 +32,7 @@ if (isset($_GET['getredirect'])) {
     $response = curl_exec($ch);
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $curlError = curl_error($ch);
-    curl_close($ch);
+    // curl_close($ch);
 
     if ($response === false) {
         header("HTTP/1.1 500 Internal Server Error");
