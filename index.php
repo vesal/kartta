@@ -87,7 +87,7 @@ $replyNames = array();
 //
 // In www-mode this service makes following directories and files to the server
 // User vesal@jyu.fi used as an example:
-//  vesal@jyu.fi     - own directory for every user with his/her email-address
+//  users/vesal@jyu.fi - own directory for every user with his/her email-address
 //     user.txt      - file with two lines.  First is oldid and next is newid (ordered by email)
 //                     if user has used his newid, then both lines are same.
 //                     id's are saved as crypted.
@@ -103,6 +103,11 @@ $replyNames = array();
 //     123.cyc       - all lines that user has send for this log (with id 123)
 //     123.grant     - one line with granted users email addresses separated by comma
 //                     or just * or all for grant any logged user to follow
+//  data/            - service data outside user directories
+//     logs/         - service request log
+//     routes/       - routes saved with !-names
+//     open/         - open-data user lists
+//     test/         - test-data state and optional test data
 //
 // GET or POST requests:
 //   order=1&e=vesal@jyu.fi - order new userid (passwd) by email
@@ -376,9 +381,9 @@ function ensureUsersDir() {
 
 // =============================================================================================
 function routePath($routename) {
-// maps the route name from client (vesal@jyu.fi/x.txt) to the real path (users/vesal@jyu.fi/x.txt).
-// Open routes (!...) and old user dirs in the root level are not mapped.
-   if ( startsWith($routename,"!") ) return $routename;
+// maps route names to their storage paths.
+// Open routes (!...) are stored under data/routes; old user dirs in the root level remain supported.
+   if ( startsWith($routename,"!") ) return dataDirBase() . "routes/" . substr($routename,1);
    $first = strstr($routename,"/",true);
    if ( $first !== false && !file_exists(userDirBase() . $first) && file_exists($first) ) return $routename;
    return userDirBase() . $routename;
@@ -426,16 +431,22 @@ function follow($email,$ufollow) {
 function testData($logname) {
 // gives testdata for this logname.  testdata is a part of normal log starting from my home
 // and gives a next step in every reguest.  Rounds to begining after end
-   $n = rfile("test/$logname-n.txt");
+   $dir = ensureDataDir("test");
+   if ( $dir === false ) error("Can not make data/test");
+   $stateFile = $dir . "$logname-n.txt";
+   if ( !file_exists($stateFile) && file_exists("test/$logname-n.txt") ) $stateFile = "test/$logname-n.txt";
+   $n = rfile($stateFile);
    $i = 0;
    if ( $n != null ) $i = $n[0];
-   $data = rfile("test/test.cyc");
+   $dataFile = $dir . "test.cyc";
+   if ( !file_exists($dataFile) && file_exists("test/test.cyc") ) $dataFile = "test/test.cyc";
+   $data = rfile($dataFile);
    $line = $data[$i];
    $line = str_replace("/123","/$logname",$line);
    print "$line\n"; // D:vesal@jyu.fi/123=62.2996956,25.7324266,0,...
    $i = $i + 1;
    if ( $i >= count($data) ) $i = 0;
-   writefile("test/$logname-n.txt","$i\n");
+   if ( !writefile($dir . "$logname-n.txt","$i\n") ) error("Could not write test data state");
    return "D";
 }
 
@@ -552,7 +563,12 @@ function isGlobalFollow($followEmail, $logname, $ufollow) {
 	foreach ( $users as $userToFollow ) {
 		// print($userToFollow . "\n");
 		if ( !startsWith($userToFollow,"!") ) continue;
-		$lines = rfile($userToFollow . "/" . $logname);
+		$openDir = openDirName($userToFollow);
+		if ( $openDir == "" ) continue;
+		$openFile = $openDir . "/" . $logname;
+		$legacyFile = legacyOpenDirName($userToFollow) . "/" . $logname;
+		if ( !file_exists($openFile) && file_exists($legacyFile) ) $openFile = $legacyFile;
+		$lines = rfile($openFile);
 		if ( $lines == null ) continue;
    	    foreach ( $lines as $user ) {
 		   // print($user . "\n");
@@ -682,7 +698,9 @@ function getRoute($email,$routename) {
   }
   if (strrpos($routename,".txt") === false ) error("Only .txt can be read: $routename");
   // print("filename: $routename\n");
-  $result = rfile(routePath($routename));
+  $path = routePath($routename);
+  if ( startsWith($routename,"!") && !file_exists($path) && file_exists($routename) ) $path = $routename;
+  $result = rfile($path);
   // print("result: $result \n");
   foreach( $result as $key => $value )
 	  print($value . "\n");
@@ -692,9 +710,32 @@ function getRoute($email,$routename) {
 
 // =============================================================================================
 function openDirName($logname) {
-// return the open dir name from logname
-  if ( !startsWith($logname,"%21") ) return "";
-  return "!" . substr($logname,3);
+// return the open-data directory under data/ from logname
+  if ( startsWith($logname,"%21") ) $name = substr($logname,3);
+  else if ( startsWith($logname,"!") ) $name = substr($logname,1);
+  else return "";
+  return dataDirBase() . "open/" . $name;
+}
+
+// =============================================================================================
+function legacyOpenDirName($logname) {
+// return the legacy root-level open-data directory from logname
+  if ( !startsWith($logname,"%21") && !startsWith($logname,"!") ) return "";
+  return "!" . substr($logname,startsWith($logname,"%21") ? 3 : 1);
+}
+
+// =============================================================================================
+function dataDirBase() {
+// directory where non-user service data is stored
+  return "data/";
+}
+
+// =============================================================================================
+function ensureDataDir($subdir) {
+// creates a directory under the service data directory
+  $dir = dataDirBase() . $subdir;
+  if ( !is_dir($dir) && !mkdir($dir,0777,true) && !is_dir($dir) ) return false;
+  return $dir . "/";
 }
 
 // =============================================================================================
@@ -708,9 +749,16 @@ function readOpenData($logname) {
 // reads the opendata user names
   if ( !startsWith($logname,"%21") ) return array();
   $dirname = openDirName($logname);
-  if ( !file_exists($dirname) ) { mkdir($dirname,0777); return array(); }
+  $legacyDir = legacyOpenDirName($logname);
+  if ( !is_dir($dirname) && is_dir($legacyDir) ) $dirname = $legacyDir;
+  if ( !is_dir($dirname) ) {
+    if ( !mkdir($dirname,0777,true) && !is_dir($dirname) ) error("Can not make $dirname");
+    return array();
+  }
   $name = datename();
-  $lines = rfile("$dirname/$name");
+  $path = "$dirname/$name";
+  if ( $dirname == openDirName($logname) && !file_exists($path) && file_exists("$legacyDir/$name") ) $path = "$legacyDir/$name";
+  $lines = rfile($path);
   // print "$dirname/$name\n";
   if ( $lines == null ) return array();
   return $lines;
@@ -726,8 +774,10 @@ function checkUser($logname,$email) {
      if ( $value == $email ) return;
   }
   array_push($openUsers,$email);
-  $name = openDirName($logname) . "/" . datename();
-  writelinesfile($name,$openUsers);
+  $dirname = openDirName($logname);
+  if ( !is_dir($dirname) && !mkdir($dirname,0777,true) && !is_dir($dirname) ) error("Can not make $dirname");
+  $name = $dirname . "/" . datename();
+  if ( !writelinesfile($name,$openUsers) ) error("Could not write open-data users");
 }
 
 // =============================================================================================
@@ -822,7 +872,8 @@ function rfile($name) {
 // =============================================================================================
 function writeLog($msg) {
   global $request;
-  writefile("log.txt",date('Ymd His') . "Z: $request => $msg\n","a");
+  $dir = ensureDataDir("logs");
+  if ( $dir !== false ) writefile($dir . "log.txt",date('Ymd His') . "Z: $request => $msg\n","a");
 }
 
 

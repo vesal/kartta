@@ -20,3 +20,5 @@ config.local.js
 
 # Käyttäjän kotihakemisto
 users/
+oldtracks/
+data/
